@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python (scripts du skill ui-ux-pro-max)
+__pycache__/
+*.pyc
