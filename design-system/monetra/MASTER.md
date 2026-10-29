@@ -1,213 +1,205 @@
 # Design System Master File
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
+> **LOGIC:** When building a specific page, first check `design-system/monetra/pages/[page-name].md`.
 > If that file exists, its rules **override** this Master file.
 > If not, strictly follow the rules below.
 
 ---
 
 **Project:** Monetra
-**Generated:** 2026-10-29 15:12:45
-**Category:** Personal Finance Tracker
+**Generated:** 2026-10-29 15:12:45 (ui-ux-pro-max)
+**Revised:** 2026-10-29 : thème sombre pro (remplace glassmorphism, Caveat et Quicksand)
+**Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
 
 ---
 
 ## Global Rules
 
-### Color Palette
+### Theme
+
+- **Sombre par défaut** (fond noir OLED). Thème clair disponible en option dans Réglages, mémorisé sur l'appareil.
+- Le thème est appliqué avant le premier rendu (script dans `index.html`) pour éviter un flash.
+- `theme-color` : `#000000` (manifest et meta) ; `#F2F2F7` quand le thème clair est actif.
+
+### Color Palette : sombre (défaut)
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#1E40AF` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#3B82F6` | `--color-secondary` |
-| On Secondary | `#000000` | `--color-on-secondary` |
-| Accent/CTA | `#059669` | `--color-accent` |
-| On Accent/CTA | `#000000` | `--color-on-accent` |
-| Background | `#0F172A` | `--color-background` |
-| Foreground | `#FFFFFF` | `--color-foreground` |
-| Card | `#192134` | `--color-card` |
-| Card Foreground | `#FFFFFF` | `--color-card-foreground` |
-| Muted | `#101A34` | `--color-muted` |
-| Muted Foreground | `#94A3B8` | `--color-muted-foreground` |
-| Border | `rgba(255,255,255,0.08)` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| On Destructive | `#FFFFFF` | `--color-on-destructive` |
-| Ring | `#FFFFFF` | `--color-ring` |
+| Background | `#000000` | `--color-bg` |
+| Surface (cartes) | `#111113` | `--color-surface` |
+| Surface surélevée (sheets, puces, tuiles) | `#1C1C1F` | `--color-surface-elevated` |
+| Border (1px) | `#26262A` | `--color-border` |
+| Border des champs de saisie | `#707076` | `--color-border-input` |
+| Text principal | `#F5F5F7` | `--color-text` |
+| Text secondaire | `#8E8E93` | `--color-text-secondary` |
+| Text tertiaire (décoratif uniquement) | `#5A5A60` | `--color-text-tertiary` |
+| Accent (revenus, action principale) | `#30D158` | `--color-accent` |
+| On Accent | `#000000` | `--color-on-accent` |
+| Accent 12 % (sélection) | `rgba(48,209,88,0.12)` | `--color-accent-soft` |
+| Danger (erreurs, suppression) | `#FF453A` | `--color-danger` |
+| Tab bar (opaque) | `#000000` (clair : `#F9F9FB`) | `--color-nav` |
 
-**Color Notes:** Trust blue + profit green on dark
+### Color Palette : clair (option)
+
+| Role | Hex | CSS Variable |
+|------|-----|--------------|
+| Background | `#F2F2F7` | `--color-bg` |
+| Surface / surélevée | `#FFFFFF` | `--color-surface`, `--color-surface-elevated` |
+| Border | `#E5E5EA` | `--color-border` |
+| Border des champs | `#8A8A8E` | `--color-border-input` |
+| Text principal / secondaire / tertiaire | `#1C1C1E` / `#6C6C70` / `#8E8E93` | `--color-text*` |
+| Accent / On Accent | `#1F7A35` / `#FFFFFF` | `--color-accent`, `--color-on-accent` |
+| Danger | `#D70015` | `--color-danger` |
+
+**Color Notes:**
+- **Un seul accent**, le vert, réservé aux revenus et à l'action principale (bouton +, « Ajouter », sélection). Pas de bleu.
+- **Les dépenses sont en texte principal**, jamais en rouge. Le rouge sert aux erreurs, à la suppression et au dépassement de budget, toujours accompagné d'une icône et d'un texte.
+- En clair, le vert est assombri (`#1F7A35`) pour garder 5,4:1 en texte et sous du blanc.
+- Le tertiaire (2,5 à 2,75:1) ne porte jamais d'information essentielle : poignée de sheet, placeholders.
+
+### Contrastes vérifiés (WCAG)
+
+| Paire | Sombre | Clair |
+|------|--------|-------|
+| Texte principal / surface | 17,3:1 | 17,0:1 |
+| Texte secondaire / surface | 5,8:1 (5,2 sur surélevée) | 5,2:1 (4,7 sur fond) |
+| Accent / surface | 9,3:1 | 5,4:1 |
+| Texte du bouton accent | 10,4:1 | 5,4:1 |
+| Bordure des champs / surface | 3,5 à 3,8:1 | 3,4:1 |
 
 ### Typography
 
-- **Heading Font:** Caveat
-- **Body Font:** Quicksand
-- **Mood:** handwritten, personal, friendly, casual, warm, charming
-- **Google Fonts:** [Caveat + Quicksand](https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap)
+- **Police unique : Inter** (variable), auto-hébergée via `@fontsource-variable/inter`, sans CDN, pour fonctionner hors ligne.
+- Repli : `-apple-system, system-ui, sans-serif`.
+- **Tous les montants** en `font-variant-numeric: tabular-nums`.
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap');
-```
+| Rôle | Taille | Graisse | Interlettrage | Couleur |
+|------|--------|---------|---------------|---------|
+| Titre d'écran (h1), logo « Monetra » | 28px | 600 | -0.02em | principal |
+| Titre de section / carte | 13px, MAJUSCULES | 500 | 0.06em | secondaire |
+| Titre de feuille (sheet) | 20px | 600 | -0.01em | principal |
+| Corps | 16px | 400 (500 pour les libellés de ligne) | normal | principal |
+| Méta, aide | 14px | 400 | normal | secondaire |
+| Montant principal (reste à vivre, saisie) | 44px | 600 | -0.03em | principal |
+| Onglets | 12px | 500 (600 si actif) | normal | secondaire / principal |
+
+Le logo est un simple texte Inter semibold, sans effet.
 
 ### Spacing Variables
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+| `--space-xs` | `4px` | Tight gaps |
+| `--space-sm` | `8px` | Icon gaps, inline spacing |
+| `--space-md` | `16px` | Standard padding, gouttière d'écran |
+| `--space-lg` | `24px` | Section padding |
+| `--space-xl` | `32px` | Large gaps |
 
-### Shadow Depths
+### Radius & Elevation
 
-| Level | Value | Usage |
+| Token | Value | Usage |
 |-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+| `--radius-sm` | `10px` | Champs, tuiles d'icône, segmented |
+| `--radius-md` | `12px` | Boutons, puces de catégorie |
+| `--radius-lg` | `16px` | Cartes |
+| Sheet | `20px` (haut) | Bottom sheets |
+
+En sombre, l'élévation passe par la surface (`#000` → `#111113` → `#1C1C1F`) et la bordure 1px, pas par les ombres. Les ombres sont réservées aux éléments flottants (toast, bouton sticky, sheet).
 
 ---
 
 ## Component Specs
 
+### Carte « Reste à vivre »
+
+```css
+.hero {
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(48, 209, 88, 0.08), transparent 60%),
+    #111113;
+  border: 1px solid #26262a;
+  border-radius: 16px;
+}
+.hero-value { font-size: 44px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+```
+
+En cas de dépassement, le halo passe au rouge à 8 % et le badge affiche « Budget dépassé » avec une icône.
+
 ### Buttons
 
 ```css
-/* Primary Button */
-.btn-primary {
-  background: #059669;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #1E40AF;
-  border: 2px solid #1E40AF;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+.btn-primary   { background: #30d158; color: #000; border-radius: 12px; min-height: 50px; font-weight: 600; }
+.btn-secondary { background: #1c1c1f; color: #f5f5f7; border: 1px solid #26262a; }
+.btn-danger    { background: rgba(255, 69, 58, 0.14); color: #ff453a; }
 ```
 
-### Cards
+### Puces (catégories, comptes)
 
 ```css
-.card {
-  background: #0F172A;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
+.choice, .chip { background: #1c1c1f; border: 1px solid #26262a; }
+.choice[aria-checked='true'] { border-color: #30d158; background: rgba(48, 209, 88, 0.12); }
 ```
+
+Libellés sur une seule ligne (catégorie « Resto »), points de suspension en dernier recours.
 
 ### Inputs
 
 ```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #1E40AF;
-  outline: none;
-  box-shadow: 0 0 0 3px #1E40AF20;
-}
+.input { background: #111113; border: 1px solid #707076; border-radius: 10px; min-height: 48px; font-size: 16px; }
+.input:focus { border-color: #30d158; box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.12); }
 ```
 
-### Modals
+### Tab bar
 
 ```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
+.tab-bar {
+  background: #000000; /* opaque : aucun contenu ne transparaît */
+  border-top: 1px solid #26262a;
+  height: calc(64px + env(safe-area-inset-bottom));
 }
 ```
+
+- 4 onglets + bouton **+** central (vert, 52px), visible sur tous les écrans.
+- Chaque écran réserve `padding-bottom: hauteur tab bar + safe-area + 24px`.
+- Un bouton d'action en bas de liste (ex. « Nouveau récurrent ») est `position: sticky` juste au-dessus de la tab bar.
+
+### Sheets
+
+Fond `#1C1C1F`, rayon 20px en haut, poignée, bouton fermer de 44px, bouton principal collé en bas. Le focus reste dans la feuille ; Échap ferme.
 
 ---
 
 ## Style Guidelines
 
-**Style:** Glassmorphism
+**Style:** Dark Mode (OLED), sobre et professionnel
 
-**Keywords:** Frosted glass, transparent, blurred background, layered, vibrant background, light source, depth, multi-layer
+**Keywords:** noir profond, surfaces étagées, bordures fines, un seul accent, typographie neutre, chiffres alignés
 
-**Best For:** Modern SaaS, financial dashboards, high-end corporate, lifestyle apps, modal overlays, navigation
+**Key Effects:** pas de verre décoratif ni de dégradés vifs. Un seul halo radial vert (8 % max) sur la carte du reste à vivre. La tab bar est opaque.
 
-**Key Effects:** Backdrop blur (10-20px), subtle border (1px solid rgba white 0.2), light reflection, Z-depth
-
-### Page Pattern
-
-**Pattern Name:** Product Demo + Features
-
-- **Conversion Strategy:** Use an interactive demo only when it explains value better than static media. Provide captions, transcript, visible play/pause controls, and a non-video fallback; do not autoplay under reduced motion. Pause media when offscreen or hidden and keep the final product state available as static content.
-- **CTA Placement:** Video center + CTA right/bottom
-- **Section Order:** Hero > Product video/mockup (center) > Feature breakdown per section > Comparison (optional) > CTA
+**Icons:** Lucide (SVG, trait de 2px), en couleur secondaire ; vertes uniquement pour les revenus et l'état sélectionné.
 
 ---
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Pure white backgrounds
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
+- ❌ Police manuscrite ou décorative (titres, logo, sections)
+- ❌ Dépenses en rouge, ou un deuxième accent (bleu, violet…)
+- ❌ Glassmorphism décoratif sur les cartes
+- ❌ **Emojis comme icônes** : utiliser des SVG (Lucide)
+- ❌ Chiffres proportionnels pour les montants
+- ❌ Contenu masqué par la tab bar fixe
+- ❌ Texte tertiaire pour une information essentielle
+- ❌ **Focus invisible** ; cibles tactiles de moins de 44px
 
 ---
 
 ## Pre-Delivery Checklist
 
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+- [ ] Aucun emoji ; icônes Lucide uniquement
+- [ ] Inter partout, montants en `tabular-nums`
+- [ ] Contrastes AA vérifiés dans les deux thèmes
+- [ ] Cibles tactiles ≥ 44px, aucun défilement horizontal (375px, paysage, texte 150 %)
+- [ ] Rien ne passe sous la tab bar ; actions sticky visibles
+- [ ] Focus visible, focus piégé dans les sheets
+- [ ] `prefers-reduced-motion` respecté

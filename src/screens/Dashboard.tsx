@@ -43,11 +43,11 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
   return (
     <div className="screen">
       <header className="screen-header">
-        <h1 className="brand" tabIndex={-1}>
+        <h1 tabIndex={-1}>
           Monetra
         </h1>
-        <MonthSwitcher month={month} onChange={onMonthChange} />
       </header>
+      <MonthSwitcher month={month} onChange={onMonthChange} />
 
       {accounts.length === 0 && (
         <section className="card onboarding">

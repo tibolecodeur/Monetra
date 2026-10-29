@@ -1,18 +1,48 @@
 /** Préférences locales non critiques : tout échec de stockage est ignoré. */
-const KEY = 'monetra:lastAccount'
+const ACCOUNT_KEY = 'monetra:lastAccount'
+const THEME_KEY = 'monetra:theme'
 
-export function getLastAccount(): string | null {
+export type Theme = 'dark' | 'light'
+
+const THEME_COLORS: Record<Theme, string> = { dark: '#000000', light: '#f2f2f7' }
+
+function read(key: string): string | null {
   try {
-    return localStorage.getItem(KEY)
+    return localStorage.getItem(key)
   } catch {
     return null
   }
 }
 
-export function setLastAccount(id: string) {
+function write(key: string, value: string) {
   try {
-    localStorage.setItem(KEY, id)
+    localStorage.setItem(key, value)
   } catch {
     /* ignoré */
   }
+}
+
+export function getLastAccount(): string | null {
+  return read(ACCOUNT_KEY)
+}
+
+export function setLastAccount(id: string) {
+  write(ACCOUNT_KEY, id)
+}
+
+/** Sombre par défaut. Le thème est aussi appliqué avant le rendu par un script dans index.html. */
+export function getTheme(): Theme {
+  return read(THEME_KEY) === 'light' ? 'light' : 'dark'
+}
+
+export function setTheme(theme: Theme) {
+  write(THEME_KEY, theme)
+  applyTheme(theme)
+}
+
+export function applyTheme(theme: Theme) {
+  const root = document.documentElement
+  if (theme === 'light') root.dataset.theme = 'light'
+  else delete root.dataset.theme
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme])
 }

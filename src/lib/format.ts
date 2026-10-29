@@ -1,8 +1,7 @@
 const euro = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 
-/** Espace insécable classique : l'espace fine (U+202F) est trop étroite dans Quicksand. */
 export function formatMoney(value: number): string {
-  return euro.format(value).replace(/\u202f/g, '\u00a0')
+  return euro.format(value)
 }
 
 export function round2(value: number): number {

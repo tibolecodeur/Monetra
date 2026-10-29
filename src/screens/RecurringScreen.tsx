@@ -84,7 +84,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
         renderList(active)
       )}
 
-      <button type="button" className="btn btn-secondary btn-block" onClick={onAdd}>
+      <button type="button" className="btn btn-secondary btn-block sticky-action" onClick={onAdd}>
         <Plus size={20} aria-hidden="true" />
         Nouveau récurrent
       </button>

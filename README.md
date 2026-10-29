@@ -19,17 +19,16 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 
 Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
-| Clair | Sombre |
-|---|---|
-| <img src="docs/screenshots/redesign/01-accueil-clair.png" width="260" alt="Accueil en mode clair"> | <img src="docs/screenshots/redesign/01-accueil-sombre.png" width="260" alt="Accueil en mode sombre"> |
+<img src="docs/screenshots/dark/01-accueil.png" width="260" alt="Accueil"> <img src="docs/screenshots/dark/03-saisie-rapide.png" width="260" alt="Saisie rapide">
 
 ## Design
 
-L'interface suit le design system généré avec le skill UI UX Pro Max : [`design-system/monetra/MASTER.md`](design-system/monetra/MASTER.md).
+L'interface suit le design system [`design-system/monetra/MASTER.md`](design-system/monetra/MASTER.md), généré avec le skill UI UX Pro Max puis révisé :
 
-- Glassmorphism sur fond bleu nuit, bleu « confiance » et vert pour les actions et les revenus.
-- Titres en Caveat, texte en Quicksand, servis en local (aucune requête vers Google Fonts).
-- Icônes SVG Lucide, modes clair et sombre selon la préférence système.
+- **Thème sombre pro par défaut** : fond noir OLED, surfaces étagées, bordures 1px. Le thème clair est disponible dans Réglages.
+- **Un seul accent**, le vert, pour les revenus et l'action principale. Les dépenses restent en texte principal.
+- **Inter** pour toute l'interface, auto-hébergée (aucune requête externe) ; montants en chiffres tabulaires.
+- Icônes SVG Lucide, sans emojis.
 - Pensé pour une main : barre d'onglets en bas avec le bouton d'ajout au centre, zones tactiles de 44 px minimum.
 
 ## Stack
@@ -37,7 +36,7 @@ L'interface suit le design system généré avec le skill UI UX Pro Max : [`desi
 - [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
 - [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) : manifest, service worker, offline
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
-- [Lucide](https://lucide.dev/) : icônes SVG ; [Fontsource](https://fontsource.org/) : polices auto-hébergées
+- [Lucide](https://lucide.dev/) : icônes SVG ; [Inter](https://rsms.me/inter/) via Fontsource, auto-hébergée
 
 ## Lancer en local
 

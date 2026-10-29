@@ -8,7 +8,7 @@ export interface Category {
 export const EXPENSE_CATEGORIES: Category[] = [
   { id: 'logement', label: 'Logement' },
   { id: 'courses', label: 'Courses' },
-  { id: 'resto', label: 'Resto / fast-food' },
+  { id: 'resto', label: 'Resto' },
   { id: 'abonnements', label: 'Abonnements' },
   { id: 'loisirs', label: 'Loisirs' },
   { id: 'epargne', label: 'Épargne' },

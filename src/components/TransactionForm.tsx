@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORY } from '../lib/categories'
 import { today } from '../lib/dates'
@@ -212,6 +213,7 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
         </div>
       ) : (
         <button type="button" className="btn btn-ghost" onClick={() => setShowMore(true)} aria-expanded={false}>
+          <Plus size={18} aria-hidden="true" />
           Ajouter une date ou une note
         </button>
       )}

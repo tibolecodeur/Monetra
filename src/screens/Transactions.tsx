@@ -42,8 +42,8 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
     <div className="screen">
       <header className="screen-header">
         <h1 tabIndex={-1}>Opérations</h1>
-        <MonthSwitcher month={month} onChange={onMonthChange} />
       </header>
+      <MonthSwitcher month={month} onChange={onMonthChange} />
 
       <section className="totals" aria-label="Totaux du mois">
         <div>

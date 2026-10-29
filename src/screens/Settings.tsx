@@ -1,10 +1,12 @@
 import { Download, Plus, ShieldCheck, Upload } from 'lucide-react'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { AccountIcon } from '../components/CategoryIcon'
+import { Segmented } from '../components/Segmented'
 import { downloadBackup, parseBackup, restoreBackup } from '../lib/backup'
 import { accountTypeLabel } from '../lib/categories'
 import { formatMoney } from '../lib/format'
 import { useAccounts } from '../lib/hooks'
+import { getTheme, setTheme, type Theme } from '../lib/prefs'
 import { generateRecurring } from '../lib/recurring'
 import type { Account } from '../lib/types'
 
@@ -20,6 +22,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<Status>(null)
   const [busy, setBusy] = useState(false)
+  const [theme, setThemeState] = useState<Theme>(getTheme)
 
   async function exportData() {
     setBusy(true)
@@ -106,6 +109,24 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
           <Plus size={20} aria-hidden="true" />
           Ajouter un compte
         </button>
+      </section>
+
+      <section aria-labelledby="appearance-title" className="stack">
+        <h2 id="appearance-title" className="section-title">
+          Apparence
+        </h2>
+        <Segmented
+          label="Thème"
+          value={theme}
+          onChange={(t) => {
+            setThemeState(t)
+            setTheme(t)
+          }}
+          options={[
+            { value: 'dark', label: 'Sombre' },
+            { value: 'light', label: 'Clair' },
+          ]}
+        />
       </section>
 
       <section aria-labelledby="backup-title" className="stack">
