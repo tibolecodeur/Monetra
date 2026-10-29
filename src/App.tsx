@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AccountForm } from './components/AccountForm'
 import { BottomNav, type Screen } from './components/BottomNav'
-import { PlusIcon } from './components/Icons'
 import { RecurringForm } from './components/RecurringForm'
 import { Sheet } from './components/Sheet'
 import { TransactionForm } from './components/TransactionForm'
@@ -30,12 +29,32 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>(screenFromHash)
   const [month, setMonth] = useState<MonthKey>(currentMonth)
   const [modal, setModal] = useState<Modal>(null)
+  const main = useRef<HTMLElement>(null)
+  const firstRender = useRef(true)
 
   useEffect(() => {
     const onHash = () => setScreen(screenFromHash())
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
+
+  // Après un changement d'onglet, le focus va au titre de l'écran (lecteurs d'écran).
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    // L'écran peut encore charger ses données : on attend que son titre soit rendu.
+    let frame = 0
+    let tries = 0
+    const focusTitle = () => {
+      const h1 = main.current?.querySelector<HTMLElement>('h1')
+      if (h1) h1.focus({ preventScroll: true })
+      else if (tries++ < 30) frame = requestAnimationFrame(focusTitle)
+    }
+    focusTitle()
+    return () => cancelAnimationFrame(frame)
+  }, [screen])
 
   // Génère les récurrents au lancement et quand l'app revient au premier plan.
   useEffect(() => {
@@ -55,7 +74,17 @@ export default function App() {
 
   return (
     <div className="app">
-      <main>
+      <a
+        href="#contenu"
+        className="skip-link"
+        onClick={(e) => {
+          e.preventDefault()
+          main.current?.querySelector<HTMLElement>('h1')?.focus()
+        }}
+      >
+        Aller au contenu
+      </a>
+      <main id="contenu" ref={main}>
         {screen === 'accueil' && (
           <Dashboard
             month={month}
@@ -77,13 +106,7 @@ export default function App() {
         )}
       </main>
 
-      {(screen === 'accueil' || screen === 'operations') && (
-        <button type="button" className="fab" aria-label="Ajouter une transaction" onClick={() => setModal({ kind: 'transaction' })}>
-          <PlusIcon />
-        </button>
-      )}
-
-      <BottomNav current={screen} onChange={navigate} />
+      <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
 
       {modal?.kind === 'transaction' && (
         <Sheet title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>

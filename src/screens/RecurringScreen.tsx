@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { getCategory } from '../lib/categories'
 import { formatShortDate, today } from '../lib/dates'
 import { formatMoney, round2 } from '../lib/format'
@@ -12,22 +13,21 @@ interface Props {
 export function RecurringScreen({ onAdd, onSelect }: Props) {
   const recurring = useRecurring()
   const accounts = useAccounts()
-  if (!recurring || !accounts) return null
+  if (!recurring || !accounts) return <div className="screen" aria-busy="true" />
 
   const now = today()
   const accountNames = accountLabels(accounts, recurring)
   const sorted = [...recurring].sort((a, b) => a.jourDuMois - b.jourDuMois || a.libelle.localeCompare(b.libelle))
   const active = sorted.filter((r) => !r.dateFin || r.dateFin >= now)
   const ended = sorted.filter((r) => r.dateFin && r.dateFin < now)
-  const sum = (type: Recurring['type']) => round2(active.filter((r) => r.type === type).reduce((s, r) => s + r.montant, 0))
+  const sum = (type: Recurring['type']) =>
+    round2(active.filter((r) => r.type === type).reduce((s, r) => s + r.montant, 0))
 
   const renderList = (list: Recurring[]) => (
-    <ul className="tx-list card">
+    <ul className="list card card-flush">
       {list.map((r) => {
-        const cat = getCategory(r.categorie)
         const meta = [
-          `le ${r.jourDuMois}`,
-          r.type === 'depense' ? cat.label : null,
+          getCategory(r.categorie).label,
           accountNames.get(r.compteId),
           r.dateFin ? `jusqu'au ${formatShortDate(r.dateFin)}` : null,
         ]
@@ -35,15 +35,17 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
           .join(' · ')
         return (
           <li key={r.id}>
-            <button type="button" className="tx-row" onClick={() => onSelect(r)}>
-              <span className={`tx-icon ${r.type}`} aria-hidden="true">
-                {cat.emoji}
+            <button type="button" className="row" onClick={() => onSelect(r)}>
+              <span className={`day-badge ${r.type}`}>
+                <small aria-hidden="true">le</small>
+                <span aria-hidden="true">{r.jourDuMois}</span>
+                <span className="sr-only">Le {r.jourDuMois} du mois :</span>
               </span>
-              <span className="tx-main">
-                <span className="tx-title">{r.libelle}</span>
-                <span className="tx-meta">{meta}</span>
+              <span className="row-main">
+                <span className="row-title">{r.libelle}</span>
+                {meta && <span className="row-meta">{meta}</span>}
               </span>
-              <span className={`tx-amount ${r.type}`}>
+              <span className={`amount ${r.type}`}>
                 {r.type === 'revenu' ? '+' : '−'}
                 {formatMoney(r.montant)}
               </span>
@@ -57,30 +59,35 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
   return (
     <div className="screen">
       <header className="screen-header">
-        <h1>Récurrents</h1>
-        <button type="button" className="button primary small" onClick={onAdd}>
-          + Ajouter
-        </button>
+        <h1 tabIndex={-1}>Récurrents</h1>
       </header>
 
-      <section className="stats two" aria-label="Total mensuel">
-        <div className="stat">
-          <span className="stat-label">Revenus fixes / mois</span>
-          <span className="stat-value income">{formatMoney(sum('revenu'))}</span>
+      <section className="totals" aria-label="Total mensuel des récurrents actifs">
+        <div>
+          <span className="totals-label">Revenus fixes / mois</span>
+          <span className="amount revenu">+{formatMoney(sum('revenu'))}</span>
         </div>
-        <div className="stat">
-          <span className="stat-label">Charges fixes / mois</span>
-          <span className="stat-value">{formatMoney(sum('depense'))}</span>
+        <div>
+          <span className="totals-label">Charges fixes / mois</span>
+          <span className="amount">−{formatMoney(sum('depense'))}</span>
         </div>
       </section>
 
       {active.length === 0 ? (
         <div className="card empty-state">
-          <p>Loyer, forfait, salaire d'alternance… Ajoutez ce qui revient chaque mois : Monetra crée la transaction automatiquement.</p>
+          <p>
+            Loyer, forfait, salaire d'alternance… Ajoutez ce qui revient chaque mois : Monetra crée la transaction
+            automatiquement au bon jour.
+          </p>
         </div>
       ) : (
         renderList(active)
       )}
+
+      <button type="button" className="btn btn-secondary btn-block" onClick={onAdd}>
+        <Plus size={20} aria-hidden="true" />
+        Nouveau récurrent
+      </button>
 
       {ended.length > 0 && (
         <>

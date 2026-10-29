@@ -1,6 +1,8 @@
+import { Repeat } from 'lucide-react'
 import { getCategory } from '../lib/categories'
 import { formatMoney } from '../lib/format'
 import type { Transaction } from '../lib/types'
+import { CategoryIcon } from './CategoryIcon'
 
 interface Props {
   transaction: Transaction
@@ -13,26 +15,29 @@ export function TransactionRow({ transaction: t, accountName, onSelect, dateLabe
   const cat = getCategory(t.categorie)
   const showCategory = t.note && t.type === 'depense'
   const meta = [dateLabel, showCategory ? cat.label : null, accountName].filter(Boolean).join(' · ')
+  const sign = t.type === 'revenu' ? '+' : '−'
   return (
     <li>
-      <button type="button" className="tx-row" onClick={() => onSelect?.(t)}>
-        <span className={`tx-icon ${t.type}`} aria-hidden="true">
-          {cat.emoji}
+      <button type="button" className="row" onClick={() => onSelect?.(t)}>
+        <span className={`row-icon ${t.type}`}>
+          <CategoryIcon categorie={t.categorie} />
         </span>
-        <span className="tx-main">
-          <span className="tx-title">
-            {t.note || cat.label}
-            {t.recurringId && (
-              <span className="badge" title="Généré par un récurrent">
-                <span aria-hidden="true">↻</span>
-                <span className="sr-only">Récurrent</span>
-              </span>
-            )}
-          </span>
-          {meta && <span className="tx-meta">{meta}</span>}
+        <span className="row-main">
+          <span className="row-title">{t.note || cat.label}</span>
+          {(meta || t.recurringId) && (
+            <span className="row-meta">
+              {t.recurringId && (
+                <span className="row-tag">
+                  <Repeat size={12} strokeWidth={2.5} aria-hidden="true" />
+                  Auto
+                </span>
+              )}
+              {meta}
+            </span>
+          )}
         </span>
-        <span className={`tx-amount ${t.type}`}>
-          {t.type === 'revenu' ? '+' : '−'}
+        <span className={`amount ${t.type}`}>
+          {sign}
           {formatMoney(t.montant)}
         </span>
       </button>

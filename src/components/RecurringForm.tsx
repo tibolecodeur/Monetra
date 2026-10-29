@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useToast } from '../lib/toast'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORY } from '../lib/categories'
 import { currentMonth } from '../lib/dates'
 import { amountToInput, parseAmount } from '../lib/format'
@@ -16,6 +17,8 @@ interface Props {
 
 export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
   const accounts = useAccounts()
+  const toast = useToast()
+  const [saving, setSaving] = useState(false)
   const [type, setType] = useState<TransactionType>(recurring?.type ?? 'depense')
   const [libelle, setLibelle] = useState(recurring?.libelle ?? '')
   const [amount, setAmount] = useState(recurring ? amountToInput(recurring.montant) : '')
@@ -33,7 +36,7 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
     return (
       <div className="empty-state">
         <p>Créez d'abord un compte pour y rattacher vos récurrents.</p>
-        <button type="button" className="button primary" onClick={onNeedAccount}>
+        <button type="button" className="btn btn-primary btn-block" onClick={onNeedAccount}>
           Créer un compte
         </button>
       </div>
@@ -45,11 +48,13 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
     e.preventDefault()
     const montant = parseAmount(amount)
     const jourDuMois = Number(jour)
-    if (!libelle.trim()) return setError('Donnez un libellé.')
-    if (!(montant > 0)) return setError('Saisissez un montant.')
-    if (!Number.isInteger(jourDuMois) || jourDuMois < 1 || jourDuMois > 31) return setError('Jour entre 1 et 31.')
+    if (!libelle.trim()) return setError('Donnez un libellé, par exemple « Loyer ».')
+    if (!(montant > 0)) return setError('Saisissez un montant supérieur à 0, par exemple 9,99.')
+    if (!Number.isInteger(jourDuMois) || jourDuMois < 1 || jourDuMois > 31)
+      return setError('Le jour du mois doit être compris entre 1 et 31.')
     const dateDebut = `${debut}-01`
-    if (dateFin && dateFin < dateDebut) return setError('La date de fin précède le début.')
+    if (dateFin && dateFin < dateDebut) return setError('La date de fin doit être après le mois de début.')
+    setSaving(true)
     await saveRecurring({
       ...recurring,
       libelle: libelle.trim(),
@@ -61,7 +66,10 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
       dateDebut,
       dateFin: dateFin || undefined,
     })
-    await generateRecurring()
+    const created = await generateRecurring()
+    toast({
+      message: created > 0 ? `Récurrent enregistré · ${created} transaction(s) créée(s)` : 'Récurrent enregistré',
+    })
     onDone()
   }
 
@@ -69,11 +77,12 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
     if (!recurring) return
     if (!confirm(`Supprimer « ${recurring.libelle} » ? Les transactions déjà générées sont conservées.`)) return
     await deleteRecurring(recurring.id)
+    toast({ message: 'Récurrent supprimé' })
     onDone()
   }
 
   return (
-    <form className="form" onSubmit={submit}>
+    <form className="form" onSubmit={submit} noValidate>
       <Segmented
         label="Type"
         value={type}
@@ -84,7 +93,7 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
         ]}
       />
       <label className="field">
-        <span>Libellé</span>
+        <span className="field-label">Libellé</span>
         <input
           value={libelle}
           onChange={(e) => setLibelle(e.target.value)}
@@ -94,28 +103,28 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
       </label>
       <div className="field-row">
         <label className="field grow">
-          <span>Montant (€)</span>
+          <span className="field-label">Montant (€)</span>
           <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" />
         </label>
         <label className="field narrow">
-          <span>Jour du mois</span>
+          <span className="field-label">Jour du mois</span>
           <input type="number" inputMode="numeric" min={1} max={31} value={jour} onChange={(e) => setJour(e.target.value)} />
         </label>
       </div>
       {type === 'depense' && (
         <label className="field">
-          <span>Catégorie</span>
+          <span className="field-label">Catégorie</span>
           <select value={categorie} onChange={(e) => setCategorie(e.target.value as CategoryId)}>
             {EXPENSE_CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.emoji} {c.label}
+                {c.label}
               </option>
             ))}
           </select>
         </label>
       )}
       <label className="field">
-        <span>Compte</span>
+        <span className="field-label">Compte</span>
         <select value={account} onChange={(e) => setCompteId(e.target.value)}>
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
@@ -126,11 +135,11 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
       </label>
       <div className="field-row">
         <label className="field grow">
-          <span>À partir de</span>
+          <span className="field-label">À partir de</span>
           <input type="month" value={debut} required onChange={(e) => setDebut(e.target.value)} />
         </label>
         <label className="field grow">
-          <span>Date de fin</span>
+          <span className="field-label">Fin (optionnel)</span>
           <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
         </label>
       </div>
@@ -138,17 +147,17 @@ export function RecurringForm({ recurring, onDone, onNeedAccount }: Props) {
         La transaction est créée automatiquement chaque mois au jour indiqué (dernier jour du mois si besoin).
       </p>
       {error && (
-        <p className="form-error" role="alert">
+        <p className="field-error" role="alert">
           {error}
         </p>
       )}
       <div className="form-actions">
         {recurring && (
-          <button type="button" className="button danger" onClick={remove}>
+          <button type="button" className="btn btn-danger" onClick={remove} disabled={saving}>
             Supprimer
           </button>
         )}
-        <button type="submit" className="button primary grow">
+        <button type="submit" className="btn btn-primary grow" disabled={saving}>
           {recurring ? 'Enregistrer' : 'Ajouter'}
         </button>
       </div>

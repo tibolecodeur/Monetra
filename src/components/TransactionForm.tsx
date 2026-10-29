@@ -1,11 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORY } from '../lib/categories'
 import { today } from '../lib/dates'
-import { amountToInput, parseAmount } from '../lib/format'
+import { amountToInput, formatMoney, parseAmount } from '../lib/format'
 import { useAccounts } from '../lib/hooks'
-import { addTransaction, deleteTransaction, updateTransaction } from '../lib/mutations'
+import { addTransaction, deleteTransaction, restoreTransaction, updateTransaction } from '../lib/mutations'
 import { getLastAccount, setLastAccount } from '../lib/prefs'
+import { useToast } from '../lib/toast'
 import type { CategoryId, Transaction, TransactionType } from '../lib/types'
+import { AccountIcon, CategoryIcon } from './CategoryIcon'
 import { Segmented } from './Segmented'
 
 interface Props {
@@ -14,8 +16,12 @@ interface Props {
   onNeedAccount: () => void
 }
 
+type Errors = Partial<Record<'amount' | 'category', string>>
+
 export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
   const accounts = useAccounts()
+  const toast = useToast()
+  const ids = { amount: useId(), amountError: useId(), categoryError: useId() }
   const [type, setType] = useState<TransactionType>(transaction?.type ?? 'depense')
   const [amount, setAmount] = useState(transaction ? amountToInput(transaction.montant) : '')
   const [categorie, setCategorie] = useState<CategoryId | null>(
@@ -25,7 +31,8 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
   const [date, setDate] = useState(transaction?.date ?? today())
   const [note, setNote] = useState(transaction?.note ?? '')
   const [showMore, setShowMore] = useState(Boolean(transaction))
-  const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Errors>({})
+  const [saving, setSaving] = useState(false)
 
   if (!accounts) return null
 
@@ -33,7 +40,7 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
     return (
       <div className="empty-state">
         <p>Créez d'abord un compte pour pouvoir saisir des transactions.</p>
-        <button type="button" className="button primary" onClick={onNeedAccount}>
+        <button type="button" className="btn btn-primary btn-block" onClick={onNeedAccount}>
           Créer un compte
         </button>
       </div>
@@ -47,9 +54,14 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
   async function submit(e: FormEvent) {
     e.preventDefault()
     const montant = parseAmount(amount)
-    if (!(montant > 0)) return setError('Saisissez un montant.')
     const cat: CategoryId | null = type === 'revenu' ? INCOME_CATEGORY.id : categorie
-    if (!cat) return setError('Choisissez une catégorie.')
+    const next: Errors = {}
+    if (!(montant > 0)) next.amount = 'Saisissez un montant supérieur à 0, par exemple 12,50.'
+    if (!cat) next.category = 'Choisissez une catégorie pour cette dépense.'
+    setErrors(next)
+    if (next.amount) return document.getElementById(ids.amount)?.focus()
+    if (next.category || !cat) return
+
     const data: Omit<Transaction, 'id'> = {
       date,
       montant,
@@ -59,27 +71,41 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
       note: note.trim(),
       ...(transaction?.recurringId ? { recurringId: transaction.recurringId } : {}),
     }
-    if (transaction) await updateTransaction(transaction.id, data)
-    else await addTransaction(data)
-    setLastAccount(selectedAccount)
-    onDone()
+    setSaving(true)
+    try {
+      if (transaction) await updateTransaction(transaction.id, data)
+      else await addTransaction(data)
+      setLastAccount(selectedAccount)
+      toast({
+        message: transaction
+          ? 'Transaction modifiée'
+          : `${type === 'revenu' ? 'Revenu' : 'Dépense'} de ${formatMoney(montant)} ajouté${type === 'revenu' ? '' : 'e'}`,
+      })
+      onDone()
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function remove() {
     if (!transaction) return
-    if (!confirm('Supprimer cette transaction ?')) return
+    setSaving(true)
     await deleteTransaction(transaction.id)
+    toast({
+      message: 'Transaction supprimée',
+      action: { label: 'Annuler', onAction: () => void restoreTransaction(transaction) },
+    })
     onDone()
   }
 
   return (
-    <form className="form" onSubmit={submit}>
+    <form className="form" onSubmit={submit} noValidate>
       <Segmented
-        label="Type"
+        label="Type de transaction"
         value={type}
         onChange={(v) => {
           setType(v)
-          setError(null)
+          setErrors({})
         }}
         options={[
           { value: 'depense', label: 'Dépense' },
@@ -87,97 +113,123 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
         ]}
       />
 
-      <label className={`amount-field ${type}`}>
-        <span className="sr-only">Montant</span>
-        <input
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0,00"
-          value={amount}
-          autoFocus={!transaction}
-          onChange={(e) => {
-            setAmount(e.target.value)
-            setError(null)
-          }}
-          aria-label="Montant en euros"
-        />
-        <span className="currency">€</span>
-      </label>
+      <div className={`amount-field ${type}${errors.amount ? ' invalid' : ''}`}>
+        <label htmlFor={ids.amount} className="field-label">
+          Montant
+        </label>
+        <div className="amount-input">
+          <input
+            id={ids.amount}
+            inputMode="decimal"
+            enterKeyHint="done"
+            autoComplete="off"
+            placeholder="0,00"
+            value={amount}
+            autoFocus={!transaction}
+            aria-invalid={Boolean(errors.amount)}
+            aria-describedby={errors.amount ? ids.amountError : undefined}
+            onChange={(e) => {
+              setAmount(e.target.value)
+              if (errors.amount) setErrors((x) => ({ ...x, amount: undefined }))
+            }}
+          />
+          <span className="currency" aria-hidden="true">
+            €
+          </span>
+        </div>
+        {errors.amount && (
+          <p id={ids.amountError} className="field-error" role="alert">
+            {errors.amount}
+          </p>
+        )}
+      </div>
 
       {type === 'depense' && (
-        <div className="category-grid" role="radiogroup" aria-label="Catégorie">
-          {EXPENSE_CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              role="radio"
-              aria-checked={categorie === c.id}
-              className={`category-chip${categorie === c.id ? ' active' : ''}`}
-              onClick={() => {
-                setCategorie(c.id)
-                setError(null)
-              }}
-            >
-              <span className="emoji" aria-hidden="true">
-                {c.emoji}
-              </span>
-              {c.label}
-            </button>
-          ))}
-        </div>
+        <fieldset className="fieldset">
+          <legend className="field-label">Catégorie</legend>
+          <div
+            className="category-grid"
+            role="radiogroup"
+            aria-label="Catégorie"
+            aria-describedby={errors.category ? ids.categoryError : undefined}
+          >
+            {EXPENSE_CATEGORIES.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={categorie === c.id}
+                className="choice"
+                onClick={() => {
+                  setCategorie(c.id)
+                  setErrors((x) => ({ ...x, category: undefined }))
+                }}
+              >
+                <CategoryIcon categorie={c.id} />
+                <span>{c.label}</span>
+              </button>
+            ))}
+          </div>
+          {errors.category && (
+            <p id={ids.categoryError} className="field-error" role="alert">
+              {errors.category}
+            </p>
+          )}
+        </fieldset>
       )}
 
       {accounts.length > 1 && (
-        <div className="chip-row" role="radiogroup" aria-label="Compte">
-          {accounts.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              role="radio"
-              aria-checked={selectedAccount === a.id}
-              className={`chip${selectedAccount === a.id ? ' active' : ''}`}
-              onClick={() => setCompteId(a.id)}
-            >
-              {a.nom}
-            </button>
-          ))}
-        </div>
+        <fieldset className="fieldset">
+          <legend className="field-label">Compte</legend>
+          <div className="chip-wrap" role="radiogroup" aria-label="Compte">
+            {accounts.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                role="radio"
+                aria-checked={selectedAccount === a.id}
+                className="chip"
+                onClick={() => setCompteId(a.id)}
+              >
+                <AccountIcon type={a.type} size={16} />
+                {a.nom}
+              </button>
+            ))}
+          </div>
+        </fieldset>
       )}
 
       {showMore ? (
         <div className="field-row">
           <label className="field">
-            <span>Date</span>
-            <input type="date" value={date} required onChange={(e) => setDate(e.target.value)} />
+            <span className="field-label">Date</span>
+            <input type="date" value={date} required onChange={(e) => setDate(e.target.value || today())} />
           </label>
           <label className="field grow">
-            <span>Note</span>
+            <span className="field-label">Note</span>
             <input value={note} placeholder="Optionnel" onChange={(e) => setNote(e.target.value)} />
           </label>
         </div>
       ) : (
-        <button type="button" className="link-button" onClick={() => setShowMore(true)}>
-          + Date, note
+        <button type="button" className="btn btn-ghost" onClick={() => setShowMore(true)} aria-expanded={false}>
+          Ajouter une date ou une note
         </button>
       )}
 
-      {error && (
-        <p className="form-error" role="alert">
-          {error}
-        </p>
+      {transaction?.recurringId && (
+        <p className="hint">Générée par un récurrent : seule cette occurrence est modifiée.</p>
       )}
 
       <div className="form-actions">
         {transaction && (
-          <button type="button" className="button danger" onClick={remove}>
+          <button type="button" className="btn btn-danger" onClick={remove} disabled={saving}>
             Supprimer
           </button>
         )}
-        <button type="submit" className="button primary grow">
+        <button type="submit" className="btn btn-primary grow" disabled={saving}>
           {transaction ? 'Enregistrer' : 'Ajouter'}
         </button>
       </div>
-      {transaction?.recurringId && <p className="hint">Générée par un récurrent : seule cette occurrence est modifiée.</p>}
     </form>
   )
 }

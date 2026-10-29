@@ -1,5 +1,6 @@
+import { Download, Plus, ShieldCheck, Upload } from 'lucide-react'
 import { useRef, useState, type ChangeEvent } from 'react'
-import { DownloadIcon, UploadIcon } from '../components/Icons'
+import { AccountIcon } from '../components/CategoryIcon'
 import { downloadBackup, parseBackup, restoreBackup } from '../lib/backup'
 import { accountTypeLabel } from '../lib/categories'
 import { formatMoney } from '../lib/format'
@@ -18,8 +19,10 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
   const accounts = useAccounts()
   const fileInput = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<Status>(null)
+  const [busy, setBusy] = useState(false)
 
   async function exportData() {
+    setBusy(true)
     try {
       const backup = await downloadBackup()
       const { transactions, accounts: acc, recurring } = backup.data
@@ -28,7 +31,9 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
         text: `Sauvegarde exportée : ${acc.length} compte(s), ${transactions.length} transaction(s), ${recurring.length} récurrent(s).`,
       })
     } catch {
-      setStatus({ kind: 'error', text: "L'export a échoué." })
+      setStatus({ kind: 'error', text: "L'export a échoué. Réessayez ; si le problème persiste, libérez de l'espace." })
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -36,6 +41,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
+    setBusy(true)
     try {
       const backup = parseBackup(await file.text())
       const { transactions, accounts: acc } = backup.data
@@ -48,79 +54,104 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
       await generateRecurring()
       setStatus({ kind: 'success', text: 'Sauvegarde importée.' })
     } catch (err) {
-      setStatus({ kind: 'error', text: err instanceof Error ? err.message : "L'import a échoué." })
+      const reason = err instanceof Error ? err.message : "L'import a échoué."
+      setStatus({ kind: 'error', text: `${reason} Choisissez un fichier exporté depuis Monetra.` })
+    } finally {
+      setBusy(false)
     }
   }
 
-  if (!accounts) return null
+  if (!accounts) return <div className="screen" aria-busy="true" />
   const total = accounts.reduce((s, a) => s + a.solde, 0)
 
   return (
     <div className="screen">
       <header className="screen-header">
-        <h1>Réglages</h1>
+        <h1 tabIndex={-1}>Réglages</h1>
       </header>
 
-      <div className="card-title-row">
-        <h2 className="section-title">Comptes</h2>
-        <button type="button" className="button primary small" onClick={onAddAccount}>
-          + Compte
-        </button>
-      </div>
-      {accounts.length === 0 ? (
-        <p className="card muted">Aucun compte pour l'instant.</p>
-      ) : (
-        <ul className="tx-list card">
-          {accounts.map((a) => (
-            <li key={a.id}>
-              <button type="button" className="tx-row" onClick={() => onSelectAccount(a)}>
-                <span className="tx-main">
-                  <span className="tx-title">{a.nom}</span>
-                  <span className="tx-meta">{[accountTypeLabel(a.type), a.banque].filter(Boolean).join(' · ')}</span>
-                </span>
-                <span className={`tx-amount${a.solde < 0 ? ' depense' : ''}`}>{formatMoney(a.solde)}</span>
-              </button>
+      <section aria-labelledby="accounts-title" className="stack">
+        <h2 id="accounts-title" className="section-title">
+          Comptes
+        </h2>
+        {accounts.length === 0 ? (
+          <div className="card empty-state">
+            <p>Aucun compte pour l'instant. Ajoutez votre compte courant pour commencer.</p>
+          </div>
+        ) : (
+          <ul className="list card card-flush">
+            {accounts.map((a) => (
+              <li key={a.id}>
+                <button type="button" className="row" onClick={() => onSelectAccount(a)}>
+                  <span className="row-icon">
+                    <AccountIcon type={a.type} />
+                  </span>
+                  <span className="row-main">
+                    <span className="row-title">{a.nom}</span>
+                    <span className="row-meta">{[accountTypeLabel(a.type), a.banque].filter(Boolean).join(' · ')}</span>
+                  </span>
+                  <span className={`amount${a.solde < 0 ? ' negative' : ''}`}>{formatMoney(a.solde)}</span>
+                </button>
+              </li>
+            ))}
+            <li className="row static total-row">
+              <span className="row-main">
+                <span className="row-title">Total</span>
+              </span>
+              <span className="amount">{formatMoney(total)}</span>
             </li>
-          ))}
-          <li className="total-row">
-            <span>Total</span>
-            <strong>{formatMoney(total)}</strong>
-          </li>
-        </ul>
-      )}
-
-      <h2 className="section-title">Sauvegarde</h2>
-      <section className="card">
-        <p className="muted">
-          Vos données sont stockées uniquement sur cet appareil. Exportez régulièrement une sauvegarde JSON pour ne rien
-          perdre ou changer de téléphone.
-        </p>
-        <div className="backup-actions">
-          <button type="button" className="button primary" onClick={exportData}>
-            <DownloadIcon /> Exporter
-          </button>
-          <button type="button" className="button" onClick={() => fileInput.current?.click()}>
-            <UploadIcon /> Importer
-          </button>
-          <input
-            ref={fileInput}
-            type="file"
-            accept="application/json,.json"
-            className="sr-only"
-            tabIndex={-1}
-            onChange={importData}
-            data-testid="import-input"
-          />
-        </div>
-        <p className="hint">L'import remplace l'intégralité des données actuelles.</p>
-        {status && (
-          <p className={`status ${status.kind}`} role="status">
-            {status.text}
-          </p>
+          </ul>
         )}
+        <button type="button" className="btn btn-secondary btn-block" onClick={onAddAccount}>
+          <Plus size={20} aria-hidden="true" />
+          Ajouter un compte
+        </button>
       </section>
 
-      <p className="footnote">Monetra · 100 % local, aucune donnée envoyée.</p>
+      <section aria-labelledby="backup-title" className="stack">
+        <h2 id="backup-title" className="section-title">
+          Sauvegarde
+        </h2>
+        <div className="card">
+          <p className="body-muted">
+            Exportez régulièrement une sauvegarde JSON pour ne rien perdre ou changer de téléphone.
+          </p>
+          <div className="backup-actions">
+            <button type="button" className="btn btn-primary" onClick={exportData} disabled={busy}>
+              <Download size={20} aria-hidden="true" />
+              Exporter
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
+              <Upload size={20} aria-hidden="true" />
+              Importer
+            </button>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="application/json,.json"
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+              onChange={importData}
+              data-testid="import-input"
+            />
+          </div>
+          <p className="hint">L'import remplace l'intégralité des données actuelles, après confirmation.</p>
+          {status && (
+            <p className={`status ${status.kind}`} role={status.kind === 'error' ? 'alert' : 'status'}>
+              {status.text}
+            </p>
+          )}
+        </div>
+      </section>
+
+      <div className="card privacy">
+        <ShieldCheck size={24} aria-hidden="true" />
+        <p>
+          <strong>100 % local.</strong> Vos données sont stockées uniquement sur cet appareil et ne sont jamais
+          envoyées à un serveur.
+        </p>
+      </div>
     </div>
   )
 }

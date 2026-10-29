@@ -26,6 +26,15 @@ export async function addTransaction(input: Omit<Transaction, 'id'>): Promise<st
   return t.id
 }
 
+/** Réinsère une transaction supprimée (annulation), avec son identifiant d'origine. */
+export async function restoreTransaction(t: Transaction) {
+  await db.transaction('rw', db.transactions, db.accounts, async () => {
+    if (await db.transactions.get(t.id)) return
+    await db.transactions.add(t)
+    await adjustBalance(t.compteId, signed(t))
+  })
+}
+
 export async function updateTransaction(id: string, changes: Omit<Transaction, 'id'>) {
   await db.transaction('rw', db.transactions, db.accounts, async () => {
     const previous = await db.transactions.get(id)

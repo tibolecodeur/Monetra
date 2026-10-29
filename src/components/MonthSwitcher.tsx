@@ -1,5 +1,5 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { addMonths, currentMonth, formatMonth, type MonthKey } from '../lib/dates'
-import { ChevronLeftIcon, ChevronRightIcon } from './Icons'
 
 interface Props {
   month: MonthKey
@@ -9,21 +9,31 @@ interface Props {
 export function MonthSwitcher({ month, onChange }: Props) {
   const isCurrent = month === currentMonth()
   return (
-    <div className="month-switcher">
-      <button type="button" className="icon-button" onClick={() => onChange(addMonths(month, -1))} aria-label="Mois précédent">
-        <ChevronLeftIcon />
+    <div className="month-switcher" role="group" aria-label="Mois affiché">
+      <button
+        type="button"
+        className="icon-button"
+        onClick={() => onChange(addMonths(month, -1))}
+        aria-label="Mois précédent"
+      >
+        <ChevronLeft size={22} aria-hidden="true" />
       </button>
       <button
         type="button"
         className="month-label"
         onClick={() => onChange(currentMonth())}
-        disabled={isCurrent}
-        title={isCurrent ? undefined : 'Revenir au mois en cours'}
+        aria-disabled={isCurrent}
+        aria-label={isCurrent ? `${formatMonth(month)}, mois en cours` : `${formatMonth(month)}, revenir au mois en cours`}
       >
         {formatMonth(month)}
       </button>
-      <button type="button" className="icon-button" onClick={() => onChange(addMonths(month, 1))} aria-label="Mois suivant">
-        <ChevronRightIcon />
+      <button
+        type="button"
+        className="icon-button"
+        onClick={() => onChange(addMonths(month, 1))}
+        aria-label="Mois suivant"
+      >
+        <ChevronRight size={22} aria-hidden="true" />
       </button>
     </div>
   )

@@ -19,13 +19,25 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 
 Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
-![Accueil](docs/screenshots/01-dashboard.png)
+| Clair | Sombre |
+|---|---|
+| <img src="docs/screenshots/redesign/01-accueil-clair.png" width="260" alt="Accueil en mode clair"> | <img src="docs/screenshots/redesign/01-accueil-sombre.png" width="260" alt="Accueil en mode sombre"> |
+
+## Design
+
+L'interface suit le design system généré avec le skill UI UX Pro Max : [`design-system/monetra/MASTER.md`](design-system/monetra/MASTER.md).
+
+- Glassmorphism sur fond bleu nuit, bleu « confiance » et vert pour les actions et les revenus.
+- Titres en Caveat, texte en Quicksand, servis en local (aucune requête vers Google Fonts).
+- Icônes SVG Lucide, modes clair et sombre selon la préférence système.
+- Pensé pour une main : barre d'onglets en bas avec le bouton d'ajout au centre, zones tactiles de 44 px minimum.
 
 ## Stack
 
 - [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
 - [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) : manifest, service worker, offline
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
+- [Lucide](https://lucide.dev/) : icônes SVG ; [Fontsource](https://fontsource.org/) : polices auto-hébergées
 
 ## Lancer en local
 

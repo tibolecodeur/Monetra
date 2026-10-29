@@ -3,20 +3,19 @@ import type { AccountType, CategoryId } from './types'
 export interface Category {
   id: CategoryId
   label: string
-  emoji: string
 }
 
 export const EXPENSE_CATEGORIES: Category[] = [
-  { id: 'logement', label: 'Logement', emoji: '🏠' },
-  { id: 'courses', label: 'Courses', emoji: '🛒' },
-  { id: 'resto', label: 'Resto / fast-food', emoji: '🍔' },
-  { id: 'abonnements', label: 'Abonnements', emoji: '📱' },
-  { id: 'loisirs', label: 'Loisirs', emoji: '🎮' },
-  { id: 'epargne', label: 'Épargne', emoji: '🐷' },
-  { id: 'divers', label: 'Divers', emoji: '📦' },
+  { id: 'logement', label: 'Logement' },
+  { id: 'courses', label: 'Courses' },
+  { id: 'resto', label: 'Resto / fast-food' },
+  { id: 'abonnements', label: 'Abonnements' },
+  { id: 'loisirs', label: 'Loisirs' },
+  { id: 'epargne', label: 'Épargne' },
+  { id: 'divers', label: 'Divers' },
 ]
 
-export const INCOME_CATEGORY: Category = { id: 'revenu', label: 'Revenu', emoji: '💶' }
+export const INCOME_CATEGORY: Category = { id: 'revenu', label: 'Revenu' }
 
 const BY_ID = new Map<CategoryId, Category>(
   [...EXPENSE_CATEGORIES, INCOME_CATEGORY].map((c) => [c.id, c]),
