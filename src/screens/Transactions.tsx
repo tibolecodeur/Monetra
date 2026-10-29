@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { Segmented } from '../components/Segmented'
@@ -5,6 +6,8 @@ import { TransactionRow } from '../components/TransactionRow'
 import { formatDay, type MonthKey } from '../lib/dates'
 import { formatMoney, round2 } from '../lib/format'
 import { accountLabels, useAccounts, useMonthTransactions } from '../lib/hooks'
+import { deleteTransaction, restoreTransaction } from '../lib/mutations'
+import { useToast } from '../lib/toast'
 import type { Transaction, TransactionType } from '../lib/types'
 
 interface Props {
@@ -19,6 +22,13 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
   const accounts = useAccounts()
   const transactions = useMonthTransactions(month)
   const [filter, setFilter] = useState<Filter>('tout')
+  const toast = useToast()
+
+  // Suppression par glissement : pas de dialogue, une annulation possible depuis le toast.
+  const swipeDelete = (t: Transaction) => {
+    void deleteTransaction(t.id)
+    toast({ message: 'Transaction supprimée', action: { label: 'Annuler', onAction: () => void restoreTransaction(t) } })
+  }
   const accountNames = useMemo(() => accountLabels(accounts, transactions), [accounts, transactions])
 
   const { groups, entrees, sorties } = useMemo(() => {
@@ -73,10 +83,18 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
           <p className="hint">Touchez le bouton + en bas de l'écran pour en saisir une.</p>
         </div>
       ) : (
-        groups.map(([date, list]) => {
+        <AnimatePresence initial={false}>
+          {groups.map(([date, list]) => {
           const net = round2(list.reduce((s, t) => s + (t.type === 'revenu' ? t.montant : -t.montant), 0))
           return (
-            <section key={date} className="day-group" aria-label={formatDay(date)}>
+            <motion.section
+              key={date}
+              className="day-group"
+              aria-label={formatDay(date)}
+              layout="position"
+              exit={{ opacity: 0 }}
+              transition={{ opacity: { duration: 0.15 } }}
+            >
               <h2 className="day-title">
                 <span>{formatDay(date)}</span>
                 <span className="amount">
@@ -85,20 +103,24 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
                 </span>
               </h2>
               <ul className="list card card-flush">
-                {list.map((t) => (
-                  <TransactionRow
-                    key={t.id}
-                    transaction={t}
-                    accountName={accountNames.get(t.compteId)}
-                    onSelect={onSelect}
-                  />
-                ))}
+                <AnimatePresence initial={false}>
+                  {list.map((t) => (
+                    <TransactionRow
+                      key={t.id}
+                      transaction={t}
+                      accountName={accountNames.get(t.compteId)}
+                      onSelect={onSelect}
+                      onSwipeDelete={swipeDelete}
+                    />
+                  ))}
+                </AnimatePresence>
               </ul>
-            </section>
+            </motion.section>
           )
-        })
+          })}
+        </AnimatePresence>
       )}
-      {groups.length > 0 && <p className="footnote">Touchez une opération pour la modifier ou la supprimer.</p>}
+      {groups.length > 0 && <p className="footnote">Touchez une opération pour la modifier. Glissez-la vers la gauche pour la supprimer.</p>}
     </div>
   )
 }

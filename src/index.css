@@ -25,7 +25,10 @@
   --color-segment-active: #3a3a3c;
   --color-pressed: rgb(255 255 255 / 6%);
   --color-scrim: rgb(0 0 0 / 60%);
-  --color-nav: #000000;
+  /* Matériau de la tab bar (translucide) et fondu du scroll edge effect. */
+  --color-material: rgb(0 0 0 / 72%);
+  --color-edge: rgb(0 0 0 / 80%);
+  --color-tab-inactive: #9e9ea3;
   --color-track: #26262a;
   --color-bar: #aeaeb2;
   --color-meter: #f5f5f7;
@@ -34,8 +37,41 @@
   --shadow-sheet: 0 -8px 24px rgb(0 0 0 / 50%);
   --shadow-float: 0 8px 24px rgb(0 0 0 / 60%);
 
-  /* Typographie */
-  --font-sans: 'Inter Variable', -apple-system, system-ui, sans-serif;
+  /* Police système (SF Pro sur iOS / macOS), Inter pour les autres plateformes.
+     Inter est placée avant system-ui, sinon elle ne servirait jamais (system-ui existe partout). */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter Variable', system-ui, sans-serif;
+  /* Typographie : taille (rem, suit le réglage de taille du texte), tracking et interlignage par taille.
+     Tracking : grand texte resserré, petit texte légèrement ouvert (skill apple-design §15). */
+  --fs-12: 0.75rem;
+  --ls-12: 0.0005em;
+  --lh-12: 1.33;
+  --fs-13: 0.8125rem;
+  --ls-13: -0.0032em;
+  --lh-13: 1.38;
+  --fs-14: 0.875rem;
+  --ls-14: -0.0062em;
+  --lh-14: 1.43;
+  --fs-15: 0.9375rem;
+  --ls-15: -0.0088em;
+  --lh-15: 1.4;
+  --fs-16: 1rem;
+  --ls-16: -0.0110em;
+  --lh-16: 1.5;
+  --fs-17: 1.0625rem;
+  --ls-17: -0.0128em;
+  --lh-17: 1.41;
+  --fs-18: 1.125rem;
+  --ls-18: -0.0143em;
+  --lh-18: 1.33;
+  --fs-20: 1.25rem;
+  --ls-20: -0.0167em;
+  --lh-20: 1.25;
+  --fs-28: 1.75rem;
+  --ls-28: -0.0209em;
+  --lh-28: 1.14;
+  --fs-44: 2.75rem;
+  --ls-44: -0.0222em;
+  --lh-44: 1.09;
 
   /* Espacements (grille de 4) */
   --space-xs: 4px;
@@ -67,14 +103,32 @@
 
   color-scheme: dark;
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 100%;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: var(--lh-16);
+  letter-spacing: var(--ls-16);
+  font-optical-sizing: auto;
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   text-size-adjust: 100%;
+}
+
+/* Safari (SF Pro) : la police système applique déjà sa table de tracking optique. */
+@supports (font: -apple-system-body) {
+  :root {
+    --ls-12: normal;
+    --ls-13: normal;
+    --ls-14: normal;
+    --ls-15: normal;
+    --ls-16: normal;
+    --ls-17: normal;
+    --ls-18: normal;
+    --ls-20: normal;
+    --ls-28: normal;
+    --ls-44: normal;
+  }
 }
 
 :root[data-theme='light'] {
@@ -97,7 +151,9 @@
   --color-segment-active: #ffffff;
   --color-pressed: rgb(0 0 0 / 5%);
   --color-scrim: rgb(0 0 0 / 35%);
-  --color-nav: #f9f9fb;
+  --color-material: rgb(249 249 251 / 78%);
+  --color-edge: rgb(242 242 247 / 85%);
+  --color-tab-inactive: #636366;
   --color-track: #e5e5ea;
   --color-bar: #6c6c70;
   --color-meter: #1c1c1e;
@@ -239,10 +295,10 @@ fieldset {
 }
 
 .screen-header h1 {
-  font-size: 28px;
+  font-size: var(--fs-28);
+  letter-spacing: var(--ls-28);
+  line-height: var(--lh-28);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
 }
 
 .stack {
@@ -253,9 +309,9 @@ fieldset {
 
 .section-title,
 .card-title {
-  font-size: 13px;
+  font-size: var(--fs-13);
+  line-height: var(--lh-13);
   font-weight: 500;
-  line-height: 1.4;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
@@ -278,11 +334,15 @@ fieldset {
 }
 
 .hint {
-  font-size: 14px;
+  font-size: var(--fs-14);
+  letter-spacing: var(--ls-14);
+  line-height: var(--lh-14);
 }
 
 .footnote {
-  font-size: 14px;
+  font-size: var(--fs-14);
+  letter-spacing: var(--ls-14);
+  line-height: var(--lh-14);
   text-align: center;
   padding: var(--space-sm) 0;
 }
@@ -322,6 +382,8 @@ fieldset {
 
 ul.card-flush {
   padding: var(--space-xs) 0;
+  /* Le fond rouge du swipe reste dans les coins arrondis (clip ne crée pas de conteneur de défilement). */
+  overflow: clip;
 }
 
 .card-title-row {
@@ -392,7 +454,8 @@ ul.card-flush {
 }
 
 .hero-label {
-  font-size: 13px;
+  font-size: var(--fs-13);
+  line-height: var(--lh-13);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -407,7 +470,9 @@ ul.card-flush {
   border-radius: var(--radius-full);
   background: var(--color-accent-soft);
   color: var(--color-accent-text);
-  font-size: 13px;
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
   font-weight: 600;
 }
 
@@ -417,16 +482,18 @@ ul.card-flush {
 }
 
 .hero-value {
-  font-size: 44px;
+  font-size: var(--fs-44);
+  letter-spacing: var(--ls-44);
+  line-height: var(--lh-44);
   font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
   font-variant-numeric: tabular-nums;
   margin: var(--space-xs) 0 2px;
 }
 
 .hero-sub {
-  font-size: 15px;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  line-height: var(--lh-15);
   color: var(--color-text-secondary);
 }
 
@@ -486,14 +553,18 @@ ul.card-flush {
 
 .breakdown dt small {
   display: block;
-  font-size: 13px;
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
   color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
 .breakdown-total {
   font-weight: 600;
-  font-size: 17px;
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  line-height: var(--lh-17);
 }
 
 /* Barres par catégorie */
@@ -557,12 +628,16 @@ ul.card-flush {
 }
 
 .totals-label {
-  font-size: 13px;
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
   color: var(--color-text-secondary);
 }
 
 .totals .amount {
-  font-size: 18px;
+  font-size: var(--fs-18);
+  letter-spacing: var(--ls-18);
+  line-height: var(--lh-18);
 }
 
 /* Listes */
@@ -587,10 +662,10 @@ ul.card-flush {
   background: none;
   border: 0;
   text-align: left;
-  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
-button.row:active {
+/* Surlignage immédiat au pointer-down (lib/press.ts), sans transition. */
+.row[data-pressed] {
   background: var(--color-pressed);
 }
 
@@ -633,7 +708,9 @@ button.row:active {
   align-items: center;
   flex-wrap: wrap;
   gap: 2px var(--space-sm);
-  font-size: 14px;
+  font-size: var(--fs-14);
+  letter-spacing: var(--ls-14);
+  line-height: var(--lh-14);
   color: var(--color-text-secondary);
 }
 
@@ -645,7 +722,9 @@ button.row:active {
   border-radius: 6px;
   background: var(--color-fill);
   border: 1px solid var(--color-border);
-  font-size: 12px;
+  font-size: var(--fs-12);
+  letter-spacing: var(--ls-12);
+  line-height: var(--lh-12);
   font-weight: 500;
 }
 
@@ -680,7 +759,9 @@ button.row:active {
 }
 
 .day-badge small {
-  font-size: 12px;
+  font-size: var(--fs-12);
+  letter-spacing: var(--ls-12);
+  line-height: var(--lh-12);
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -700,7 +781,8 @@ button.row:active {
   justify-content: space-between;
   gap: var(--space-sm);
   padding: 0 var(--space-xs);
-  font-size: 13px;
+  font-size: var(--fs-13);
+  line-height: var(--lh-13);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -720,18 +802,16 @@ button.row:active {
   border: 1px solid transparent;
   font-weight: 600;
   text-align: center;
-  transition:
-    opacity var(--duration) ease,
-    background-color var(--duration) ease;
 }
 
-.btn:active:not(:disabled) {
-  opacity: 0.8;
+/* Échelle gérée en spring par lib/press.ts ; l'assombrissement est immédiat. */
+.btn[data-pressed] {
+  filter: brightness(0.88);
 }
 
 @media (hover: hover) {
   .btn:hover:not(:disabled) {
-    opacity: 0.9;
+    filter: brightness(1.06);
   }
 }
 
@@ -772,7 +852,9 @@ button.row:active {
   border: 0;
   background: none;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--fs-14);
+  letter-spacing: var(--ls-14);
+  line-height: var(--lh-14);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -805,10 +887,10 @@ button.row:active {
   border: 0;
   background: transparent;
   color: var(--color-text);
-  transition: background-color var(--duration-fast) ease;
 }
 
-.icon-button:active {
+.icon-button[data-pressed],
+.month-label[data-pressed] {
   background: var(--color-pressed);
 }
 
@@ -849,22 +931,31 @@ button.row:active {
 }
 
 .segmented button {
+  position: relative;
   min-height: var(--touch);
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--color-text-secondary);
   font-weight: 500;
-  transition:
-    background-color var(--duration) ease,
-    color var(--duration) ease;
 }
 
 .segmented button.active {
-  background: var(--color-segment-active);
   color: var(--color-text);
   font-weight: 600;
+}
+
+/* Indicateur qui glisse en spring d'une option à l'autre (layoutId). */
+.segment-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: var(--color-segment-active);
   box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.segment-label {
+  position: relative;
 }
 
 /* Barre d'onglets */
@@ -882,9 +973,26 @@ button.row:active {
   margin: 0 auto;
   height: calc(var(--tab-height) + env(safe-area-inset-bottom));
   padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  /* Fond opaque : rien ne transparaît sous les onglets, quel que soit le support du flou. */
-  background: var(--color-nav);
-  border-top: 1px solid var(--color-border);
+  /* Matériau translucide : le contenu défile dessous, flouté (skill apple-design §12). */
+  background: var(--color-material);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Scroll edge effect au lieu d'une bordure : fondu là où le contenu passe sous la barre. */
+.tab-bar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 24px;
+  pointer-events: none;
+  background: linear-gradient(to top, var(--color-edge), transparent);
+  opacity: 0;
+}
+
+.tab-bar[data-edge='on']::before {
+  opacity: 1;
 }
 
 @media (min-width: 560px) {
@@ -896,6 +1004,7 @@ button.row:active {
 }
 
 .tab {
+  /* Sur un matériau, le texte gagne en contraste et en graisse (vibrancy). */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -904,10 +1013,11 @@ button.row:active {
   min-width: var(--touch);
   border: 0;
   background: none;
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  transition: color var(--duration) ease;
+  color: var(--color-tab-inactive);
+  font-size: var(--fs-12);
+  letter-spacing: 0.01em;
+  line-height: var(--lh-12);
+  font-weight: 600;
 }
 
 .tab.active {
@@ -929,11 +1039,6 @@ button.row:active {
   border-radius: 50%;
   background: var(--color-accent);
   color: var(--color-on-accent);
-  transition: transform var(--duration) var(--ease-out);
-}
-
-.tab-add:active {
-  transform: scale(0.94);
 }
 
 /* Toast */
@@ -963,7 +1068,6 @@ button.row:active {
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-float);
   pointer-events: auto;
-  animation: toast-in var(--duration-slow) var(--ease-out);
 }
 
 .toast-icon {
@@ -986,43 +1090,69 @@ button.row:active {
   font-weight: 600;
 }
 
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
+/* Bottom sheet (animée et glissable via motion, voir components/Sheet.tsx) */
 
-/* Bottom sheet */
-
-.sheet-scrim {
+.sheet-layer {
   position: fixed;
   inset: 0;
   z-index: var(--z-sheet);
   display: flex;
   align-items: flex-end;
   justify-content: center;
+}
+
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
   background: var(--color-scrim);
-  animation: fade-in var(--duration) ease-out;
+}
+
+/* En cours de fermeture : seuls les touchers sur la feuille elle-même (pour la rattraper) restent captés. */
+.sheet-layer[data-closing] {
+  pointer-events: none;
+}
+
+.sheet-layer[data-closing='slide'] .sheet {
+  pointer-events: auto;
 }
 
 .sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 560px;
   max-height: 92dvh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: var(--space-sm) var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
   border-radius: 20px 20px 0 0;
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-bottom: 0;
   box-shadow: var(--shadow-sheet);
-  animation: sheet-in var(--duration-slow) var(--ease-out);
+  will-change: transform;
 }
 
 .sheet:focus {
   outline: none;
+}
+
+/* Zone de préhension : le navigateur ne gère aucun geste ici, on suit le doigt 1:1. */
+.sheet-grabber {
+  flex: none;
+  padding: var(--space-sm) var(--space-md) 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.sheet-grabber:active {
+  cursor: grabbing;
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
 }
 
 .sheet-handle {
@@ -1042,23 +1172,53 @@ button.row:active {
 }
 
 .sheet-header h2 {
-  font-size: 20px;
+  font-size: var(--fs-20);
+  letter-spacing: var(--ls-20);
+  line-height: var(--lh-20);
   font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
+/* Glissement pour supprimer */
+
+.swipe-row {
+  position: relative;
+  /* clip et non hidden : hidden crée un conteneur de défilement qui capterait le geste horizontal. */
+  overflow: clip;
+  touch-action: pan-y;
 }
 
-@keyframes sheet-in {
-  from {
-    transform: translateY(40px);
-    opacity: 0.6;
-  }
+.swipe-action {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: 0 var(--space-lg);
+  background: var(--color-danger);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.swipe-action-icon {
+  display: grid;
+  place-items: center;
+}
+
+.swipe-content {
+  position: relative;
+  background: var(--color-surface);
+  /* Vertical : défilement natif ; horizontal : suivi 1:1 par le geste. */
+  touch-action: pan-y;
+  will-change: transform;
+}
+
+.month-pager {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  touch-action: pan-y;
+  will-change: transform;
 }
 
 /* Formulaires */
@@ -1071,7 +1231,8 @@ button.row:active {
 
 .field-label {
   display: block;
-  font-size: 13px;
+  font-size: var(--fs-13);
+  line-height: var(--lh-13);
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1107,7 +1268,9 @@ button.row:active {
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border-input);
   background: var(--color-surface);
-  font-size: 16px;
+  font-size: var(--fs-16);
+  letter-spacing: var(--ls-16);
+  line-height: var(--lh-16);
   transition:
     border-color var(--duration) ease,
     box-shadow var(--duration) ease;
@@ -1131,7 +1294,9 @@ button.row:active {
 
 .field-error {
   color: var(--color-danger);
-  font-size: 14px;
+  font-size: var(--fs-14);
+  letter-spacing: var(--ls-14);
+  line-height: var(--lh-14);
   font-weight: 500;
 }
 
@@ -1167,10 +1332,10 @@ button.row:active {
   background: none;
   outline: none;
   text-align: right;
-  font-size: 44px;
+  font-size: var(--fs-44);
+  letter-spacing: var(--ls-44);
+  line-height: var(--lh-44);
   font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
   font-variant-numeric: tabular-nums;
   caret-color: var(--color-accent);
 }
@@ -1182,7 +1347,9 @@ button.row:active {
 .currency {
   flex: 1;
   text-align: left;
-  font-size: 28px;
+  font-size: var(--fs-28);
+  letter-spacing: var(--ls-28);
+  line-height: var(--lh-28);
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -1206,9 +1373,6 @@ button.row:active {
   background: var(--color-surface-elevated);
   font-weight: 500;
   text-align: left;
-  transition:
-    border-color var(--duration) ease,
-    background-color var(--duration) ease;
 }
 
 .choice {
@@ -1261,7 +1425,7 @@ button.row:active {
 }
 
 /* Dans une feuille, le bouton principal reste visible sous le pouce. */
-.sheet .form-actions {
+.sheet-body .form-actions {
   position: sticky;
   bottom: calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
   margin: 0 calc(-1 * var(--space-md)) calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
@@ -1292,6 +1456,44 @@ button.row:active {
 
 .status.error {
   color: var(--color-danger);
+}
+
+/* Transparence réduite : matériaux opaques, plus de flou. */
+@media (prefers-reduced-transparency: reduce) {
+  .tab-bar {
+    background: var(--color-bg);
+    backdrop-filter: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .tab-bar::before {
+    display: none;
+  }
+}
+
+/* Contraste renforcé : fonds quasi pleins, bordures franches, texte secondaire plus marqué. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #707076;
+    --color-text-secondary: #aeaeb2;
+    --color-tab-inactive: #c7c7cc;
+  }
+
+  :root[data-theme='light'] {
+    --color-border: #8a8a8e;
+    --color-text-secondary: #3a3a3c;
+    --color-tab-inactive: #3a3a3c;
+  }
+
+  .tab-bar {
+    background: var(--color-bg);
+    backdrop-filter: none;
+    border-top: 1px solid var(--color-text-secondary);
+  }
+
+  .tab-bar::before {
+    display: none;
+  }
 }
 
 /* Réduction des animations */

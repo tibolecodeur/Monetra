@@ -1,13 +1,16 @@
 import { ArrowDownLeft, ArrowRight, Repeat, ShoppingBag, TrendingUp, TriangleAlert } from 'lucide-react'
-import { useMemo } from 'react'
+import { motion } from 'motion/react'
+import { useMemo, useRef } from 'react'
+import { AnimatedAmount } from '../components/AnimatedAmount'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { TransactionRow } from '../components/TransactionRow'
 import { getCategory } from '../lib/categories'
-import { currentMonth, daysInMonth, formatShortDate, today, type MonthKey } from '../lib/dates'
+import { addMonths, currentMonth, daysInMonth, formatShortDate, today, type MonthKey } from '../lib/dates'
 import { formatMoney } from '../lib/format'
 import { accountLabels, useAccounts, useMonthTransactions, useRecurring } from '../lib/hooks'
 import { upcomingOccurrences } from '../lib/recurring'
+import { useMonthPager } from '../lib/useMonthPager'
 import { summarize } from '../lib/summary'
 import type { Transaction } from '../lib/types'
 
@@ -27,6 +30,8 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
   const upcoming = useMemo(() => upcomingOccurrences(recurring ?? [], month), [recurring, month])
   const summary = useMemo(() => summarize(transactions ?? [], upcoming), [transactions, upcoming])
   const accountNames = useMemo(() => accountLabels(accounts, transactions), [accounts, transactions])
+  const pagerArea = useRef<HTMLDivElement>(null)
+  const pager = useMonthPager(month, onMonthChange, pagerArea)
 
   if (!accounts || !transactions || !recurring) return <div className="screen" aria-busy="true" />
 
@@ -47,7 +52,18 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
           Monetra
         </h1>
       </header>
-      <MonthSwitcher month={month} onChange={onMonthChange} />
+      <MonthSwitcher
+        month={month}
+        onChange={(m) => (m === addMonths(month, 1) ? pager.go(1) : m === addMonths(month, -1) ? pager.go(-1) : onMonthChange(m))}
+      />
+
+      <motion.div
+        ref={pagerArea}
+        className="month-pager"
+        style={{ x: pager.x, opacity: pager.opacity }}
+        data-testid="month-pager"
+        {...pager.drag}
+      >
 
       {accounts.length === 0 && (
         <section className="card onboarding">
@@ -75,7 +91,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
             {negative ? 'Budget dépassé' : 'Dans le vert'}
           </span>
         </div>
-        <p className="hero-value">{formatMoney(summary.resteAVivre)}</p>
+        <AnimatedAmount className="hero-value" value={summary.resteAVivre} />
         {perDay !== null && (
           <p className="hero-sub">
             Soit <strong>{formatMoney(perDay)}</strong> par jour pendant {daysLeft} jour{daysLeft > 1 ? 's' : ''}
@@ -219,6 +235,8 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
           </ul>
         )}
       </section>
+
+      </motion.div>
 
       {accounts.length > 0 && (
         <p className="footnote">

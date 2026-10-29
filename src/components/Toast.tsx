@@ -1,4 +1,6 @@
 import { CircleCheck } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { SPRINGS } from '../lib/motion'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ToastContext, type ToastOptions } from '../lib/toast'
 
@@ -23,8 +25,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={show}>
       {children}
       <div className="toast-region" role="status" aria-live="polite">
+        <AnimatePresence>
         {toast && (
-          <div className="toast" key={toast.id}>
+          <motion.div
+            className="toast"
+            key={toast.id}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0, transition: SPRINGS.default() }}
+            exit={{ opacity: 0, y: 24, transition: { duration: 0.15, ease: 'easeIn' } }}
+          >
             <CircleCheck size={20} aria-hidden="true" className="toast-icon" />
             <span className="toast-message">{toast.message}</span>
             {toast.action && (
@@ -39,8 +48,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 {toast.action.label}
               </button>
             )}
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   )

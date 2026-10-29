@@ -19,7 +19,7 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 
 Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
-<img src="docs/screenshots/dark/01-accueil.png" width="260" alt="Accueil"> <img src="docs/screenshots/dark/03-saisie-rapide.png" width="260" alt="Saisie rapide">
+<img src="docs/screenshots/apple/01-accueil.png" width="240" alt="Accueil"> <img src="docs/videos/sheet.gif" width="240" alt="Sheet glissable"> <img src="docs/videos/swipe-suppression.gif" width="240" alt="Swipe pour supprimer">
 
 ## Design
 
@@ -31,12 +31,28 @@ L'interface suit le design system [`design-system/monetra/MASTER.md`](design-sys
 - Icônes SVG Lucide, sans emojis.
 - Pensé pour une main : barre d'onglets en bas avec le bouton d'ajout au centre, zones tactiles de 44 px minimum.
 
+### Interactions fluides
+
+Les principes du skill `apple-design` (`.claude/skills/apple-design/SKILL.md`), avec la librairie [Motion](https://motion.dev/) :
+
+- **Springs** paramétrés comme chez Apple (damping ratio + response), interruptibles, qui reprennent la vélocité du doigt.
+- **Sheet glissable** : suivi 1:1, rubber-band vers le haut, fermeture décidée par la vélocité et la projection du momentum, voile qui suit le geste.
+- **Swipe pour supprimer** (opérations, récurrents) avec seuil, rubber-band et annulation depuis un toast.
+- **Swipe horizontal** sur l'accueil pour changer de mois, avec snap et momentum.
+- **Retour visuel au pointer-down** partout ; reste à vivre animé en spring.
+- **Tab bar** en matériau translucide, avec scroll edge effect.
+- Respect de `prefers-reduced-motion`, `prefers-reduced-transparency` et `prefers-contrast`.
+
+Vidéos des gestes : [`docs/videos/`](docs/videos).
+
 ## Stack
 
 - [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
 - [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) : manifest, service worker, offline
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
-- [Lucide](https://lucide.dev/) : icônes SVG ; [Inter](https://rsms.me/inter/) via Fontsource, auto-hébergée
+- [Motion](https://motion.dev/) : springs et gestes
+- [Lucide](https://lucide.dev/) : icônes SVG ; police système (SF Pro), [Inter](https://rsms.me/inter/) auto-hébergée en repli
+- [Playwright](https://playwright.dev/) : tests e2e tactiles
 
 ## Lancer en local
 
@@ -56,6 +72,8 @@ npm run build     # build de production dans dist/
 npm run preview   # sert le build (service worker actif)
 npm run lint      # lint avec oxlint
 npm test          # tests unitaires (Vitest)
+npm run test:e2e  # tests e2e Playwright en émulation iPhone (build + preview automatiques)
+npm run record:videos  # enregistre les vidéos des gestes (test-results/)
 ```
 
 Pour tester l'installation sur mobile, servez le build (`npm run preview -- --host`) et ouvrez l'URL depuis le téléphone sur le même réseau. L'installation de la PWA demande HTTPS, sauf sur `localhost`.

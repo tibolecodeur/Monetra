@@ -26,3 +26,8 @@ dist-ssr
 # Python (scripts du skill ui-ux-pro-max)
 __pycache__/
 *.pyc
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/

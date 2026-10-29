@@ -1,8 +1,12 @@
 import { Plus } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { SwipeRow } from '../components/SwipeRow'
 import { getCategory } from '../lib/categories'
 import { formatShortDate, today } from '../lib/dates'
 import { formatMoney, round2 } from '../lib/format'
 import { accountLabels, useAccounts, useRecurring } from '../lib/hooks'
+import { deleteRecurring, restoreRecurring } from '../lib/mutations'
+import { useToast } from '../lib/toast'
 import type { Recurring } from '../lib/types'
 
 interface Props {
@@ -13,6 +17,7 @@ interface Props {
 export function RecurringScreen({ onAdd, onSelect }: Props) {
   const recurring = useRecurring()
   const accounts = useAccounts()
+  const toast = useToast()
   if (!recurring || !accounts) return <div className="screen" aria-busy="true" />
 
   const now = today()
@@ -23,8 +28,15 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
   const sum = (type: Recurring['type']) =>
     round2(active.filter((r) => r.type === type).reduce((s, r) => s + r.montant, 0))
 
+  // Suppression par glissement, annulable ; les transactions déjà générées sont conservées.
+  const swipeDelete = (r: Recurring) => {
+    void deleteRecurring(r.id)
+    toast({ message: `« ${r.libelle} » supprimé`, action: { label: 'Annuler', onAction: () => void restoreRecurring(r) } })
+  }
+
   const renderList = (list: Recurring[]) => (
     <ul className="list card card-flush">
+      <AnimatePresence initial={false}>
       {list.map((r) => {
         const meta = [
           getCategory(r.categorie).label,
@@ -34,7 +46,8 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
           .filter(Boolean)
           .join(' · ')
         return (
-          <li key={r.id}>
+          <motion.li key={r.id} layout="position" exit={{ opacity: 0 }} transition={{ opacity: { duration: 0.15 } }}>
+            <SwipeRow label={`Supprimer ${r.libelle}`} onDelete={() => swipeDelete(r)}>
             <button type="button" className="row" onClick={() => onSelect(r)}>
               <span className={`day-badge ${r.type}`}>
                 <small aria-hidden="true">le</small>
@@ -50,9 +63,11 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
                 {formatMoney(r.montant)}
               </span>
             </button>
-          </li>
+            </SwipeRow>
+          </motion.li>
         )
       })}
+      </AnimatePresence>
     </ul>
   )
 

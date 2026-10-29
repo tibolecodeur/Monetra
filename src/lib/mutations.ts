@@ -87,3 +87,8 @@ export async function saveRecurring(rec: Omit<Recurring, 'id'> & { id?: string }
 export async function deleteRecurring(id: string) {
   await db.recurring.delete(id)
 }
+
+/** Annulation d'une suppression de récurrent. */
+export async function restoreRecurring(rec: Recurring) {
+  await db.recurring.put(rec)
+}

@@ -1,4 +1,5 @@
 import { House, ListOrdered, Plus, Repeat, Settings2, type LucideIcon } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 export type Screen = 'accueil' | 'operations' | 'recurrents' | 'reglages'
 
@@ -15,7 +16,30 @@ interface Props {
   onAdd: () => void
 }
 
+/** Le fondu de bord n'apparaît que lorsque du contenu passe réellement sous la barre. */
+function useScrollEdge() {
+  const nav = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const update = () => {
+      const below = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight)
+      if (nav.current) nav.current.dataset.edge = below > 1 ? 'on' : 'off'
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    const observer = new ResizeObserver(update)
+    observer.observe(document.body)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+      observer.disconnect()
+    }
+  }, [])
+  return nav
+}
+
 export function BottomNav({ current, onChange, onAdd }: Props) {
+  const nav = useScrollEdge()
   const renderItem = ({ id, label, icon: Icon }: (typeof ITEMS)[number]) => (
     <button
       key={id}
@@ -30,7 +54,7 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
   )
 
   return (
-    <nav className="tab-bar" aria-label="Navigation principale">
+    <nav ref={nav} className="tab-bar" aria-label="Navigation principale">
       {ITEMS.slice(0, 2).map(renderItem)}
       <div className="tab-add-slot">
         <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">

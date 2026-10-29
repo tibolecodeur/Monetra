@@ -5,6 +5,7 @@ import { RecurringForm } from './components/RecurringForm'
 import { Sheet } from './components/Sheet'
 import { TransactionForm } from './components/TransactionForm'
 import { currentMonth, type MonthKey } from './lib/dates'
+import { installPressFeedback } from './lib/press'
 import { generateRecurring } from './lib/recurring'
 import type { Account, Recurring, Transaction } from './lib/types'
 import { Dashboard } from './screens/Dashboard'
@@ -55,6 +56,9 @@ export default function App() {
     focusTitle()
     return () => cancelAnimationFrame(frame)
   }, [screen])
+
+  // Retour visuel au pointer-down sur tous les éléments touchables.
+  useEffect(() => installPressFeedback(), [])
 
   // Génère les récurrents au lancement et quand l'app revient au premier plan.
   useEffect(() => {
@@ -109,18 +113,18 @@ export default function App() {
       <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
 
       {modal?.kind === 'transaction' && (
-        <Sheet title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>
-          <TransactionForm transaction={modal.transaction} onDone={close} onNeedAccount={addAccount} />
+        <Sheet key="transaction" title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>
+          {(dismiss) => <TransactionForm transaction={modal.transaction} onDone={dismiss} onNeedAccount={addAccount} />}
         </Sheet>
       )}
       {modal?.kind === 'account' && (
-        <Sheet title={modal.account ? 'Modifier le compte' : 'Nouveau compte'} onClose={close}>
-          <AccountForm account={modal.account} onDone={close} />
+        <Sheet key="account" title={modal.account ? 'Modifier le compte' : 'Nouveau compte'} onClose={close}>
+          {(dismiss) => <AccountForm account={modal.account} onDone={dismiss} />}
         </Sheet>
       )}
       {modal?.kind === 'recurring' && (
-        <Sheet title={modal.recurring ? 'Modifier le récurrent' : 'Nouveau récurrent'} onClose={close}>
-          <RecurringForm recurring={modal.recurring} onDone={close} onNeedAccount={addAccount} />
+        <Sheet key="recurring" title={modal.recurring ? 'Modifier le récurrent' : 'Nouveau récurrent'} onClose={close}>
+          {(dismiss) => <RecurringForm recurring={modal.recurring} onDone={dismiss} onNeedAccount={addAccount} />}
         </Sheet>
       )}
     </div>
