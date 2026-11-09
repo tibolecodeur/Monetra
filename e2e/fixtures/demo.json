@@ -1,0 +1,41 @@
+{
+  "app": "monetra",
+  "version": 1,
+  "exportedAt": "2026-10-01T08:00:00.000Z",
+  "data": {
+    "accounts": [
+      { "id": "acc-courant", "nom": "Compte courant", "type": "courant", "banque": "Ma banque", "solde": 380 },
+      { "id": "acc-livret", "nom": "Livret A", "type": "livret", "banque": "Ma banque", "solde": 2350 },
+      { "id": "acc-pel", "nom": "PEL", "type": "pel", "banque": "Ma banque", "solde": 1200 },
+      { "id": "acc-parts", "nom": "Parts sociales", "type": "parts-sociales", "banque": "Ma banque", "solde": 50 }
+    ],
+    "recurring": [
+      { "id": "rec-salaire", "libelle": "Salaire alternance", "montant": 1150, "type": "revenu", "jourDuMois": 28, "categorie": "revenu", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-apl", "libelle": "Aide au logement", "montant": 185, "type": "revenu", "jourDuMois": 5, "categorie": "revenu", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-loyer", "libelle": "Loyer", "montant": 520, "type": "depense", "jourDuMois": 5, "categorie": "logement", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-navigo", "libelle": "Pass transport", "montant": 43.15, "type": "depense", "jourDuMois": 2, "categorie": "abonnements", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-forfait", "libelle": "Forfait mobile", "montant": 9.99, "type": "depense", "jourDuMois": 12, "categorie": "abonnements", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-musique", "libelle": "Musique (offre étudiante)", "montant": 5.99, "type": "depense", "jourDuMois": 20, "categorie": "abonnements", "compteId": "acc-courant", "dateDebut": "2026-10-01", "dateFin": "2027-06-30" },
+      { "id": "rec-epargne", "libelle": "Virement Livret A", "montant": 100, "type": "depense", "jourDuMois": 30, "categorie": "epargne", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-assurance", "libelle": "Assurance habitation", "montant": 8.5, "type": "depense", "jourDuMois": 31, "categorie": "logement", "compteId": "acc-courant", "dateDebut": "2026-10-01" },
+      { "id": "rec-salle", "libelle": "Salle de sport", "montant": 19.99, "type": "depense", "jourDuMois": 15, "categorie": "loisirs", "compteId": "acc-courant", "dateDebut": "2026-01-01", "dateFin": "2026-08-31", "derniereGeneration": "2026-08" }
+    ],
+    "transactions": [
+      { "id": "t1", "date": "2026-10-03", "montant": 34.2, "type": "depense", "categorie": "courses", "compteId": "acc-courant", "note": "Supermarché" },
+      { "id": "t2", "date": "2026-10-07", "montant": 9.8, "type": "depense", "categorie": "resto", "compteId": "acc-courant", "note": "Fast-food" },
+      { "id": "t3", "date": "2026-10-09", "montant": 18.65, "type": "depense", "categorie": "courses", "compteId": "acc-courant", "note": "Supérette" },
+      { "id": "t4", "date": "2026-10-11", "montant": 7.9, "type": "depense", "categorie": "loisirs", "compteId": "acc-courant", "note": "Cinéma" },
+      { "id": "t5", "date": "2026-10-14", "montant": 6.4, "type": "depense", "categorie": "divers", "compteId": "acc-courant", "note": "Pharmacie" },
+      { "id": "t6", "date": "2026-10-15", "montant": 8.5, "type": "depense", "categorie": "resto", "compteId": "acc-courant", "note": "Kebab" },
+      { "id": "t7", "date": "2026-10-17", "montant": 41.3, "type": "depense", "categorie": "courses", "compteId": "acc-courant", "note": "Supermarché" },
+      { "id": "t8", "date": "2026-10-18", "montant": 32, "type": "depense", "categorie": "loisirs", "compteId": "acc-courant", "note": "Concert" },
+      { "id": "t9", "date": "2026-10-21", "montant": 15, "type": "depense", "categorie": "divers", "compteId": "acc-courant", "note": "Coiffeur" },
+      { "id": "t10", "date": "2026-10-22", "montant": 24, "type": "depense", "categorie": "resto", "compteId": "acc-courant", "note": "Resto entre amis" },
+      { "id": "t11", "date": "2026-10-24", "montant": 22.9, "type": "depense", "categorie": "courses", "compteId": "acc-courant", "note": "Marché" },
+      { "id": "t12", "date": "2026-10-26", "montant": 60, "type": "revenu", "categorie": "revenu", "compteId": "acc-courant", "note": "Remboursement" },
+      { "id": "t13", "date": "2026-10-28", "montant": 4.2, "type": "depense", "categorie": "resto", "compteId": "acc-courant", "note": "Boulangerie" }
+    ],
+    "budgets": [],
+    "goals": []
+  }
+}

@@ -3,8 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Monetra : gestion de finances personnelles, 100 % locale." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Monetra" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <title>Monetra</title>
+    <script>
+      // Thème choisi dans Réglages, appliqué avant le premier rendu (sombre par défaut).
+      try {
+        if (localStorage.getItem('monetra:theme') === 'light') {
+          document.documentElement.dataset.theme = 'light'
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f2f2f7')
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

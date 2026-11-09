@@ -1,122 +1,136 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { AccountForm } from './components/AccountForm'
+import { AppBackground } from './components/AppBackground'
+import { BottomNav, type Screen } from './components/BottomNav'
+import { RecurringForm } from './components/RecurringForm'
+import { Sheet } from './components/Sheet'
+import { TransactionForm } from './components/TransactionForm'
+import { currentMonth, type MonthKey } from './lib/dates'
+import { installPressFeedback } from './lib/press'
+import { generateRecurring } from './lib/recurring'
+import type { Account, Recurring, Transaction } from './lib/types'
+import { Dashboard } from './screens/Dashboard'
+import { RecurringScreen } from './screens/RecurringScreen'
+import { Settings } from './screens/Settings'
+import { Transactions } from './screens/Transactions'
 
-function App() {
-  const [count, setCount] = useState(0)
+const SCREENS: Screen[] = ['accueil', 'operations', 'recurrents', 'reglages']
+
+type Modal =
+  | { kind: 'transaction'; transaction?: Transaction }
+  | { kind: 'account'; account?: Account }
+  | { kind: 'recurring'; recurring?: Recurring }
+  | null
+
+function screenFromHash(): Screen {
+  const id = location.hash.replace('#/', '') as Screen
+  return SCREENS.includes(id) ? id : 'accueil'
+}
+
+export default function App() {
+  const [screen, setScreen] = useState<Screen>(screenFromHash)
+  const [month, setMonth] = useState<MonthKey>(currentMonth)
+  const [modal, setModal] = useState<Modal>(null)
+  const main = useRef<HTMLElement>(null)
+  const firstRender = useRef(true)
+
+  useEffect(() => {
+    const onHash = () => setScreen(screenFromHash())
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  // Après un changement d'onglet, le focus va au titre de l'écran (lecteurs d'écran).
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    // L'écran peut encore charger ses données : on attend que son titre soit rendu.
+    let frame = 0
+    let tries = 0
+    const focusTitle = () => {
+      const h1 = main.current?.querySelector<HTMLElement>('h1')
+      if (h1) h1.focus({ preventScroll: true })
+      else if (tries++ < 30) frame = requestAnimationFrame(focusTitle)
+    }
+    focusTitle()
+    return () => cancelAnimationFrame(frame)
+  }, [screen])
+
+  // Retour visuel au pointer-down sur tous les éléments touchables.
+  useEffect(() => installPressFeedback(), [])
+
+  // Génère les récurrents au lancement et quand l'app revient au premier plan.
+  useEffect(() => {
+    generateRecurring()
+    const onVisible = () => document.visibilityState === 'visible' && generateRecurring()
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [])
+
+  const navigate = (s: Screen) => {
+    location.hash = `#/${s}`
+    window.scrollTo(0, 0)
+  }
+  const close = useCallback(() => setModal(null), [])
+  const editTransaction = (transaction: Transaction) => setModal({ kind: 'transaction', transaction })
+  const addAccount = () => setModal({ kind: 'account' })
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+      <AppBackground />
+      <div className="app">
+        <a
+          href="#contenu"
+          className="skip-link"
+          onClick={(e) => {
+            e.preventDefault()
+            main.current?.querySelector<HTMLElement>('h1')?.focus()
+          }}
         >
-          Count is {count}
-        </button>
-      </section>
+          Aller au contenu
+        </a>
+        <main id="contenu" ref={main}>
+          {screen === 'accueil' && (
+            <Dashboard
+              month={month}
+              onMonthChange={setMonth}
+              onSelect={editTransaction}
+              onSeeAll={() => navigate('operations')}
+              onAddAccount={addAccount}
+            />
+          )}
+          {screen === 'operations' && <Transactions month={month} onMonthChange={setMonth} onSelect={editTransaction} />}
+          {screen === 'recurrents' && (
+            <RecurringScreen
+              onAdd={() => setModal({ kind: 'recurring' })}
+              onSelect={(recurring) => setModal({ kind: 'recurring', recurring })}
+            />
+          )}
+          {screen === 'reglages' && (
+            <Settings onAddAccount={addAccount} onSelectAccount={(account) => setModal({ kind: 'account', account })} />
+          )}
+        </main>
 
-      <div className="ticks"></div>
+        <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+        {modal?.kind === 'transaction' && (
+          <Sheet key="transaction" title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>
+            {(dismiss) => <TransactionForm transaction={modal.transaction} onDone={dismiss} onNeedAccount={addAccount} />}
+          </Sheet>
+        )}
+        {modal?.kind === 'account' && (
+          <Sheet key="account" title={modal.account ? 'Modifier le compte' : 'Nouveau compte'} onClose={close}>
+            {(dismiss) => <AccountForm account={modal.account} onDone={dismiss} />}
+          </Sheet>
+        )}
+        {modal?.kind === 'recurring' && (
+          <Sheet key="recurring" title={modal.recurring ? 'Modifier le récurrent' : 'Nouveau récurrent'} onClose={close}>
+            {(dismiss) => <RecurringForm recurring={modal.recurring} onDone={dismiss} onNeedAccount={addAccount} />}
+          </Sheet>
+        )}
+      </div>
     </>
   )
 }
-
-export default App
