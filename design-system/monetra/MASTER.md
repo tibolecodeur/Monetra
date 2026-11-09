@@ -74,10 +74,9 @@ En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-d
 
 ### Typography (apple-design §15)
 
-- **Police système d'abord** : `-apple-system, BlinkMacSystemFont, 'Inter Variable', system-ui, sans-serif`.
+- **SF Pro sous Safari, Inter ailleurs** : `--font-sans` vaut `'Inter Variable', system-ui, sans-serif` et passe à `-apple-system, …` uniquement dans `@supports (font: -apple-system-body)` (WebKit). Chromium reconnaît lui aussi `-apple-system` / `BlinkMacSystemFont` : placés en tête de pile, ils masquaient Inter sur Android.
   - Sur iOS et macOS, c'est SF Pro, avec son dimensionnement optique.
   - Ailleurs, Inter, auto-hébergée via `@fontsource-variable/inter` (hors ligne, sans CDN).
-  - Inter est placée **avant** `system-ui`, sinon elle ne servirait jamais (system-ui existe sur toutes les plateformes).
 - **Tailles en `rem`** : la mise en page suit le réglage de taille du texte de l'utilisateur.
 - **Tracking et interlignage par taille**, jamais une valeur unique :
   - le grand texte est resserré, le petit légèrement ouvert ;
