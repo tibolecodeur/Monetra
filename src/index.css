@@ -37,9 +37,10 @@
   --shadow-sheet: 0 -8px 24px rgb(0 0 0 / 50%);
   --shadow-float: 0 8px 24px rgb(0 0 0 / 60%);
 
-  /* Police système (SF Pro sur iOS / macOS), Inter pour les autres plateformes.
-     Inter est placée avant system-ui, sinon elle ne servirait jamais (system-ui existe partout). */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter Variable', system-ui, sans-serif;
+  /* Inter partout, SF Pro sous Safari (voir @supports plus bas).
+     Chromium reconnaît aussi -apple-system et BlinkMacSystemFont : en tête de pile,
+     ils masqueraient Inter sur Android et ailleurs. */
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
   /* Typographie : taille (rem, suit le réglage de taille du texte), tracking et interlignage par taille.
      Tracking : grand texte resserré, petit texte légèrement ouvert (skill apple-design §15). */
   --fs-12: 0.75rem;
@@ -115,9 +116,10 @@
   text-size-adjust: 100%;
 }
 
-/* Safari (SF Pro) : la police système applique déjà sa table de tracking optique. */
+/* Safari (iOS, macOS) : police système SF Pro, qui applique déjà sa table de tracking optique. */
 @supports (font: -apple-system-body) {
   :root {
+    --font-sans: -apple-system, 'Inter Variable', system-ui, sans-serif;
     --ls-12: normal;
     --ls-13: normal;
     --ls-14: normal;
