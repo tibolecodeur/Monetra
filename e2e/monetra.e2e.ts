@@ -81,6 +81,8 @@ test.describe('Monetra en émulation iPhone', () => {
 
     // Même geste sur un récurrent.
     await page.getByRole('button', { name: 'Récurrents' }).tap()
+    // L'écran Opérations a aussi une ligne « Forfait mobile » (transaction générée) : on attend le bon écran.
+    await expect(page.getByRole('heading', { name: 'Récurrents', level: 1 })).toBeVisible()
     const rec = page.locator('.swipe-content', { hasText: 'Forfait mobile' })
     await rec.scrollIntoViewIfNeeded()
     const rbox = (await rec.boundingBox())!
@@ -144,6 +146,23 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(b.app).toBe('monetra')
     expect(normalize(b.data)).toEqual(normalize(a.data))
     expect(a.data.transactions.length).toBeGreaterThan(0)
+  })
+
+  test('fond plasma derrière tous les écrans, sans bloquer les touchers', async ({ page }) => {
+    await openWithDemo(page)
+    const background = page.getByTestId('app-background')
+    for (const tab of ['Accueil', 'Opérations', 'Récurrents', 'Réglages']) {
+      await page.getByRole('button', { name: tab }).tap()
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await expect(background.locator('canvas')).toBeVisible()
+    }
+    const style = await background.evaluate((el) => getComputedStyle(el))
+    expect(style.position).toBe('fixed')
+    expect(style.pointerEvents).toBe('none')
+    expect(await background.getAttribute('aria-hidden')).toBe('true')
+    // Le centre de l'écran appartient au contenu, pas au fond.
+    const hit = await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest('[data-testid="app-background"]'))
+    expect(hit).toBeNull()
   })
 
   test.describe('avec prefers-reduced-motion', () => {

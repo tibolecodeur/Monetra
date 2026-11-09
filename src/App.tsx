@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AccountForm } from './components/AccountForm'
+import { AppBackground } from './components/AppBackground'
 import { BottomNav, type Screen } from './components/BottomNav'
 import { RecurringForm } from './components/RecurringForm'
 import { Sheet } from './components/Sheet'
@@ -77,56 +78,59 @@ export default function App() {
   const addAccount = () => setModal({ kind: 'account' })
 
   return (
-    <div className="app">
-      <a
-        href="#contenu"
-        className="skip-link"
-        onClick={(e) => {
-          e.preventDefault()
-          main.current?.querySelector<HTMLElement>('h1')?.focus()
-        }}
-      >
-        Aller au contenu
-      </a>
-      <main id="contenu" ref={main}>
-        {screen === 'accueil' && (
-          <Dashboard
-            month={month}
-            onMonthChange={setMonth}
-            onSelect={editTransaction}
-            onSeeAll={() => navigate('operations')}
-            onAddAccount={addAccount}
-          />
-        )}
-        {screen === 'operations' && <Transactions month={month} onMonthChange={setMonth} onSelect={editTransaction} />}
-        {screen === 'recurrents' && (
-          <RecurringScreen
-            onAdd={() => setModal({ kind: 'recurring' })}
-            onSelect={(recurring) => setModal({ kind: 'recurring', recurring })}
-          />
-        )}
-        {screen === 'reglages' && (
-          <Settings onAddAccount={addAccount} onSelectAccount={(account) => setModal({ kind: 'account', account })} />
-        )}
-      </main>
+    <>
+      <AppBackground />
+      <div className="app">
+        <a
+          href="#contenu"
+          className="skip-link"
+          onClick={(e) => {
+            e.preventDefault()
+            main.current?.querySelector<HTMLElement>('h1')?.focus()
+          }}
+        >
+          Aller au contenu
+        </a>
+        <main id="contenu" ref={main}>
+          {screen === 'accueil' && (
+            <Dashboard
+              month={month}
+              onMonthChange={setMonth}
+              onSelect={editTransaction}
+              onSeeAll={() => navigate('operations')}
+              onAddAccount={addAccount}
+            />
+          )}
+          {screen === 'operations' && <Transactions month={month} onMonthChange={setMonth} onSelect={editTransaction} />}
+          {screen === 'recurrents' && (
+            <RecurringScreen
+              onAdd={() => setModal({ kind: 'recurring' })}
+              onSelect={(recurring) => setModal({ kind: 'recurring', recurring })}
+            />
+          )}
+          {screen === 'reglages' && (
+            <Settings onAddAccount={addAccount} onSelectAccount={(account) => setModal({ kind: 'account', account })} />
+          )}
+        </main>
 
-      <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
+        <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
 
-      {modal?.kind === 'transaction' && (
-        <Sheet key="transaction" title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>
-          {(dismiss) => <TransactionForm transaction={modal.transaction} onDone={dismiss} onNeedAccount={addAccount} />}
-        </Sheet>
-      )}
-      {modal?.kind === 'account' && (
-        <Sheet key="account" title={modal.account ? 'Modifier le compte' : 'Nouveau compte'} onClose={close}>
-          {(dismiss) => <AccountForm account={modal.account} onDone={dismiss} />}
-        </Sheet>
-      )}
-      {modal?.kind === 'recurring' && (
-        <Sheet key="recurring" title={modal.recurring ? 'Modifier le récurrent' : 'Nouveau récurrent'} onClose={close}>
-          {(dismiss) => <RecurringForm recurring={modal.recurring} onDone={dismiss} onNeedAccount={addAccount} />}
-        </Sheet>
-      )}
-    </div>
+        {modal?.kind === 'transaction' && (
+          <Sheet key="transaction" title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>
+            {(dismiss) => <TransactionForm transaction={modal.transaction} onDone={dismiss} onNeedAccount={addAccount} />}
+          </Sheet>
+        )}
+        {modal?.kind === 'account' && (
+          <Sheet key="account" title={modal.account ? 'Modifier le compte' : 'Nouveau compte'} onClose={close}>
+            {(dismiss) => <AccountForm account={modal.account} onDone={dismiss} />}
+          </Sheet>
+        )}
+        {modal?.kind === 'recurring' && (
+          <Sheet key="recurring" title={modal.recurring ? 'Modifier le récurrent' : 'Nouveau récurrent'} onClose={close}>
+            {(dismiss) => <RecurringForm recurring={modal.recurring} onDone={dismiss} onNeedAccount={addAccount} />}
+          </Sheet>
+        )}
+      </div>
+    </>
   )
 }

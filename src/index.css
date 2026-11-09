@@ -139,7 +139,7 @@
   --color-border: #e5e5ea;
   --color-border-input: #8a8a8e;
   --color-text: #1c1c1e;
-  --color-text-secondary: #6c6c70;
+  --color-text-secondary: #5c5c61;
   --color-text-tertiary: #8e8e93;
   --color-accent: #1f7a35;
   --color-on-accent: #ffffff;
@@ -263,9 +263,24 @@ fieldset {
   top: calc(env(safe-area-inset-top) + var(--space-sm));
 }
 
+/* Fond plasma (components/AppBackground.tsx) : fixe, derrière tout le contenu. */
+.app-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.app-background canvas {
+  position: absolute;
+  inset: 0;
+}
+
 /* Gabarit */
 
 .app {
+  position: relative;
+  z-index: 1;
   max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;

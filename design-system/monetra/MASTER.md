@@ -50,7 +50,7 @@ En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-d
 | Surface / surélevée | `#FFFFFF` | `--color-surface`, `--color-surface-elevated` |
 | Border | `#E5E5EA` | `--color-border` |
 | Border des champs | `#8A8A8E` | `--color-border-input` |
-| Text principal / secondaire / tertiaire | `#1C1C1E` / `#6C6C70` / `#8E8E93` | `--color-text*` |
+| Text principal / secondaire / tertiaire | `#1C1C1E` / `#5C5C61` / `#8E8E93` | `--color-text*` |
 | Accent / On Accent | `#1F7A35` / `#FFFFFF` | `--color-accent`, `--color-on-accent` |
 | Danger | `#D70015` | `--color-danger` |
 
@@ -65,7 +65,9 @@ En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-d
 | Paire | Sombre | Clair |
 |------|--------|-------|
 | Texte principal / surface | 17,3:1 | 17,0:1 |
-| Texte secondaire / surface | 5,8:1 (5,2 sur surélevée) | 5,2:1 (4,7 sur fond) |
+| Texte secondaire / surface | 5,8:1 (5,2 sur surélevée) | 6,6:1 (5,9 sur fond) |
+| Texte secondaire / fond plasma (pire cas mesuré) | 4,69:1 | 4,68:1 |
+| Texte principal / fond plasma (pire cas mesuré) | 14,0:1 | 12,0:1 |
 | Accent / surface | 9,3:1 | 5,4:1 |
 | Texte du bouton accent | 10,4:1 | 5,4:1 |
 | Bordure des champs / surface | 3,5 à 3,8:1 | 3,4:1 |
@@ -197,6 +199,24 @@ Libellés sur une seule ligne (catégorie « Resto »), points de suspension en 
 
 ---
 
+## Fond plasma (`@componentry/closing-plasma`)
+
+Fond animé WebGL installé avec `npx shadcn@latest add @componentry/closing-plasma` (`src/components/ui/closing-plasma.tsx`), posé derrière tous les écrans par `src/components/AppBackground.tsx`.
+
+- **Placement** : `position: fixed`, plein écran, `z-index: 0`, `pointer-events: none`, `aria-hidden`. Le contenu (`.app`) est au-dessus (`z-index: 1`). Le plasma se voit entre les cartes, derrière les en-têtes et, flouté, sous la tab bar.
+- **Réglages** : palette d'origine du composant (bleu nuit en sombre, gris bleuté pâle en clair), `speed 0.6`, `sparkle 0.25`, non interactif. Opacité `0.45` en sombre et `0.6` en clair : le texte posé directement sur le fond garde au moins 4,5:1 dans le pire cas mesuré.
+- **Coût** : rendu à 0,5× puis agrandi (le plasma est flou), animation arrêtée quand l'onglet est caché.
+- **Thème** : suit le choix de Réglages (`data-theme`).
+- **`prefers-reduced-motion`** : image fixe, aucune animation.
+- **Adaptations du composant d'origine** (commentées « Monetra » dans le fichier) :
+  - prop `themeMode` réellement appliquée (elle était figée en sombre) ;
+  - props `paused` et `maxDpr` ;
+  - pause quand l'onglet est caché ;
+  - `premultipliedAlpha: false`, sans quoi `opacity` < 1 surexposait le rendu.
+- **Exception assumée à « pas de bleu »** : le plasma reste en arrière-plan discret, l'accent fonctionnel reste le vert.
+
+---
+
 ## Motion (apple-design §1 à §11)
 
 Tout ce qui se manipule au doigt est animé avec **`motion`** en springs. Pas de transition CSS ni de `@keyframes` sur ces éléments : un spring repart de la valeur affichée et peut être rattrapé à tout moment.
@@ -260,6 +280,7 @@ Le rebond n'apparaît **que** si le geste avait de l'élan.
 - Pas de verre décoratif sur les cartes ni de dégradés vifs.
 - Un seul halo radial vert (8 % max) sur la carte du reste à vivre.
 - Un seul matériau translucide : la tab bar (fonctionnel, le contenu défile dessous).
+- Un fond plasma animé et discret derrière tous les écrans (voir « Fond plasma »).
 
 **Icons:** Lucide (SVG, trait de 2px), en couleur secondaire ; vertes uniquement pour les revenus et l'état sélectionné.
 

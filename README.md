@@ -51,6 +51,7 @@ Vidéos des gestes : [`docs/videos/`](docs/videos).
 - [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) : manifest, service worker, offline
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
 - [Motion](https://motion.dev/) : springs et gestes
+- Fond animé [`@componentry/closing-plasma`](https://componentry.dev) (WebGL), installé via `shadcn`
 - [Lucide](https://lucide.dev/) : icônes SVG ; police système (SF Pro), [Inter](https://rsms.me/inter/) auto-hébergée en repli
 - [Playwright](https://playwright.dev/) : tests e2e tactiles
 
