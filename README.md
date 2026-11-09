@@ -77,4 +77,12 @@ npm run test:e2e  # tests e2e Playwright en émulation iPhone (build + preview a
 npm run record:videos  # enregistre les vidéos des gestes (test-results/)
 ```
 
+## Déploiement
+
+L'app est publiée sur GitHub Pages à chaque push sur `main` : **https://tibolecodeur.github.io/Monetra/**. Le workflow est `.github/workflows/deploy.yml` (lint, tests unitaires, build, publication).
+
+- Une seule fois : **Settings → Pages → Source : GitHub Actions**.
+- Le build de production est servi dans le sous-dossier `/Monetra/`, via la variable `BASE_PATH` ; en local, tout reste à la racine.
+- Pour l'installer sur iPhone : ouvrez l'URL dans Safari, puis **Partager → Sur l'écran d'accueil**.
+
 Pour tester l'installation sur mobile, servez le build (`npm run preview -- --host`) et ouvrez l'URL depuis le téléphone sur le même réseau. L'installation de la PWA demande HTTPS, sauf sur `localhost`.
