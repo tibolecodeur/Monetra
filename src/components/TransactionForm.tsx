@@ -160,7 +160,7 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
                 type="button"
                 role="radio"
                 aria-checked={categorie === c.id}
-                className="choice"
+                className={`choice cat-${c.id}`}
                 onClick={() => {
                   setCategorie(c.id)
                   setErrors((x) => ({ ...x, category: undefined }))

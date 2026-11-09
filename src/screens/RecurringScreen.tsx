@@ -8,6 +8,7 @@ import { accountLabels, useAccounts, useRecurring } from '../lib/hooks'
 import { deleteRecurring, restoreRecurring } from '../lib/mutations'
 import { useToast } from '../lib/toast'
 import type { Recurring } from '../lib/types'
+import { NavHeader } from '../components/NavHeader'
 
 interface Props {
   onAdd: () => void
@@ -73,9 +74,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <h1 tabIndex={-1}>Récurrents</h1>
-      </header>
+      <NavHeader title="Récurrents" />
 
       <section className="totals" aria-label="Total mensuel des récurrents actifs">
         <div>

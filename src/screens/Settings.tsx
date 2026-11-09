@@ -9,6 +9,7 @@ import { useAccounts } from '../lib/hooks'
 import { getTheme, setTheme, type Theme } from '../lib/prefs'
 import { generateRecurring } from '../lib/recurring'
 import type { Account } from '../lib/types'
+import { NavHeader } from '../components/NavHeader'
 
 interface Props {
   onAddAccount: () => void
@@ -69,9 +70,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <h1 tabIndex={-1}>Réglages</h1>
-      </header>
+      <NavHeader title="Réglages" />
 
       <section aria-labelledby="accounts-title" className="stack">
         <h2 id="accounts-title" className="section-title">
@@ -86,7 +85,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
             {accounts.map((a) => (
               <li key={a.id}>
                 <button type="button" className="row" onClick={() => onSelectAccount(a)}>
-                  <span className="row-icon">
+                  <span className="row-icon cat-compte">
                     <AccountIcon type={a.type} />
                   </span>
                   <span className="row-main">
