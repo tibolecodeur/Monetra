@@ -2,6 +2,7 @@ import { House, ListOrdered, Plus, Repeat, Settings2, type LucideIcon } from 'lu
 import { motion } from 'motion/react'
 import { useEffect, useRef } from 'react'
 import { SPRINGS } from '../lib/motion'
+import { Glass } from './Glass'
 
 export type Screen = 'accueil' | 'operations' | 'recurrents' | 'reglages'
 
@@ -45,7 +46,7 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
 
   return (
     <nav ref={nav} className="tab-dock" aria-label="Navigation principale">
-      <div className="tab-bar">
+      <Glass className="tab-bar" height="var(--dock-height)" radius={30} frost={0.55}>
         {ITEMS.map(({ id, label, icon: Icon }) => {
           const active = current === id
           return (
@@ -63,10 +64,12 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
             </button>
           )
         })}
-      </div>
-      <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">
-        <Plus size={28} strokeWidth={2.4} aria-hidden="true" />
-      </button>
+      </Glass>
+      <Glass className="tab-add-glass glass-press" width="var(--dock-add)" height="var(--dock-add)" radius={28} frost={0}>
+        <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">
+          <Plus size={28} strokeWidth={2.4} aria-hidden="true" />
+        </button>
+      </Glass>
     </nav>
   )
 }

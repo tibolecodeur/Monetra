@@ -1,6 +1,7 @@
 import { Download, Plus, ShieldCheck, Upload } from 'lucide-react'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { AccountIcon } from '../components/CategoryIcon'
+import { GlassButton } from '../components/GlassButton'
 import { Segmented } from '../components/Segmented'
 import { downloadBackup, parseBackup, restoreBackup } from '../lib/backup'
 import { accountTypeLabel } from '../lib/categories'
@@ -104,10 +105,10 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
             </li>
           </ul>
         )}
-        <button type="button" className="btn btn-secondary btn-block" onClick={onAddAccount}>
+        <GlassButton onClick={onAddAccount}>
           <Plus size={20} aria-hidden="true" />
           Ajouter un compte
-        </button>
+        </GlassButton>
       </section>
 
       <section aria-labelledby="appearance-title" className="stack">
@@ -141,10 +142,10 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
               <Download size={20} aria-hidden="true" />
               Exporter
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
+            <GlassButton onClick={() => fileInput.current?.click()} disabled={busy}>
               <Upload size={20} aria-hidden="true" />
               Importer
-            </button>
+            </GlassButton>
             <input
               ref={fileInput}
               type="file"

@@ -19,14 +19,14 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 
 Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
-<img src="docs/screenshots/apple/01-accueil.png" width="240" alt="Accueil"> <img src="docs/videos/sheet.gif" width="240" alt="Sheet glissable"> <img src="docs/videos/swipe-suppression.gif" width="240" alt="Swipe pour supprimer">
+<img src="docs/screenshots/glass/01-accueil-dark.png" width="240" alt="Accueil"> <img src="docs/screenshots/glass/01-accueil-light.png" width="240" alt="Accueil en clair"> <img src="docs/videos/sheet.gif" width="240" alt="Sheet glissable"> <img src="docs/videos/swipe-suppression.gif" width="240" alt="Swipe pour supprimer">
 
 ## Design
 
 L'interface suit le design system [`design-system/monetra/MASTER.md`](design-system/monetra/MASTER.md), généré avec le skill UI UX Pro Max puis révisé :
 
-- **Thème sombre pro par défaut** : fond noir OLED, surfaces étagées, bordures 1px. Le thème clair est disponible dans Réglages.
-- **Un seul accent**, le vert, pour les revenus et l'action principale. Les dépenses restent en texte principal.
+- **Liquid Glass sur fond plasma** : navigation et contrôles en verre réfractant (tab bar flottante, grand titre repliable, sélecteur de mois, segmented), contenu sur des cartes dépolies. Sombre par défaut, clair dans Réglages.
+- **Palette tirée du fond** : accent pervenche, vert pour les revenus, pastilles de catégorie colorées façon iOS.
 - **Inter** pour toute l'interface, auto-hébergée (aucune requête externe) ; montants en chiffres tabulaires.
 - Icônes SVG Lucide, sans emojis.
 - Pensé pour une main : barre d'onglets en bas avec le bouton d'ajout au centre, zones tactiles de 44 px minimum.
@@ -52,6 +52,7 @@ Vidéos des gestes : [`docs/videos/`](docs/videos).
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
 - [Motion](https://motion.dev/) : springs et gestes
 - Fond animé [`@componentry/closing-plasma`](https://componentry.dev) (WebGL), installé via `shadcn`
+- Liquid Glass [`GlassSurface`](https://reactbits.dev/components/glass-surface) (React Bits), installé via `shadcn`
 - [Lucide](https://lucide.dev/) : icônes SVG ; police système (SF Pro), [Inter](https://rsms.me/inter/) auto-hébergée en repli
 - [Playwright](https://playwright.dev/) : tests e2e tactiles
 

@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { addMonths, currentMonth, formatMonth, type MonthKey } from '../lib/dates'
+import { Glass } from './Glass'
 
 interface Props {
   month: MonthKey
@@ -9,7 +10,8 @@ interface Props {
 export function MonthSwitcher({ month, onChange }: Props) {
   const isCurrent = month === currentMonth()
   return (
-    <div className="month-switcher" role="group" aria-label="Mois affiché">
+    <Glass className="month-switcher" height={50} radius={25}>
+    <div className="month-switcher-inner" role="group" aria-label="Mois affiché">
       <button
         type="button"
         className="icon-button"
@@ -36,5 +38,6 @@ export function MonthSwitcher({ month, onChange }: Props) {
         <ChevronRight size={22} aria-hidden="true" />
       </button>
     </div>
+    </Glass>
   )
 }

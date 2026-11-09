@@ -8,211 +8,161 @@
 
 **Project:** Monetra
 **Generated:** 2026-10-29 15:12:45 (ui-ux-pro-max)
-**Revised:** 2026-10-29 : thème sombre pro (remplace glassmorphism, Caveat et Quicksand)
-**Revised:** 2026-10-29 : version fluide « style Apple » (police système, springs, gestes, matériaux)
-**Sources :** skill `ui-ux-pro-max` (couleurs, composants) et skill `apple-design` (`.claude/skills/apple-design/SKILL.md`).
+**Revised:** 2026-10-29 : thème sombre pro, puis version fluide « style Apple » (springs, gestes)
+**Revised:** 2026-11-09 : **Liquid Glass sur fond plasma** (React Bits `GlassSurface`, palette tirée du plasma)
+**Sources :** skill `ui-ux-pro-max` (style « liquid-glass », composants) et skill `apple-design` (`.claude/skills/apple-design/SKILL.md`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-design` prime.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
 
 ---
 
+## Principe
+
+Le fond plasma animé donne la palette et la profondeur. Comme sur iOS 26 :
+
+- **Liquid Glass réel pour la navigation et les contrôles** : tab bar, bouton +, barre de titre compacte, sélecteur de mois, contrôle segmenté, toast, boutons secondaires. Le verre réfracte ce qui est derrière.
+- **Matériau dépoli pour le contenu** (cartes) : il reste sur sa propre couche, plus calme que le verre (règle du style « liquid-glass » : le verre est réservé à la navigation et aux contrôles).
+- **Sheets** en verre épais dépoli (grande surface déplacée au doigt : pas de réfraction, trop coûteuse).
+
 ## Global Rules
 
 ### Theme
 
-- **Sombre par défaut** (fond noir OLED). Thème clair disponible en option dans Réglages, mémorisé sur l'appareil.
-- Le thème est appliqué avant le premier rendu (script dans `index.html`) pour éviter un flash.
-- `theme-color` : `#000000` (manifest et meta) ; `#F2F2F7` quand le thème clair est actif.
+- **Sombre par défaut**. Thème clair dans Réglages, mémorisé sur l'appareil, appliqué avant le premier rendu.
+- `theme-color` : `#000000` (manifest et meta) ; `#F2F2F7` en clair.
 
-### Color Palette : sombre (défaut)
+### Couleurs : sombre (défaut)
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Background | `#000000` | `--color-bg` |
-| Surface (cartes) | `#111113` | `--color-surface` |
-| Surface surélevée (sheets, puces, tuiles) | `#1C1C1F` | `--color-surface-elevated` |
-| Border (1px) | `#26262A` | `--color-border` |
-| Border des champs de saisie | `#707076` | `--color-border-input` |
-| Text principal | `#F5F5F7` | `--color-text` |
-| Text secondaire | `#8E8E93` | `--color-text-secondary` |
-| Text tertiaire (décoratif uniquement) | `#5A5A60` | `--color-text-tertiary` |
-| Accent (revenus, action principale) | `#30D158` | `--color-accent` |
-| On Accent | `#000000` | `--color-on-accent` |
-| Accent 12 % (sélection) | `rgba(48,209,88,0.12)` | `--color-accent-soft` |
-| Danger (erreurs, suppression) | `#FF453A` | `--color-danger` |
-| Tab bar (matériau) | `rgba(0,0,0,0.72)` + flou 20px (clair : `rgba(249,249,251,0.78)`) | `--color-material` |
+| Rôle | Valeur | Variable |
+|------|--------|----------|
+| Fond (sous le plasma) | `#05060C` | `--color-bg` |
+| Libellé principal | `#FFFFFF` | `--color-text` |
+| Libellé secondaire | `rgba(235,235,245,0.66)` | `--color-text-secondary` |
+| Libellé tertiaire (décoratif) | `rgba(235,235,245,0.34)` | `--color-text-tertiary` |
+| Texte posé sur le plasma | `rgba(255,255,255,0.86)` | `--color-text-on-bg` |
+| Accent (pervenche, tiré du plasma) : remplissage | `#5468E0` | `--color-accent` |
+| Accent : texte, onglet actif, liens, sélection | `#A8B6FF` | `--color-accent-text` |
+| Revenus | `#30D158` | `--color-income` |
+| Danger | `#FF6961` (texte), `#FF453A` (fond du swipe) | `--color-danger*` |
+| Matériau du contenu (cartes) | `rgba(17,20,36,0.60)` + flou 22px | `--material-content` |
+| Feuille (sheet) | `rgba(22,25,42,0.86)` + flou 40px | `--glass-sheet` |
+| Remplissage (tuiles, champs, puces) | `rgba(120,132,180,0.20)` | `--color-fill` |
+| Séparateurs | `rgba(255,255,255,0.10)` | `--color-separator` |
 
-### Color Palette : clair (option)
+### Couleurs : clair
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Background | `#F2F2F7` | `--color-bg` |
-| Surface / surélevée | `#FFFFFF` | `--color-surface`, `--color-surface-elevated` |
-| Border | `#E5E5EA` | `--color-border` |
-| Border des champs | `#8A8A8E` | `--color-border-input` |
-| Text principal / secondaire / tertiaire | `#1C1C1E` / `#5C5C61` / `#8E8E93` | `--color-text*` |
-| Accent / On Accent | `#1F7A35` / `#FFFFFF` | `--color-accent`, `--color-on-accent` |
+| Rôle | Valeur | Variable |
+|------|--------|----------|
+| Fond | `#EEF0F8` | `--color-bg` |
+| Libellés principal / secondaire / tertiaire | `#000000` / `rgba(60,60,67,0.82)` / `rgba(60,60,67,0.42)` | `--color-text*` |
+| Texte posé sur le plasma | `rgba(28,30,44,0.86)` | `--color-text-on-bg` |
+| Accent : remplissage / texte | `#4A5EE0` / `#3A4FD0` | `--color-accent`, `--color-accent-text` |
+| Revenus | `#196B2E` | `--color-income` |
 | Danger | `#D70015` | `--color-danger` |
+| Matériau du contenu | `rgba(255,255,255,0.66)` + flou | `--material-content` |
 
-**Color Notes:**
-- **Un seul accent**, le vert, réservé aux revenus et à l'action principale (bouton +, « Ajouter », sélection). Pas de bleu.
-- **Les dépenses sont en texte principal**, jamais en rouge. Le rouge sert aux erreurs, à la suppression et au dépassement de budget, toujours accompagné d'une icône et d'un texte.
-- En clair, le vert est assombri (`#1F7A35`) pour garder 5,4:1 en texte et sous du blanc.
-- Le tertiaire (2,5 à 2,75:1) ne porte jamais d'information essentielle : poignée de sheet, placeholders.
+### Couleurs de catégories (pastilles d'icônes et barres)
 
-### Contrastes vérifiés (WCAG)
+Palette système iOS, glyphe blanc sur pastille arrondie (façon Réglages iOS). L'identité ne repose jamais sur la couleur seule : chaque pastille est accompagnée de son libellé.
 
-| Paire | Sombre | Clair |
-|------|--------|-------|
-| Texte principal / surface | 17,3:1 | 17,0:1 |
-| Texte secondaire / surface | 5,8:1 (5,2 sur surélevée) | 6,6:1 (5,9 sur fond) |
-| Texte secondaire / fond plasma (pire cas mesuré) | 4,69:1 | 4,68:1 |
-| Texte principal / fond plasma (pire cas mesuré) | 14,0:1 | 12,0:1 |
-| Accent / surface | 9,3:1 | 5,4:1 |
-| Texte du bouton accent | 10,4:1 | 5,4:1 |
-| Bordure des champs / surface | 3,5 à 3,8:1 | 3,4:1 |
+| Catégorie | Sombre | Clair |
+|-----------|--------|-------|
+| Logement | `#FF9F0A` | `#FF9500` |
+| Courses | `#40C8E0` | `#32ADE6` |
+| Resto | `#FF453A` | `#FF3B30` |
+| Abonnements | `#BF5AF2` | `#AF52DE` |
+| Loisirs | `#FF375F` | `#FF2D55` |
+| Épargne | `#5E5CE6` | `#5856D6` |
+| Divers | `#8E8E93` | `#8E8E93` |
+| Revenu | `#30D158` | `#34C759` |
 
-### Typography (apple-design §15)
+### Contrastes vérifiés (WCAG AA)
 
-- **SF Pro sous Safari, Inter ailleurs** : `--font-sans` vaut `'Inter Variable', system-ui, sans-serif` et passe à `-apple-system, …` uniquement dans `@supports (font: -apple-system-body)` (WebKit). Chromium reconnaît lui aussi `-apple-system` / `BlinkMacSystemFont` : placés en tête de pile, ils masquaient Inter sur Android.
-  - Sur iOS et macOS, c'est SF Pro, avec son dimensionnement optique.
-  - Ailleurs, Inter, auto-hébergée via `@fontsource-variable/inter` (hors ligne, sans CDN).
-- **Tailles en `rem`** : la mise en page suit le réglage de taille du texte de l'utilisateur.
-- **Tracking et interlignage par taille**, jamais une valeur unique :
-  - le grand texte est resserré, le petit légèrement ouvert ;
-  - l'interlignage est serré sur les titres et plus aéré sur le corps.
-  - Valeurs : courbe dynamique d'Inter, proche de la table de SF. Sous Safari (`@supports (font: -apple-system-body)`), le tracking repasse à `normal`, car SF applique déjà sa propre table optique.
-- **Exception** : les libellés en MAJUSCULES (titres de section) gardent `+0.06em`.
-- **Tous les montants** en `font-variant-numeric: tabular-nums`. Le reste à vivre s'anime en spring sans que les chiffres sautent.
+Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (plasma + verre + matériaux) est photographié sur plusieurs images. Le pire cas (2e centile des pixels sous chaque texte) est calculé pour tous les styles de texte, sur les 4 écrans, en haut de page et après défilement.
 
-| Taille | Tracking (`--ls-*`) | Interlignage (`--lh-*`) |
-|--------|---------------------|-------------------------|
-| 12px (`0.75rem`) | +0.000em | 1.33 |
-| 13px (`0.8125rem`) | -0.003em | 1.38 |
-| 14px (`0.875rem`) | -0.006em | 1.43 |
-| 15px (`0.9375rem`) | -0.009em | 1.4 |
-| 16px (`1rem`) | -0.011em | 1.5 |
-| 17px (`1.0625rem`) | -0.013em | 1.41 |
-| 18px (`1.125rem`) | -0.014em | 1.33 |
-| 20px (`1.25rem`) | -0.017em | 1.25 |
-| 28px (`1.75rem`) | -0.021em | 1.14 |
-| 44px (`2.75rem`) | -0.022em | 1.09 |
+- **Sombre** : tous les styles ≥ 4,93:1.
+- **Clair** : tous les styles ≥ 4,59:1.
+- Les bordures des champs restent au-dessus de 3:1.
+
+### Typographie (apple-design §15)
+
+- **SF Pro sous Safari, Inter ailleurs** (`@supports (font: -apple-system-body)`) ; **SF Pro Rounded** (`ui-rounded`) pour les montants clés sous Safari.
+- Tailles en `rem`, tracking et interlignage par taille (tokens `--fs-*`, `--ls-*`, `--lh-*`), montants en `tabular-nums`.
 
 | Rôle | Taille | Graisse |
 |------|--------|---------|
-| Titre d'écran (h1), logo « Monetra » | 28px | 600 |
-| Titre de section / carte | 13px, MAJUSCULES, +0.06em | 500 |
-| Titre de feuille | 20px | 600 |
-| Corps | 16px | 400 (500 pour les libellés de ligne) |
-| Méta, aide | 14px | 400 |
-| Montant principal (reste à vivre, saisie) | 44px | 600 |
-| Onglets (sur matériau : vibrancy) | 12px, +0.01em | 600 |
+| Grand titre d'écran (repliable) | 34px | 700 |
+| Titre de la barre compacte | 17px | 600 |
+| Titre de section (sur le fond) | 22px | 700 |
+| Titre de carte | 17px | 600 |
+| Ligne de liste (corps iOS) | 17px | 400 ; méta 15px |
+| Reste à vivre | 52px arrondi | 700 |
+| En-tête de jour | 13px majuscules, +0.04em | 600 |
+| Onglets | 12px, −0.01em | 500 (600 actif) |
 
-### Spacing Variables
+### Rayons
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` | Tight gaps |
-| `--space-sm` | `8px` | Icon gaps, inline spacing |
-| `--space-md` | `16px` | Standard padding, gouttière d'écran |
-| `--space-lg` | `24px` | Section padding |
-| `--space-xl` | `32px` | Large gaps |
+| Token | Valeur | Usage |
+|-------|--------|-------|
+| `--radius-sm` | 10px | Pastilles d'icône |
+| `--radius-md` | 14px | Champs, puces de catégorie |
+| `--radius-lg` | 22px | Cartes |
+| `--radius-xl` | 28px | Reste à vivre, sheets |
+| `--radius-full` | 999px | Capsules : boutons, sélecteur de mois, segmented, tab bar, toast |
 
-### Radius & Elevation
+---
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--radius-sm` | `10px` | Champs, tuiles d'icône, segmented |
-| `--radius-md` | `12px` | Boutons, puces de catégorie |
-| `--radius-lg` | `16px` | Cartes |
-| Sheet | `20px` (haut) | Bottom sheets |
+## Liquid Glass (React Bits `GlassSurface`)
 
-En sombre, l'élévation passe par la surface (`#000` → `#111113` → `#1C1C1F`) et la bordure 1px, pas par les ombres. Les ombres sont réservées aux éléments flottants (toast, bouton sticky, sheet).
+Installé avec `npx shadcn@latest add @react-bits/GlassSurface-JS-CSS` (`src/components/GlassSurface.jsx` + `.css`, typé par `GlassSurface.d.ts`). Toujours utilisé via `src/components/Glass.tsx` :
+
+```tsx
+<Glass className="month-switcher" height={50} radius={25}>…</Glass>
+// = <GlassSurface distortionScale={-180} displace={0.5} backgroundOpacity={frost} backdrop={canvas plasma} … />
+```
+
+- **Deux rendus selon le navigateur** :
+  - **Chrome / Android** : réfraction SVG (`backdrop-filter: url(#filtre)`) de tout ce qui est derrière, contenu compris.
+  - **Safari / iPhone** : pas de filtre SVG en `backdrop-filter`, donc réfraction **WebGL** du canvas plasma, passé en `backdrop`. Sous la tab bar, c'est alors le plasma qui est réfracté, pas le contenu.
+- **Voile (`frost`)** : `0.1` sur ce qui est posé sur le plasma (mois, segmented, boutons secondaires) ; `0.55` à `0.6` sur ce que le contenu traverse (tab bar, barre de titre, toast), pour que les libellés restent lisibles.
+- **Bouton +** : verre teinté de l'accent (78 %), la réfraction reste visible.
+- **Retour au toucher** : un bouton qui remplit un verre (`.glass-press`) fait réagir le verre entier (échelle 0.94 en spring).
+- **Lentille de l'onglet actif** : capsule claire qui glisse en spring (`layoutId`) d'un onglet à l'autre ; même principe pour le segmented.
+- **Performance** :
+  - le plasma tourne à 30 images/s (`maxFps`) et expose `data-frame` ; le verre WebGL ne recharge et ne redessine que lorsqu'une nouvelle image existe ;
+  - plasma figé (sheet ouverte, mouvement réduit), verre figé ;
+  - adaptations commentées « Monetra » dans les deux composants.
 
 ---
 
 ## Component Specs
 
-### Carte « Reste à vivre »
+### Navigation
 
-```css
-.hero {
-  background:
-    radial-gradient(120% 100% at 100% 0%, rgba(48, 209, 88, 0.08), transparent 60%),
-    #111113;
-  border: 1px solid #26262a;
-  border-radius: 16px;
-}
-.hero-value { font-size: 44px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-```
+- **Grand titre repliable** (`NavHeader`) : 34px qui défile avec la page ; une barre compacte en Liquid Glass, titre 17px centré, apparaît en fondu dès qu'il passe sous le haut de l'écran.
+- **Dock** : tab bar en capsule flottante (60px, 4 onglets) + bouton + rond séparé (56px), posés au-dessus de l'indicateur d'accueil. Scroll edge effect (dégradé) seulement quand du contenu passe dessous. Chaque écran réserve la hauteur du dock en bas.
 
-En cas de dépassement, le halo passe au rouge à 8 % et le badge affiche « Budget dépassé » avec une icône.
+### Cartes et listes
 
-### Buttons
+- Cartes en matériau dépoli, rayon 22px, arête claire en haut ; la carte du reste à vivre (rayon 28px) a un reflet supérieur, rouge si dépassement.
+- Listes « inset grouped » : séparateurs décalés après la pastille d'icône, lignes de 60px, surlignage au toucher.
+- Swipe pour supprimer : le rouge n'occupe que la zone découverte (la ligne reste transparente sur le verre).
 
-```css
-.btn-primary   { background: #30d158; color: #000; border-radius: 12px; min-height: 50px; font-weight: 600; }
-.btn-secondary { background: #1c1c1f; color: #f5f5f7; border: 1px solid #26262a; }
-.btn-danger    { background: rgba(255, 69, 58, 0.14); color: #ff453a; }
-```
+### Boutons et contrôles
 
-### Puces (catégories, comptes)
-
-```css
-.choice, .chip { background: #1c1c1f; border: 1px solid #26262a; }
-.choice[aria-checked='true'] { border-color: #30d158; background: rgba(48, 209, 88, 0.12); }
-```
-
-Libellés sur une seule ligne (catégorie « Resto »), points de suspension en dernier recours.
-
-### Inputs
-
-```css
-.input { background: #111113; border: 1px solid #707076; border-radius: 10px; min-height: 48px; font-size: 16px; }
-.input:focus { border-color: #30d158; box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.12); }
-```
-
-### Tab bar (matériau, apple-design §12)
-
-```css
-.tab-bar {
-  background: rgba(0, 0, 0, 0.72);              /* clair : rgba(249, 249, 251, 0.78) */
-  backdrop-filter: blur(20px) saturate(180%);   /* propriété standard seule : le build ajoute -webkit- */
-  height: calc(64px + env(safe-area-inset-bottom));
-}
-/* Scroll edge effect au lieu d'une bordure, seulement quand du contenu passe dessous */
-.tab-bar[data-edge='on']::before { background: linear-gradient(to top, rgba(0,0,0,.8), transparent); }
-```
-
-- Le contenu défile **sous** la barre, flouté. Chaque écran réserve `padding-bottom: hauteur tab bar + safe-area + 24px`, donc rien n'est masqué en bas de page.
-- Libellés plus contrastés et plus gras sur le matériau (vibrancy).
-- 4 onglets + bouton **+** central (vert, 52px), visible sur tous les écrans.
-- « Nouveau récurrent » est `position: sticky` juste au-dessus de la barre.
-- Ne jamais écrire `-webkit-backdrop-filter` à la main à côté de la propriété standard : le minifieur ne garderait que la version préfixée, et Chrome ne floute plus.
+- Capsules (`--radius-full`), 50px. Principal : accent plein avec reflet ; secondaire : Liquid Glass (`GlassButton`) ; danger : rouge à 18 %.
+- Sélecteur de mois et segmented : capsules de verre ; segmented avec lentille glissante.
+- Champs : remplissage `--color-fill`, bordure ≥ 3:1, halo d'accent au focus.
 
 ### Sheets
 
-- Fond `#1C1C1F`, rayon 20px en haut, poignée, bouton fermer de 44px, bouton principal collé en bas.
-- Le focus reste dans la feuille ; Échap ferme.
-- **Voile modal** qui s'éclaircit avec la progression du glissement (dim to focus).
+Verre épais dépoli, rayon 28px en haut, poignée, bouton fermer rond, bouton principal collé en bas sur un dégradé. Voile qui s'éclaircit avec le glissement.
 
 ---
 
 ## Fond plasma (`@componentry/closing-plasma`)
 
-Fond animé WebGL installé avec `npx shadcn@latest add @componentry/closing-plasma` (`src/components/ui/closing-plasma.tsx`), posé derrière tous les écrans par `src/components/AppBackground.tsx`.
-
-- **Placement** : `position: fixed`, plein écran, `z-index: 0`, `pointer-events: none`, `aria-hidden`. Le contenu (`.app`) est au-dessus (`z-index: 1`). Le plasma se voit entre les cartes, derrière les en-têtes et, flouté, sous la tab bar.
-- **Réglages** : palette d'origine du composant (bleu nuit en sombre, gris bleuté pâle en clair), `speed 0.6`, `sparkle 0.25`, non interactif. Opacité `0.45` en sombre et `0.6` en clair : le texte posé directement sur le fond garde au moins 4,5:1 dans le pire cas mesuré.
-- **Coût** : rendu à 0,5× puis agrandi (le plasma est flou), animation arrêtée quand l'onglet est caché.
-- **Thème** : suit le choix de Réglages (`data-theme`).
-- **`prefers-reduced-motion`** : image fixe, aucune animation.
-- **Adaptations du composant d'origine** (commentées « Monetra » dans le fichier) :
-  - prop `themeMode` réellement appliquée (elle était figée en sombre) ;
-  - props `paused` et `maxDpr` ;
-  - pause quand l'onglet est caché ;
-  - `premultipliedAlpha: false`, sans quoi `opacity` < 1 surexposait le rendu.
-- **Exception assumée à « pas de bleu »** : le plasma reste en arrière-plan discret, l'accent fonctionnel reste le vert.
+Fond WebGL fixe derrière tous les écrans (`AppBackground`), non interactif, `aria-hidden`. Palette d'origine (bleu nuit / gris bleuté pâle), opacité `0.9` en sombre et `1` en clair, `speed 0.5`, 30 images/s, rendu à 0,5×. Suit le thème ; figé en mouvement réduit et sous une sheet. Adaptations commentées « Monetra » : `themeMode` appliqué, `paused`, `maxDpr`, `maxFps`, `premultipliedAlpha: false`, `preserveDrawingBuffer` (lecture par le verre WebGL), `data-frame`.
 
 ---
 
@@ -264,52 +214,40 @@ Le rebond n'apparaît **que** si le geste avait de l'élan.
   - le changement de mois est un fondu enchaîné ;
   - les chiffres changent directement ;
   - `MotionConfig reducedMotion="user"` coupe les animations de transformation et de layout.
-- **`prefers-reduced-transparency: reduce`** : tab bar opaque, sans flou, avec une bordure fine.
-- **`prefers-contrast: more`** : fonds pleins, bordures `#707076`, texte secondaire `#AEAEB2` (clair : `#3A3A3C`).
+- **`prefers-reduced-transparency: reduce`** : verre et matériaux deviennent opaques ; réfraction et flou coupés (canvas WebGL du verre masqué).
+- **`prefers-contrast: more`** : fonds pleins, bordures franches, libellés secondaires renforcés ; verre opaque.
 
 ---
 
 ## Style Guidelines
 
-**Style:** Dark Mode (OLED), sobre et professionnel
+**Style:** Liquid Glass (iOS 26) sur fond plasma bleu nuit
 
-**Keywords:** noir profond, surfaces étagées, bordures fines, un seul accent, typographie neutre, chiffres alignés
+**Keywords:** verre réfractant, lentille, capsules, grand titre repliable, pastilles colorées, profondeur, calme
 
-**Key Effects:**
-- Pas de verre décoratif sur les cartes ni de dégradés vifs.
-- Un seul halo radial vert (8 % max) sur la carte du reste à vivre.
-- Un seul matériau translucide : la tab bar (fonctionnel, le contenu défile dessous).
-- Un fond plasma animé et discret derrière tous les écrans (voir « Fond plasma »).
-
-**Icons:** Lucide (SVG, trait de 2px), en couleur secondaire ; vertes uniquement pour les revenus et l'état sélectionné.
+**Icons:** Lucide (SVG, trait de 2px) ; blancs sur pastilles de catégorie colorées dans les listes, accent pour l'onglet actif.
 
 ---
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Police manuscrite ou décorative (titres, logo, sections)
-- ❌ Dépenses en rouge, ou un deuxième accent (bleu, violet…)
-- ❌ Glassmorphism décoratif sur les cartes (le seul matériau est la tab bar)
+- ❌ Liquid Glass sur le contenu (cartes, listes) : le verre est réservé à la navigation et aux contrôles
+- ❌ Verre sans voile là où du contenu passe dessous (libellés illisibles)
+- ❌ `-webkit-backdrop-filter` écrit à la main à côté de la propriété standard (le minifieur ne garde que la version préfixée)
 - ❌ Transitions CSS ou `@keyframes` sur un élément manipulé au doigt : utiliser un spring `motion`
-- ❌ Retour visuel uniquement au relâcher ; animation qui bloque l'entrée
 - ❌ Dialogue de confirmation pour une suppression annulable : préférer l'annulation par toast
-- ❌ Bordure dure sous une barre flottante : utiliser le scroll edge effect
-- ❌ **Emojis comme icônes** : utiliser des SVG (Lucide)
-- ❌ Chiffres proportionnels pour les montants
-- ❌ Contenu masqué par la tab bar fixe
-- ❌ Texte tertiaire pour une information essentielle
-- ❌ **Focus invisible** ; cibles tactiles de moins de 44px
+- ❌ Couleur seule pour identifier une catégorie (toujours le libellé)
+- ❌ **Emojis comme icônes** ; chiffres proportionnels pour les montants
+- ❌ Contenu masqué par le dock ; **focus invisible** ; cibles tactiles de moins de 44px
 
 ---
 
 ## Pre-Delivery Checklist
 
-- [ ] Aucun emoji ; icônes Lucide uniquement
-- [ ] Police système (SF) puis Inter, tracking et interlignage par taille, montants en `tabular-nums`
-- [ ] Gestes testés en e2e (`npm run test:e2e`) : sheet, swipe-suppression + annulation, swipe de mois
+- [ ] Verre via `Glass` / `GlassButton` uniquement, voile adapté à ce qui passe dessous
+- [ ] Contrastes AA mesurés sur le rendu réel, dans les deux thèmes
+- [ ] Chemin iPhone (verre WebGL) et chemin Chrome (verre SVG) vérifiés (`npm run test:e2e`)
+- [ ] Gestes testés en e2e : sheet, swipe-suppression + annulation, swipe de mois
 - [ ] Springs `motion` sur tout ce qui se manipule ; retour au pointer-down partout
-- [ ] Contrastes AA vérifiés dans les deux thèmes
-- [ ] Cibles tactiles ≥ 44px, aucun défilement horizontal (375px, paysage, texte 150 %)
-- [ ] Rien ne passe sous la tab bar ; actions sticky visibles
-- [ ] Focus visible, focus piégé dans les sheets
+- [ ] Cibles tactiles ≥ 44px, libellés des onglets sans débordement à 375px
 - [ ] `prefers-reduced-motion`, `prefers-reduced-transparency` et `prefers-contrast` respectés

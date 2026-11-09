@@ -1,4 +1,5 @@
 import { motion, useScroll, useTransform } from 'motion/react'
+import { Glass } from './Glass'
 
 /**
  * Grand titre façon iOS : il défile avec le contenu, et une barre compacte en verre
@@ -13,7 +14,9 @@ export function NavHeader({ title }: { title: string }) {
   return (
     <>
       <motion.div className="nav-bar" style={{ opacity: barOpacity }} aria-hidden="true">
-        <span className="nav-bar-title">{title}</span>
+        <Glass className="nav-bar-glass" height="calc(env(safe-area-inset-top) + var(--nav-height))" radius={0} frost={0.55}>
+          <span className="nav-bar-title">{title}</span>
+        </Glass>
       </motion.div>
       <header className="screen-header">
         <motion.h1 tabIndex={-1} className="large-title" style={{ scale: titleScale }}>

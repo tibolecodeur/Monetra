@@ -29,12 +29,14 @@ export function installPressFeedback(): () => void {
     const el = (e.target as Element | null)?.closest<HTMLElement>(SELECTOR)
     if (!el || (el as HTMLButtonElement).disabled || el.getAttribute('aria-disabled') === 'true') return
     release()
-    active = el
+    // Bouton qui remplit une surface de verre : c'est le verre entier qui réagit.
+    const target = el.closest<HTMLElement>('.glass-press') ?? el
+    active = target
     startX = e.clientX
     startY = e.clientY
-    el.dataset.pressed = 'true'
+    target.dataset.pressed = 'true'
     scaled = !el.matches(HIGHLIGHT_ONLY) && !prefersReducedMotion()
-    if (scaled) animate(el, { scale: 0.97 }, SPRINGS.press())
+    if (scaled) animate(target, { scale: target === el ? 0.97 : 0.94 }, SPRINGS.press())
   }
 
   const onMove = (e: PointerEvent) => {

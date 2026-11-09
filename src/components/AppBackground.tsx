@@ -47,6 +47,7 @@ export function AppBackground() {
       paused={Boolean(reduced) || sheetOpen}
       interactive={false}
       maxDpr={0.5}
+      maxFps={30}
       speed={0.5}
       sparkle={0.25}
       opacity={theme === 'dark' ? 0.9 : 1}

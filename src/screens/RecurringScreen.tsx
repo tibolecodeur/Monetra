@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { GlassButton } from '../components/GlassButton'
 import { SwipeRow } from '../components/SwipeRow'
 import { getCategory } from '../lib/categories'
 import { formatShortDate, today } from '../lib/dates'
@@ -98,10 +99,10 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
         renderList(active)
       )}
 
-      <button type="button" className="btn btn-secondary btn-block sticky-action" onClick={onAdd}>
+      <GlassButton glassClassName="sticky-action" onClick={onAdd}>
         <Plus size={20} aria-hidden="true" />
         Nouveau récurrent
-      </button>
+      </GlassButton>
 
       {ended.length > 0 && (
         <>
