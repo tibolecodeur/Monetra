@@ -42,7 +42,10 @@ Les principes du skill `apple-design` (`.claude/skills/apple-design/SKILL.md`), 
 - **Swipe pour supprimer** (opérations, récurrents) avec seuil, rubber-band et annulation depuis un toast.
 - **Swipe horizontal** sur l'accueil pour changer de mois, avec snap et momentum.
 - **Retour visuel au pointer-down** partout ; reste à vivre animé en spring.
-- **Verre interactif** : il gonfle et s'éclaire sous le doigt, puis rebondit.
+- **Verre interactif** : il gonfle et s'éclaire sous le doigt, puis rebondit ; la lumière rayonne vers le verre voisin du dock.
+- **Tab bar réduite au défilement** (comme `tabBarMinimizeBehavior(.onScrollDown)`), rouverte en remontant ou au toucher.
+- **Sheets en verre flottant**, décollées des bords, et boutons principaux en « glass prominent ».
+- Règles tirées du skill [`liquid-glass`](https://github.com/haider-nawaz/liquid-glass-skill) (SwiftUI), copié dans `.claude/skills/liquid-glass/`.
 - **Tab bar** en Liquid Glass, avec scroll edge effect.
 - Respect de `prefers-reduced-motion`, `prefers-reduced-transparency` et `prefers-contrast`.
 

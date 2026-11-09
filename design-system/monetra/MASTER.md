@@ -133,6 +133,22 @@ D'après la doc Apple [Applying Liquid Glass to custom views](https://developer.
 - **Voile (`frost`)** : `0.12` sur le plasma, `0.32` pour le segmented, `0.6` sur ce que le contenu traverse (tab bar, toast). Contraste AA mesuré sur rendu réel : pire cas 4,70.
 - **Performance** : le plasma tourne à 30 images/s et expose `data-frame` ; le verre WebGL ne redessine que lorsqu'une nouvelle image existe (5 lectures de texture par pixel).
 
+### Correspondance avec SwiftUI (skill `liquid-glass`)
+
+Règles du skill [`haider-nawaz/liquid-glass-skill`](https://github.com/haider-nawaz/liquid-glass-skill), copié dans `.claude/skills/liquid-glass/` (API SwiftUI iOS 26), transposées au web :
+
+| SwiftUI | Monetra |
+|---|---|
+| `.glassEffect(.regular, in: .capsule)` | `<Glass radius={h / 2}>` (réfraction + liseré) |
+| `.regular.tint(color)` | `<Glass tint="…">` (bouton +) |
+| `.regular.interactive()` | `.glass-press` : gonfle, s'éclaire sous le doigt, rebondit |
+| `GlassEffectContainer` | `.glass-container` (dock) : la lumière du toucher rayonne vers le verre voisin |
+| `.buttonStyle(.glassProminent)` | `.btn-primary` : verre teinté de l'accent, liseré, lumière au toucher |
+| `.tabBarMinimizeBehavior(.onScrollDown)` | tab bar réduite à l'onglet courant en descendant ; remonter ou toucher la rouvre |
+| Sheet partielle (`.presentationDetents`) | sheet flottante, décollée de 8 px des bords, rayon 34 px, liseré spéculaire (`GlassRim`) |
+| Pas de verre sur le contenu | cartes et listes en matériau dépoli ; barre de titre en scroll edge effect |
+| Transparence réduite / contraste renforcé | verre opaque, sans réfraction ni liseré |
+
 ---
 
 ## Component Specs

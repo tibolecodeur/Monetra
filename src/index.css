@@ -395,6 +395,12 @@ fieldset {
   transition-duration: 0.08s;
 }
 
+/* GlassEffectContainer : la lumière du toucher rayonne vers le verre voisin, plus faiblement. */
+.lg[data-lit] > .lg-glow {
+  opacity: 0.55;
+  transition-duration: 0.12s;
+}
+
 .lg[data-pressed] > .lg-specular {
   opacity: 1;
   transition-duration: 0.08s;
@@ -1062,12 +1068,35 @@ ul.card-flush {
   }
 }
 
+/* buttonStyle(.glassProminent) : verre entièrement teinté de l'accent, liseré lumineux
+   (haut-gauche vif, bas-droite à contre-jour) et lumière qui naît sous le doigt. */
 .btn-primary {
-  background: linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 60%), var(--color-accent);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: linear-gradient(180deg, rgb(255 255 255 / 14%), transparent 55%), var(--color-accent);
   color: var(--color-on-accent);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 1.5px 1.5px 0 -0.5px rgb(255 255 255 / 55%),
+    inset -1px -1px 0 -0.25px rgb(255 255 255 / 22%),
+    inset 0 0 10px rgb(255 255 255 / 10%),
     0 6px 18px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at var(--lg-x, 50%) var(--lg-y, 50%), rgb(255 255 255 / 34%), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+  pointer-events: none;
+}
+
+.btn-primary[data-pressed]::after {
+  opacity: 1;
+  transition-duration: 0.08s;
 }
 
 .glass-button {
@@ -1269,10 +1298,29 @@ ul.card-flush {
   opacity: 1;
 }
 
+.tab-dock {
+  --tab-bar-width: calc(100% - var(--dock-add) - 8px);
+}
+
+/* tabBarMinimizeBehavior(.onScrollDown) : au défilement vers le bas, la barre se réduit à l'onglet courant. */
+.tab-dock[data-minimized] {
+  --tab-bar-width: 68px;
+  justify-content: space-between;
+}
+
 .tab-bar {
-  flex: 1;
   box-shadow: var(--shadow-float);
   pointer-events: auto;
+  transition: width 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.tab-dock[data-minimized] .tab-bar > .lg-content {
+  grid-template-columns: 1fr;
+}
+
+.tab-dock[data-minimized] .tab:not(.active),
+.tab-dock[data-minimized] .tab-label {
+  display: none;
 }
 
 .tab-bar > .lg-content {
@@ -1418,22 +1466,25 @@ ul.card-flush {
   pointer-events: auto;
 }
 
+/* Sheet partielle iOS 26 : verre flottant, décollée des bords de l'écran, coins concentriques. */
 .sheet {
   position: relative;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 560px;
-  max-height: 92dvh;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  width: calc(100% - 16px);
+  max-width: 544px;
+  max-height: calc(92dvh - 8px);
+  margin-bottom: calc(8px + env(safe-area-inset-bottom) * 0.5);
+  border-radius: 34px;
   background: var(--glass-sheet);
   backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid var(--glass-edge);
-  border-bottom: 0;
-  box-shadow:
-    inset 0 1px 0 var(--glass-highlight),
-    0 -12px 40px rgb(0 0 12 / 35%);
+  box-shadow: 0 18px 50px rgb(0 0 12 / 38%);
+  overflow: clip;
   will-change: transform;
+}
+
+.lg-rim {
+  z-index: 2;
 }
 
 .sheet:focus {

@@ -19,6 +19,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react'
+import { GlassRim } from './LiquidGlass'
 import { GESTURE_SLOP, project, REDUCED_FADE, rubberband, SPRINGS, VelocityTracker } from '../lib/motion'
 
 interface Props {
@@ -195,6 +196,8 @@ export function Sheet({ title, onClose, children }: Props) {
         style={{ y, opacity: fade }}
         data-testid="sheet"
       >
+        {/* Sheet partielle iOS 26 : verre flottant, décollé des bords, avec son liseré. */}
+        <GlassRim radius={34} />
         <div
           className="sheet-grabber"
           data-testid="sheet-grabber"

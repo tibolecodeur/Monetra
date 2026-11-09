@@ -19,11 +19,15 @@ export function installPressFeedback(): () => void {
   let startX = 0
   let startY = 0
 
+  let lit: HTMLElement[] = []
+
   const release = () => {
     if (!active) return
     const el = active
     active = null
     delete el.dataset.pressed
+    for (const other of lit) delete other.dataset.lit
+    lit = []
     if (scaled) animate(el, { scale: 1 }, glass ? spring(0.55, 0.42) : SPRINGS.press())
   }
 
@@ -33,7 +37,8 @@ export function installPressFeedback(): () => void {
     if (!el || (el as HTMLButtonElement).disabled || el.getAttribute('aria-disabled') === 'true') return
     release()
     // Bouton qui remplit une surface de verre : c'est le verre entier qui réagit.
-    const glassTarget = el.closest<HTMLElement>('.glass-press')
+    // .btn-primary : bouton « glassProminent » (verre teinté de l'accent), interactif lui aussi.
+    const glassTarget = el.closest<HTMLElement>('.glass-press, .btn-primary')
     const target = glassTarget ?? el
     glass = Boolean(glassTarget)
     active = target
@@ -45,6 +50,17 @@ export function installPressFeedback(): () => void {
       const box = target.getBoundingClientRect()
       target.style.setProperty('--lg-x', `${e.clientX - box.left}px`)
       target.style.setProperty('--lg-y', `${e.clientY - box.top}px`)
+      // GlassEffectContainer : le verre voisin du même groupe capte la lumière, du côté du doigt.
+      const container = target.closest('.glass-container')
+      lit = container
+        ? [...container.querySelectorAll<HTMLElement>('.lg')].filter((other) => other !== target && !other.contains(target))
+        : []
+      for (const other of lit) {
+        const r = other.getBoundingClientRect()
+        other.style.setProperty('--lg-x', `${e.clientX - r.left}px`)
+        other.style.setProperty('--lg-y', `${e.clientY - r.top}px`)
+        other.dataset.lit = 'true'
+      }
     }
     // Le verre gonfle d'autant moins qu'il est grand (≈ 4 px sur le plus grand côté).
     const grow = glass ? 1 + 4 / Math.max(target.offsetWidth, target.offsetHeight, 1) : 0.97

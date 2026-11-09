@@ -23,23 +23,52 @@ export interface LiquidGlassProps {
 
 const css = (value: number | string) => (typeof value === 'number' ? `${value}px` : value)
 
-/** Taille de mise en page (sans les transformations : l'effet de pression ne recalcule rien). */
+/**
+ * Taille de mise en page (sans les transformations : l'effet de pression ne recalcule rien).
+ * Pendant un changement de taille animé (tab bar qui se réduit), les cartes existantes sont
+ * étirées et ne sont recalculées qu'une fois la taille stable, comme le recommande kube.io.
+ */
 function useSize(ref: React.RefObject<HTMLElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number } | null>(null)
   useLayoutEffect(() => {
     const node = ref.current
     if (!node) return
-    const measure = () => {
+    let timer = 0
+    const read = () => {
       const w = Math.round(node.offsetWidth)
       const h = Math.round(node.offsetHeight)
       setSize((old) => (old && old.w === w && old.h === h ? old : w && h ? { w, h } : null))
     }
-    measure()
-    const observer = new ResizeObserver(measure)
+    read()
+    const observer = new ResizeObserver(() => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(read, 160)
+    })
     observer.observe(node)
-    return () => observer.disconnect()
+    return () => {
+      window.clearTimeout(timer)
+      observer.disconnect()
+    }
   }, [ref])
   return size
+}
+
+/**
+ * Liseré spéculaire seul, pour les grandes surfaces de verre (sheets) où la réfraction serait
+ * trop coûteuse pendant le glissement : il se mesure lui-même et suit les transformations de son parent.
+ */
+export function GlassRim({ radius }: { radius: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const size = useSize(ref)
+  const rim = size ? glassMaps(defaultShape(size.w, size.h, radius), 1) : null
+  return (
+    <span
+      ref={ref}
+      className="lg-specular lg-rim"
+      aria-hidden="true"
+      style={rim ? { backgroundImage: `url(${rim.urls().specular})` } : undefined}
+    />
+  )
 }
 
 /**
