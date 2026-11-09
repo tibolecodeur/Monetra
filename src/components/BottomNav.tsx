@@ -46,7 +46,7 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
 
   return (
     <nav ref={nav} className="tab-dock" aria-label="Navigation principale">
-      <Glass className="tab-bar" height="var(--dock-height)" radius={30} frost={0.55}>
+      <Glass className="tab-bar" height="var(--dock-height)" radius={30} frost={0.6}>
         {ITEMS.map(({ id, label, icon: Icon }) => {
           const active = current === id
           return (
@@ -65,7 +65,14 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
           )
         })}
       </Glass>
-      <Glass className="tab-add-glass glass-press" width="var(--dock-add)" height="var(--dock-add)" radius={28} frost={0}>
+      <Glass
+        className="tab-add-glass glass-press"
+        width="var(--dock-add)"
+        height="var(--dock-add)"
+        radius={28}
+        frost={0.72}
+        tint="var(--color-accent)"
+      >
         <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">
           <Plus size={28} strokeWidth={2.4} aria-hidden="true" />
         </button>
