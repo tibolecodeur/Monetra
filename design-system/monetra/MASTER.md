@@ -9,7 +9,7 @@
 **Project:** Monetra
 **Generated:** 2026-10-29 15:12:45 (ui-ux-pro-max)
 **Revised:** 2026-10-29 : thème sombre pro, puis version fluide « style Apple » (springs, gestes)
-**Revised:** 2026-11-09 : **Liquid Glass sur fond plasma** (React Bits `GlassSurface`, palette tirée du plasma)
+**Revised:** 2026-11-09 : **Liquid Glass physique sur fond plasma** (réfraction de Snell, liseré spéculaire, palette tirée du plasma)
 **Sources :** skill `ui-ux-pro-max` (style « liquid-glass », composants) et skill `apple-design` (`.claude/skills/apple-design/SKILL.md`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-design` prime.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -112,26 +112,42 @@ Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (pl
 
 ---
 
-## Liquid Glass (React Bits `GlassSurface`)
+## Liquid Glass (physique, maison)
 
-Installé avec `npx shadcn@latest add @react-bits/GlassSurface-JS-CSS` (`src/components/GlassSurface.jsx` + `.css`, typé par `GlassSurface.d.ts`). Toujours utilisé via `src/components/Glass.tsx` :
+D'après la doc Apple [Applying Liquid Glass to custom views](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views) et l'article [Liquid Glass in the Browser](https://kube.io/blog/liquid-glass-css-svg/). Physique dans `src/lib/liquidGlass.ts` (testée), rendu dans `src/components/LiquidGlass.tsx`, toujours utilisé via `src/components/Glass.tsx` :
 
 ```tsx
-<Glass className="month-switcher" height={50} radius={25}>…</Glass>
-// = <GlassSurface distortionScale={-180} displace={0.5} backgroundOpacity={frost} backdrop={canvas plasma} … />
+<Glass className="month-switcher" height={50} radius={25} frost={0.12} tint="var(--color-accent)">…</Glass>
 ```
 
+- **Modèle** : une plaque de verre (indice 1,5) posée sur le contenu, au **bord bombé en squircle** `y = ⁴√(1 − (1 − x)⁴)`. Le centre est plat (le fond passe tel quel) ; dans le biseau, chaque rayon est dévié par la **loi de Snell**, convexe : le fond est « tiré » vers l'intérieur, comme dans une lentille.
+- **Carte de déplacement** calculée par forme et par taille (mise en cache) : R = x, G = y, 128 = neutre ; l'échelle est le déplacement maximal en px.
+- **Liseré spéculaire** calculé par pixel : intensité selon l'angle entre la normale du bord et une lumière fixe (haut-gauche), plus faible à contre-jour (bas-droite) ; il s'avive au toucher.
+- **Matériau** : léger flou (2,5 px) + saturation 170 % + voile (`frost`) ou teinte (`tint`, comme `.tint()`).
 - **Deux rendus selon le navigateur** :
-  - **Chrome / Android** : réfraction SVG (`backdrop-filter: url(#filtre)`) de tout ce qui est derrière, contenu compris.
-  - **Safari / iPhone** : pas de filtre SVG en `backdrop-filter`, donc réfraction **WebGL** du canvas plasma, passé en `backdrop`. Sous la tab bar, c'est alors le plasma qui est réfracté, pas le contenu.
-- **Voile (`frost`)** : `0.1` sur ce qui est posé sur le plasma (mois, segmented, boutons secondaires) ; `0.55` à `0.6` sur ce que le contenu traverse (tab bar, barre de titre, toast), pour que les libellés restent lisibles.
-- **Bouton +** : verre teinté de l'accent (78 %), la réfraction reste visible.
-- **Retour au toucher** : un bouton qui remplit un verre (`.glass-press`) fait réagir le verre entier (échelle 0.94 en spring).
-- **Lentille de l'onglet actif** : capsule claire qui glisse en spring (`layoutId`) d'un onglet à l'autre ; même principe pour le segmented.
-- **Performance** :
-  - le plasma tourne à 30 images/s (`maxFps`) et expose `data-frame` ; le verre WebGL ne recharge et ne redessine que lorsqu'une nouvelle image existe ;
-  - plasma figé (sheet ouverte, mouvement réduit), verre figé ;
-  - adaptations commentées « Monetra » dans les deux composants.
+  - **Chrome / Android** : filtre SVG en `backdrop-filter` (`feGaussianBlur` → `feDisplacementMap` → `feColorMatrix`) : réfraction du contenu réel.
+  - **Safari / iPhone, Firefox** : pas de filtre SVG en `backdrop-filter`. Un shader WebGL applique la même carte au fond plasma dans le biseau ; le centre garde le flou CSS du contenu réel.
+  - Transparence réduite ou contraste renforcé : verre opaque, sans réfraction ni liseré.
+- **Interactif** (`.glass-press`, comme `.interactive()`) : au toucher, le verre gonfle (≈ 4 px sur son grand côté), la lumière naît sous le doigt, puis il rebondit au relâcher (spring 0,55 / 0,42 s).
+- **Usage, comme Apple** : le verre est réservé à ce qui flotte au-dessus du contenu (tab bar, bouton +, sélecteur de mois, segmented, toast, boutons secondaires). Les cartes restent du contenu dépoli ; la barre de titre est un **scroll edge effect** (flou progressif), pas une plaque de verre.
+- **Voile (`frost`)** : `0.12` sur le plasma, `0.32` pour le segmented, `0.6` sur ce que le contenu traverse (tab bar, toast). Contraste AA mesuré sur rendu réel : pire cas 4,70.
+- **Performance** : le plasma tourne à 30 images/s et expose `data-frame` ; le verre WebGL ne redessine que lorsqu'une nouvelle image existe (5 lectures de texture par pixel).
+
+### Correspondance avec SwiftUI (skill `liquid-glass`)
+
+Règles du skill [`haider-nawaz/liquid-glass-skill`](https://github.com/haider-nawaz/liquid-glass-skill), copié dans `.claude/skills/liquid-glass/` (API SwiftUI iOS 26), transposées au web :
+
+| SwiftUI | Monetra |
+|---|---|
+| `.glassEffect(.regular, in: .capsule)` | `<Glass radius={h / 2}>` (réfraction + liseré) |
+| `.regular.tint(color)` | `<Glass tint="…">` (bouton +) |
+| `.regular.interactive()` | `.glass-press` : gonfle, s'éclaire sous le doigt, rebondit |
+| `GlassEffectContainer` | `.glass-container` (dock) : la lumière du toucher rayonne vers le verre voisin |
+| `.buttonStyle(.glassProminent)` | `.btn-primary` : verre teinté de l'accent, liseré, lumière au toucher |
+| `.tabBarMinimizeBehavior(.onScrollDown)` | tab bar réduite à l'onglet courant en descendant ; remonter ou toucher la rouvre |
+| Sheet partielle (`.presentationDetents`) | sheet flottante, décollée de 8 px des bords, rayon 34 px, liseré spéculaire (`GlassRim`) |
+| Pas de verre sur le contenu | cartes et listes en matériau dépoli ; barre de titre en scroll edge effect |
+| Transparence réduite / contraste renforcé | verre opaque, sans réfraction ni liseré |
 
 ---
 
@@ -139,7 +155,7 @@ Installé avec `npx shadcn@latest add @react-bits/GlassSurface-JS-CSS` (`src/com
 
 ### Navigation
 
-- **Grand titre repliable** (`NavHeader`) : 34px qui défile avec la page ; une barre compacte en Liquid Glass, titre 17px centré, apparaît en fondu dès qu'il passe sous le haut de l'écran.
+- **Grand titre repliable** (`NavHeader`) : 34px qui défile avec la page ; une barre compacte (scroll edge effect, flou progressif), titre 17px centré, apparaît en fondu dès qu'il passe sous le haut de l'écran.
 - **Dock** : tab bar en capsule flottante (60px, 4 onglets) + bouton + rond séparé (56px), posés au-dessus de l'indicateur d'accueil. Scroll edge effect (dégradé) seulement quand du contenu passe dessous. Chaque écran réserve la hauteur du dock en bas.
 
 ### Cartes et listes

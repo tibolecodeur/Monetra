@@ -25,7 +25,9 @@ Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
 L'interface suit le design system [`design-system/monetra/MASTER.md`](design-system/monetra/MASTER.md), généré avec le skill UI UX Pro Max puis révisé :
 
-- **Liquid Glass sur fond plasma** : navigation et contrôles en verre réfractant (tab bar flottante, grand titre repliable, sélecteur de mois, segmented), contenu sur des cartes dépolies. Sombre par défaut, clair dans Réglages.
+- **Liquid Glass sur fond plasma** : navigation et contrôles en verre qui réfracte vraiment ce qu'il y a derrière (bord bombé en squircle, loi de Snell, liseré spéculaire), interactif au toucher ; contenu sur des cartes dépolies, grand titre repliable avec scroll edge effect. Sombre par défaut, clair dans Réglages.
+
+<img src="docs/screenshots/glass/zoom-dock.png" width="480" alt="Tab bar en Liquid Glass : le contenu se courbe dans le biseau">
 - **Palette tirée du fond** : accent pervenche, vert pour les revenus, pastilles de catégorie colorées façon iOS.
 - **Inter** pour toute l'interface, auto-hébergée (aucune requête externe) ; montants en chiffres tabulaires.
 - Icônes SVG Lucide, sans emojis.
@@ -40,7 +42,11 @@ Les principes du skill `apple-design` (`.claude/skills/apple-design/SKILL.md`), 
 - **Swipe pour supprimer** (opérations, récurrents) avec seuil, rubber-band et annulation depuis un toast.
 - **Swipe horizontal** sur l'accueil pour changer de mois, avec snap et momentum.
 - **Retour visuel au pointer-down** partout ; reste à vivre animé en spring.
-- **Tab bar** en matériau translucide, avec scroll edge effect.
+- **Verre interactif** : il gonfle et s'éclaire sous le doigt, puis rebondit ; la lumière rayonne vers le verre voisin du dock.
+- **Tab bar réduite au défilement** (comme `tabBarMinimizeBehavior(.onScrollDown)`), rouverte en remontant ou au toucher.
+- **Sheets en verre flottant**, décollées des bords, et boutons principaux en « glass prominent ».
+- Règles tirées du skill [`liquid-glass`](https://github.com/haider-nawaz/liquid-glass-skill) (SwiftUI), copié dans `.claude/skills/liquid-glass/`.
+- **Tab bar** en Liquid Glass, avec scroll edge effect.
 - Respect de `prefers-reduced-motion`, `prefers-reduced-transparency` et `prefers-contrast`.
 
 Vidéos des gestes : [`docs/videos/`](docs/videos).
@@ -52,7 +58,7 @@ Vidéos des gestes : [`docs/videos/`](docs/videos).
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
 - [Motion](https://motion.dev/) : springs et gestes
 - Fond animé [`@componentry/closing-plasma`](https://componentry.dev) (WebGL), installé via `shadcn`
-- Liquid Glass [`GlassSurface`](https://reactbits.dev/components/glass-surface) (React Bits), installé via `shadcn`
+- Liquid Glass maison (`src/lib/liquidGlass.ts`) : carte de déplacement SVG sur Chrome, shader WebGL sur Safari, d'après [kube.io](https://kube.io/blog/liquid-glass-css-svg/)
 - [Lucide](https://lucide.dev/) : icônes SVG ; police système (SF Pro), [Inter](https://rsms.me/inter/) auto-hébergée en repli
 - [Playwright](https://playwright.dev/) : tests e2e tactiles
 

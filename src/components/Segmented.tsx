@@ -14,7 +14,7 @@ interface Props<T extends string> {
 export function Segmented<T extends string>({ value, options, onChange, label }: Props<T>) {
   const id = useId()
   return (
-    <Glass className="segmented" height={46} radius={23}>
+    <Glass className="segmented" height={46} radius={23} frost={0.32}>
     <div className="segmented-inner" role="radiogroup" aria-label={label}>
       {options.map((o) => (
         <button

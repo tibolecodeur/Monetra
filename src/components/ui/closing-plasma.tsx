@@ -277,7 +277,7 @@ export function ClosingPlasma({
     container.addEventListener("pointerleave", handlePointerLeave);
 
     // Monetra : le shader sort une couleur non prémultipliée ; sans ce réglage, opacity < 1 surexpose le rendu.
-    // Monetra : preserveDrawingBuffer garde la dernière image lisible par le verre (GlassSurface en WebGL), même en pause.
+    // Monetra : preserveDrawingBuffer garde la dernière image lisible par le verre (LiquidGlass en WebGL), même en pause.
     const gl = canvas.getContext("webgl", {
       antialias: false,
       alpha: true,
@@ -432,7 +432,7 @@ export function ClosingPlasma({
       gl.uniform1f(uVignette, settings.vignette);
       gl.uniform1f(uOpacity, settings.opacity);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      // Monetra : numéro d'image lu par GlassSurface, qui ne réfracte à nouveau que si le plasma a changé.
+      // Monetra : numéro d'image lu par LiquidGlass, qui ne réfracte à nouveau que si le plasma a changé.
       canvas.dataset.frame = String(++frameCount);
     };
 

@@ -79,7 +79,8 @@ test.describe('Monetra en émulation iPhone', () => {
     await page.getByRole('button', { name: 'Annuler' }).tap()
     await expect(page.locator('.swipe-content', { hasText: 'Kebab' })).toBeVisible()
 
-    // Même geste sur un récurrent.
+    // Même geste sur un récurrent. La tab bar s'est réduite au défilement : on remonte pour la rouvrir.
+    await page.evaluate(() => window.scrollTo(0, 0))
     await page.getByRole('button', { name: 'Récurrents' }).tap()
     // L'écran Opérations a aussi une ligne « Forfait mobile » (transaction générée) : on attend le bon écran.
     await expect(page.getByRole('heading', { name: 'Récurrents', level: 1 })).toBeVisible()
@@ -167,10 +168,58 @@ test.describe('Monetra en émulation iPhone', () => {
 
   test('Liquid Glass : réfraction SVG sur Chrome', async ({ page }) => {
     await openWithDemo(page)
-    const glass = page.locator('.glass-surface')
-    await expect(glass.first()).toBeVisible()
-    expect(await page.locator('.glass-surface--svg').count()).toBeGreaterThanOrEqual(4)
-    expect(await page.locator('.glass-surface--webgl, .glass-surface--fallback').count()).toBe(0)
+    const bar = page.locator('.tab-bar')
+    await expect(bar).toBeVisible()
+    expect(await page.locator('.lg--svg').count()).toBeGreaterThanOrEqual(3)
+    expect(await page.locator('.lg--webgl, .lg--frost').count()).toBe(0)
+    // Le verre filtre son arrière-plan avec un filtre SVG : carte de déplacement calculée + flou + saturation.
+    const glass = await bar.evaluate((el) => {
+      const id = getComputedStyle(el).backdropFilter.match(/url\("?#([^")]+)/)?.[1] ?? ''
+      const filter = document.getElementById(id)
+      return {
+        id,
+        scale: Number(filter?.querySelector('feDisplacementMap')?.getAttribute('scale')),
+        map: filter?.querySelector('feImage')?.getAttribute('href')?.slice(0, 22),
+        specular: getComputedStyle(el.querySelector('.lg-specular')!).backgroundImage.slice(0, 26),
+      }
+    })
+    expect(glass.id).not.toBe('')
+    expect(glass.scale).toBeGreaterThan(4)
+    expect(glass.map).toBe('data:image/png;base64,')
+    expect(glass.specular).toContain('data:image/png')
+  })
+
+  test('Liquid Glass interactif : le verre gonfle et s\'éclaire sous le doigt', async ({ page }) => {
+    await openWithDemo(page)
+    const add = page.locator('.tab-add-glass')
+    const box = (await add.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await expect(add).toHaveAttribute('data-pressed', 'true')
+    await expect.poll(() => add.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(box.width + 1)
+    expect(await add.evaluate((el) => getComputedStyle(el).getPropertyValue('--lg-x'))).not.toBe('')
+    await page.mouse.up()
+    await expect(add).not.toHaveAttribute('data-pressed')
+  })
+
+  test('tab bar réduite au défilement vers le bas, rouverte en remontant ou au toucher', async ({ page }) => {
+    await openWithDemo(page)
+    const dock = page.locator('.tab-dock')
+    const bar = page.locator('.tab-bar')
+    const full = (await bar.boundingBox())!.width
+    await page.evaluate(() => window.scrollTo(0, 500))
+    await expect(dock).toHaveAttribute('data-minimized', 'true')
+    await expect.poll(async () => (await bar.boundingBox())!.width).toBeLessThan(80)
+    await expect(page.getByRole('button', { name: 'Opérations' })).toBeHidden()
+    // Remonter un peu suffit à la rouvrir.
+    await page.evaluate(() => window.scrollTo(0, 440))
+    await expect(dock).not.toHaveAttribute('data-minimized')
+    // Toucher l'onglet de la barre réduite la rouvre aussi, sans changer d'écran.
+    await page.evaluate(() => window.scrollTo(0, 800))
+    await expect(dock).toHaveAttribute('data-minimized', 'true')
+    await page.getByRole('button', { name: 'Accueil' }).tap()
+    await expect(dock).not.toHaveAttribute('data-minimized')
+    await expect.poll(async () => (await bar.boundingBox())!.width).toBeGreaterThan(full - 2)
   })
 
   test.describe('sur iPhone (Safari)', () => {
@@ -184,9 +233,9 @@ test.describe('Monetra en émulation iPhone', () => {
       page.on('pageerror', (e) => errors.push(String(e)))
       await page.goto('/#/accueil')
       // Safari ne gère pas la réfraction SVG : chaque verre réfracte le canvas plasma en WebGL.
-      await expect.poll(() => page.locator('.glass-surface--webgl').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(4)
-      expect(await page.locator('.glass-surface--svg, .glass-surface--fallback').count()).toBe(0)
-      const canvas = page.locator('.tab-bar .glass-surface__canvas')
+      await expect.poll(() => page.locator('.lg--webgl').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(3)
+      expect(await page.locator('.lg--svg, .lg--frost').count()).toBe(0)
+      const canvas = page.locator('.tab-bar .lg-canvas')
       await expect(canvas).toBeVisible()
       expect(await canvas.evaluate((c: HTMLCanvasElement) => c.width * c.height)).toBeGreaterThan(0)
       // Le fond plasma expose son numéro d'image, que le verre suit.
