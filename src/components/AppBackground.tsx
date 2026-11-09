@@ -17,6 +17,17 @@ function useDocumentTheme(): Theme {
   return theme
 }
 
+/** Vrai tant qu'une feuille modale est ouverte (Sheet pose la classe no-scroll sur <body>). */
+function useSheetOpen(): boolean {
+  const [open, setOpen] = useState(() => document.body.classList.contains('no-scroll'))
+  useEffect(() => {
+    const observer = new MutationObserver(() => setOpen(document.body.classList.contains('no-scroll')))
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+  return open
+}
+
 /**
  * Fond plasma (@componentry/closing-plasma) derrière tous les écrans.
  * Fixe, non interactif et ignoré par les lecteurs d'écran ; figé si le système
@@ -25,18 +36,21 @@ function useDocumentTheme(): Theme {
 export function AppBackground() {
   const theme = useDocumentTheme()
   const reduced = useReducedMotion()
+  // Figé sous une feuille : le fond est voilé, et le flou de la feuille n'a plus à être recalculé à chaque image.
+  const sheetOpen = useSheetOpen()
   return (
     <ClosingPlasma
       className="app-background"
       aria-hidden="true"
       data-testid="app-background"
       themeMode={theme}
-      paused={Boolean(reduced)}
+      paused={Boolean(reduced) || sheetOpen}
       interactive={false}
       maxDpr={0.5}
-      speed={0.6}
+      maxFps={30}
+      speed={0.5}
       sparkle={0.25}
-      opacity={theme === 'dark' ? 0.45 : 0.6}
+      opacity={theme === 'dark' ? 0.9 : 1}
     />
   )
 }

@@ -24,7 +24,7 @@ export function TransactionRow({ transaction: t, accountName, onSelect, onSwipeD
 
   const row = (
     <button type="button" className="row" onClick={() => onSelect?.(t)}>
-      <span className={`row-icon ${t.type}`}>
+      <span className={`row-icon ${t.type} cat-${t.categorie}`}>
         <CategoryIcon categorie={t.categorie} />
       </span>
       <span className="row-main">

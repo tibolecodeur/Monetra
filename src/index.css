@@ -1,78 +1,101 @@
 /*
  * Monetra : tokens et composants.
- * Référence : design-system/monetra/MASTER.md (thème sombre pro, accent vert unique).
+ * Référence : design-system/monetra/MASTER.md (Liquid Glass sur fond plasma).
+ * - Le fond plasma (AppBackground) donne la palette : bleu nuit, accent pervenche.
+ * - Verre (« liquid glass ») pour la navigation et les contrôles : tab bar, barre de titre,
+ *   sélecteur de mois, segmented, sheets, toast.
+ * - Matériau dépoli plus discret pour le contenu (cartes), qui reste sur sa propre couche.
  * Sombre par défaut ; le thème clair s'active avec [data-theme='light'] (Réglages).
  */
 
 :root {
-  /* Couleurs : sombre (défaut) */
-  --color-bg: #000000;
-  --color-surface: #111113;
-  --color-surface-elevated: #1c1c1f;
-  --color-fill: #1c1c1f;
-  --color-border: #26262a;
-  --color-border-input: #707076;
-  --color-text: #f5f5f7;
-  --color-text-secondary: #8e8e93;
-  --color-text-tertiary: #5a5a60;
-  --color-accent: #30d158;
-  --color-on-accent: #000000;
-  --color-accent-text: #30d158;
-  --color-accent-soft: rgb(48 209 88 / 12%);
-  --color-danger: #ff453a;
-  --color-danger-soft: rgb(255 69 58 / 14%);
-  --color-segment-bg: rgb(118 118 128 / 24%);
-  --color-segment-active: #3a3a3c;
-  --color-pressed: rgb(255 255 255 / 6%);
-  --color-scrim: rgb(0 0 0 / 60%);
-  /* Matériau de la tab bar (translucide) et fondu du scroll edge effect. */
-  --color-material: rgb(0 0 0 / 72%);
-  --color-edge: rgb(0 0 0 / 80%);
-  --color-tab-inactive: #9e9ea3;
-  --color-track: #26262a;
-  --color-bar: #aeaeb2;
-  --color-meter: #f5f5f7;
-  --hero-glow: rgb(48 209 88 / 8%);
-  --hero-glow-negative: rgb(255 69 58 / 8%);
-  --shadow-sheet: 0 -8px 24px rgb(0 0 0 / 50%);
-  --shadow-float: 0 8px 24px rgb(0 0 0 / 60%);
+  /* Fond (sous le plasma) */
+  --color-bg: #05060c;
 
-  /* Inter partout, SF Pro sous Safari (voir @supports plus bas).
-     Chromium reconnaît aussi -apple-system et BlinkMacSystemFont : en tête de pile,
-     ils masqueraient Inter sur Android et ailleurs. */
+  /* Libellés (vibrancy : opacité sur blanc, comme les labels iOS) */
+  --color-text: #ffffff;
+  --color-text-secondary: rgb(235 235 245 / 66%);
+  --color-text-tertiary: rgb(235 235 245 / 34%);
+  /* Texte secondaire posé directement sur le plasma : plus opaque pour rester lisible. */
+  --color-text-on-bg: rgb(255 255 255 / 86%);
+
+  /* Accent tiré du plasma (pervenche) ; vert réservé aux revenus, rouge aux erreurs. */
+  --color-accent: #5468e0;
+  --color-on-accent: #ffffff;
+  --color-accent-text: #a8b6ff;
+  --color-accent-soft: rgb(124 143 255 / 22%);
+  --color-income: #30d158;
+  --color-income-soft: rgb(48 209 88 / 18%);
+  --color-danger: #ff6961;
+  --color-danger-fill: #ff453a;
+  --color-danger-soft: rgb(255 69 58 / 18%);
+
+  /* Matériaux */
+  --material-content: rgb(17 20 36 / 60%);
+  --material-content-edge: rgb(255 255 255 / 9%);
+  --material-content-highlight: rgb(255 255 255 / 7%);
+  --glass: rgb(32 37 62 / 48%);
+  --glass-strong: rgb(26 30 50 / 72%);
+  --glass-edge: rgb(255 255 255 / 16%);
+  --glass-highlight: rgb(255 255 255 / 24%);
+  --glass-lens: rgb(255 255 255 / 14%);
+  --glass-sheet: rgb(22 25 42 / 86%);
+  --blur-content: blur(22px) saturate(160%);
+  --blur-glass: blur(26px) saturate(190%);
+
+  /* Remplissages, séparateurs, états */
+  --color-fill: rgb(120 132 180 / 20%);
+  --color-separator: rgb(255 255 255 / 10%);
+  --color-border-input: rgb(255 255 255 / 38%);
+  --color-pressed: rgb(255 255 255 / 9%);
+  --color-scrim: rgb(2 3 12 / 48%);
+  --color-track: rgb(255 255 255 / 12%);
+  --color-meter: #ffffff;
+  --color-edge: rgb(5 6 12 / 72%);
+  --shadow-float: 0 10px 32px rgb(0 0 12 / 45%);
+  --shadow-card: 0 8px 28px rgb(0 0 12 / 28%);
+
+  /* Couleurs de catégories (pastilles d'icônes, barres) : palette système iOS sombre. */
+  --cat-logement: #ff9f0a;
+  --cat-courses: #40c8e0;
+  --cat-resto: #ff453a;
+  --cat-abonnements: #bf5af2;
+  --cat-loisirs: #ff375f;
+  --cat-epargne: #5e5ce6;
+  --cat-divers: #8e8e93;
+  --cat-revenu: #30d158;
+  --cat-charges: #64d2ff;
+  --cat-variables: #ff9f0a;
+  --cat-compte: #5468e0;
+
+  /* Inter partout, SF Pro sous Safari (voir @supports plus bas). */
   --font-sans: 'Inter Variable', system-ui, sans-serif;
-  /* Typographie : taille (rem, suit le réglage de taille du texte), tracking et interlignage par taille.
-     Tracking : grand texte resserré, petit texte légèrement ouvert (skill apple-design §15). */
+  --font-rounded: 'Inter Variable', system-ui, sans-serif;
+  /* Typographie : taille (rem), tracking et interlignage par taille (skill apple-design §15). */
   --fs-12: 0.75rem;
   --ls-12: 0.0005em;
   --lh-12: 1.33;
   --fs-13: 0.8125rem;
   --ls-13: -0.0032em;
   --lh-13: 1.38;
-  --fs-14: 0.875rem;
-  --ls-14: -0.0062em;
-  --lh-14: 1.43;
   --fs-15: 0.9375rem;
   --ls-15: -0.0088em;
-  --lh-15: 1.4;
-  --fs-16: 1rem;
-  --ls-16: -0.0110em;
-  --lh-16: 1.5;
+  --lh-15: 1.33;
   --fs-17: 1.0625rem;
   --ls-17: -0.0128em;
-  --lh-17: 1.41;
-  --fs-18: 1.125rem;
-  --ls-18: -0.0143em;
-  --lh-18: 1.33;
+  --lh-17: 1.29;
   --fs-20: 1.25rem;
   --ls-20: -0.0167em;
   --lh-20: 1.25;
-  --fs-28: 1.75rem;
-  --ls-28: -0.0209em;
-  --lh-28: 1.14;
-  --fs-44: 2.75rem;
-  --ls-44: -0.0222em;
-  --lh-44: 1.09;
+  --fs-22: 1.375rem;
+  --ls-22: -0.0183em;
+  --lh-22: 1.27;
+  --fs-34: 2.125rem;
+  --ls-34: -0.0215em;
+  --lh-34: 1.21;
+  --fs-52: 3.25rem;
+  --ls-52: -0.0223em;
+  --lh-52: 1.08;
 
   /* Espacements (grille de 4) */
   --space-xs: 4px;
@@ -81,33 +104,31 @@
   --space-lg: 24px;
   --space-xl: 32px;
 
-  /* Rayons, élévation */
+  /* Rayons (formes continues façon iOS) */
   --radius-sm: 10px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
   --radius-full: 999px;
   --z-sticky: 5;
   --z-nav: 10;
   --z-toast: 30;
   --z-sheet: 40;
 
-  /* Mouvement */
-  --duration-fast: 150ms;
-  --duration: 200ms;
-  --duration-slow: 300ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-
-  /* Gabarit */
-  --tab-height: 64px;
+  /* Gabarit : tab bar flottante en capsule, posée au-dessus de l'indicateur d'accueil. */
   --touch: 44px;
-  --content-bottom: calc(var(--tab-height) + env(safe-area-inset-bottom) + var(--space-lg));
+  --dock-height: 60px;
+  --dock-add: 56px;
+  --dock-bottom: max(env(safe-area-inset-bottom), 14px);
+  --nav-height: 44px;
+  --content-bottom: calc(var(--dock-height) + var(--dock-bottom) + var(--space-xl));
 
   color-scheme: dark;
   font-family: var(--font-sans);
   font-size: 100%;
   font-weight: 400;
-  line-height: var(--lh-16);
-  letter-spacing: var(--ls-16);
+  line-height: var(--lh-17);
+  letter-spacing: var(--ls-17);
   font-optical-sizing: auto;
   color: var(--color-text);
   background: var(--color-bg);
@@ -116,53 +137,67 @@
   text-size-adjust: 100%;
 }
 
-/* Safari (iOS, macOS) : police système SF Pro, qui applique déjà sa table de tracking optique. */
+/* Safari (iOS, macOS) : SF Pro (et SF Pro Rounded pour les montants clés), avec sa propre table de tracking. */
 @supports (font: -apple-system-body) {
   :root {
     --font-sans: -apple-system, 'Inter Variable', system-ui, sans-serif;
+    --font-rounded: ui-rounded, -apple-system, 'Inter Variable', system-ui, sans-serif;
     --ls-12: normal;
     --ls-13: normal;
-    --ls-14: normal;
     --ls-15: normal;
-    --ls-16: normal;
     --ls-17: normal;
-    --ls-18: normal;
     --ls-20: normal;
-    --ls-28: normal;
-    --ls-44: normal;
+    --ls-22: normal;
+    --ls-34: normal;
+    --ls-52: normal;
   }
 }
 
 :root[data-theme='light'] {
-  --color-bg: #f2f2f7;
-  --color-surface: #ffffff;
-  --color-surface-elevated: #ffffff;
-  --color-fill: #f2f2f7;
-  --color-border: #e5e5ea;
-  --color-border-input: #8a8a8e;
-  --color-text: #1c1c1e;
-  --color-text-secondary: #5c5c61;
-  --color-text-tertiary: #8e8e93;
-  --color-accent: #1f7a35;
+  --color-bg: #eef0f8;
+  --color-text: #000000;
+  --color-text-secondary: rgb(60 60 67 / 82%);
+  --color-text-tertiary: rgb(60 60 67 / 42%);
+  --color-text-on-bg: rgb(28 30 44 / 86%);
+  --color-accent: #4a5ee0;
   --color-on-accent: #ffffff;
-  --color-accent-text: #1f7a35;
-  --color-accent-soft: rgb(31 122 53 / 12%);
+  --color-accent-text: #3a4fd0;
+  --color-accent-soft: rgb(74 94 224 / 14%);
+  --color-income: #196b2e;
+  --color-income-soft: rgb(52 199 89 / 12%);
   --color-danger: #d70015;
-  --color-danger-soft: rgb(215 0 21 / 10%);
-  --color-segment-bg: rgb(118 118 128 / 12%);
-  --color-segment-active: #ffffff;
-  --color-pressed: rgb(0 0 0 / 5%);
-  --color-scrim: rgb(0 0 0 / 35%);
-  --color-material: rgb(249 249 251 / 78%);
-  --color-edge: rgb(242 242 247 / 85%);
-  --color-tab-inactive: #636366;
-  --color-track: #e5e5ea;
-  --color-bar: #6c6c70;
+  --color-danger-fill: #ff3b30;
+  --color-danger-soft: rgb(255 59 48 / 12%);
+  --material-content: rgb(255 255 255 / 66%);
+  --material-content-edge: rgb(255 255 255 / 80%);
+  --material-content-highlight: rgb(255 255 255 / 70%);
+  --glass: rgb(255 255 255 / 52%);
+  --glass-strong: rgb(250 251 255 / 78%);
+  --glass-edge: rgb(255 255 255 / 85%);
+  --glass-highlight: rgb(255 255 255 / 95%);
+  --glass-lens: rgb(255 255 255 / 85%);
+  --glass-sheet: rgb(247 248 253 / 90%);
+  --color-fill: rgb(116 116 140 / 13%);
+  --color-separator: rgb(60 60 67 / 14%);
+  --color-border-input: rgb(60 60 67 / 52%);
+  --color-pressed: rgb(0 0 20 / 6%);
+  --color-scrim: rgb(20 24 50 / 22%);
+  --color-track: rgb(60 60 67 / 14%);
   --color-meter: #1c1c1e;
-  --hero-glow: rgb(31 122 53 / 8%);
-  --hero-glow-negative: rgb(215 0 21 / 8%);
-  --shadow-sheet: 0 -8px 24px rgb(0 0 0 / 10%);
-  --shadow-float: 0 8px 24px rgb(0 0 0 / 12%);
+  --color-edge: rgb(238 240 248 / 78%);
+  --shadow-float: 0 10px 30px rgb(40 50 110 / 16%);
+  --shadow-card: 0 6px 24px rgb(40 50 110 / 10%);
+  --cat-logement: #ff9500;
+  --cat-courses: #32ade6;
+  --cat-resto: #ff3b30;
+  --cat-abonnements: #af52de;
+  --cat-loisirs: #ff2d55;
+  --cat-epargne: #5856d6;
+  --cat-divers: #8e8e93;
+  --cat-revenu: #34c759;
+  --cat-charges: #30b0c7;
+  --cat-variables: #ff9500;
+  --cat-compte: #4a5ee0;
 
   color-scheme: light;
 }
@@ -176,7 +211,8 @@
 }
 
 html {
-  /* Le focus clavier ne doit jamais finir sous la barre d'onglets. */
+  /* Le focus clavier ne doit jamais finir sous la tab bar ni sous la barre de titre. */
+  scroll-padding-top: calc(env(safe-area-inset-top) + var(--nav-height) + var(--space-sm));
   scroll-padding-bottom: var(--content-bottom);
 }
 
@@ -232,7 +268,7 @@ fieldset {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-text);
+  outline: 2px solid var(--color-accent-text);
   outline-offset: 2px;
 }
 
@@ -255,14 +291,38 @@ fieldset {
   top: -100px;
   z-index: var(--z-sheet);
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-elevated);
+  border-radius: var(--radius-full);
+  background: var(--glass-strong);
   color: var(--color-text);
   font-weight: 600;
 }
 
 .skip-link:focus {
   top: calc(env(safe-area-inset-top) + var(--space-sm));
+}
+
+/* Recettes de matériaux */
+
+/* Contenu : dépoli, discret, sur sa propre couche. */
+.card,
+.totals > div,
+.hero {
+  background: var(--material-content);
+  backdrop-filter: var(--blur-content);
+  border: 1px solid var(--material-content-edge);
+  box-shadow:
+    inset 0 1px 0 var(--material-content-highlight),
+    var(--shadow-card);
+}
+
+/* Navigation et contrôles : Liquid Glass réel (React Bits GlassSurface, via components/Glass.tsx).
+   GlassSurface pose sa propre réfraction ; ici, seulement la mise en page de son contenu. */
+.glass {
+  flex: none;
+}
+
+.glass > .glass-surface__content {
+  padding: 0;
 }
 
 /* Fond plasma (components/AppBackground.tsx) : fixe, derrière tout le contenu. */
@@ -298,23 +358,45 @@ fieldset {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  padding: calc(env(safe-area-inset-top) + var(--space-md)) max(var(--space-md), env(safe-area-inset-right))
+  padding: calc(env(safe-area-inset-top) + var(--space-sm)) max(var(--space-md), env(safe-area-inset-right))
     var(--content-bottom) max(var(--space-md), env(safe-area-inset-left));
 }
 
+/* Grand titre (NavHeader) */
+
 .screen-header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xs);
-  min-height: 52px;
+  align-items: flex-end;
+  min-height: calc(var(--nav-height) + 8px);
+  padding: 0 var(--space-xs);
 }
 
-.screen-header h1 {
-  font-size: var(--fs-28);
-  letter-spacing: var(--ls-28);
-  line-height: var(--lh-28);
+.large-title {
+  font-size: var(--fs-34);
+  letter-spacing: var(--ls-34);
+  line-height: var(--lh-34);
+  font-weight: 700;
+  transform-origin: left center;
+}
+
+/* Barre compacte en verre qui apparaît au défilement, titre centré. */
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  pointer-events: none;
+}
+
+.nav-bar-glass > .glass-surface__content {
+  align-items: flex-end;
+  padding-bottom: 11px;
+}
+
+.nav-bar-title {
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
   font-weight: 600;
 }
 
@@ -324,22 +406,22 @@ fieldset {
   gap: var(--space-sm);
 }
 
-.section-title,
-.card-title {
-  font-size: var(--fs-13);
-  line-height: var(--lh-13);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
+/* Titre de section posé sur le fond (au-dessus des cartes) */
 .section-title {
-  padding: var(--space-sm) var(--space-xs) 0;
+  padding: var(--space-md) var(--space-xs) 0;
+  font-size: var(--fs-22);
+  letter-spacing: var(--ls-22);
+  line-height: var(--lh-22);
+  font-weight: 700;
 }
 
+/* Titre à l'intérieur d'une carte */
 .card-title {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  line-height: var(--lh-17);
+  font-weight: 600;
 }
 
 .hint,
@@ -351,17 +433,18 @@ fieldset {
 }
 
 .hint {
-  font-size: var(--fs-14);
-  letter-spacing: var(--ls-14);
-  line-height: var(--lh-14);
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
 }
 
 .footnote {
-  font-size: var(--fs-14);
-  letter-spacing: var(--ls-14);
-  line-height: var(--lh-14);
+  padding: var(--space-sm) var(--space-md) 0;
+  color: var(--color-text-on-bg);
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
   text-align: center;
-  padding: var(--space-sm) 0;
 }
 
 .amount {
@@ -371,7 +454,7 @@ fieldset {
 }
 
 .amount.revenu {
-  color: var(--color-accent-text);
+  color: var(--color-income);
 }
 
 .amount.negative {
@@ -381,14 +464,12 @@ fieldset {
 /* Cartes */
 
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
 }
 
 .card-flush {
-  padding: var(--space-md) 0 var(--space-xs);
+  padding: 14px 0 var(--space-xs);
 }
 
 .card-flush > .card-title,
@@ -398,7 +479,7 @@ fieldset {
 }
 
 ul.card-flush {
-  padding: var(--space-xs) 0;
+  padding: 2px 0;
   /* Le fond rouge du swipe reste dans les coins arrondis (clip ne crée pas de conteneur de défilement). */
   overflow: clip;
 }
@@ -408,7 +489,7 @@ ul.card-flush {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  margin-bottom: var(--space-xs);
+  margin-bottom: 2px;
 }
 
 .card-title-row .card-title {
@@ -428,9 +509,12 @@ ul.card-flush {
 
 .privacy {
   display: flex;
-  gap: var(--space-md);
+  gap: 14px;
   align-items: flex-start;
   color: var(--color-text-secondary);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  line-height: var(--lh-15);
 }
 
 .privacy strong {
@@ -440,27 +524,27 @@ ul.card-flush {
 
 .privacy svg {
   flex: none;
-  color: var(--color-accent-text);
+  color: var(--color-income);
 }
 
-/* Reste à vivre */
+/* Reste à vivre : la carte la plus épaisse, avec un reflet en haut. */
 
 .hero {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  padding: 20px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+  gap: 2px;
+  padding: 20px 20px 18px;
+  border-radius: var(--radius-xl);
   background:
-    radial-gradient(120% 100% at 100% 0%, var(--hero-glow), transparent 60%),
-    var(--color-surface);
+    linear-gradient(180deg, rgb(255 255 255 / 9%), transparent 42%),
+    var(--material-content);
 }
 
 .hero.negative {
   background:
-    radial-gradient(120% 100% at 100% 0%, var(--hero-glow-negative), transparent 60%),
-    var(--color-surface);
+    linear-gradient(180deg, rgb(255 69 58 / 16%), transparent 55%),
+    var(--material-content);
 }
 
 .hero-top {
@@ -471,25 +555,23 @@ ul.card-flush {
 }
 
 .hero-label {
-  font-size: var(--fs-13);
-  line-height: var(--lh-13);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  line-height: var(--lh-15);
+  font-weight: 600;
   color: var(--color-text-secondary);
 }
 
 .hero-status {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: 2px 10px;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  background: var(--color-income-soft);
+  color: var(--color-income);
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
-  line-height: var(--lh-13);
   font-weight: 600;
 }
 
@@ -499,12 +581,13 @@ ul.card-flush {
 }
 
 .hero-value {
-  font-size: var(--fs-44);
-  letter-spacing: var(--ls-44);
-  line-height: var(--lh-44);
-  font-weight: 600;
+  margin: 6px 0 2px;
+  font-family: var(--font-rounded);
+  font-size: var(--fs-52);
+  letter-spacing: var(--ls-52);
+  line-height: var(--lh-52);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  margin: var(--space-xs) 0 2px;
 }
 
 .hero-sub {
@@ -521,8 +604,8 @@ ul.card-flush {
 }
 
 .meter {
-  height: 6px;
-  margin-top: 12px;
+  height: 8px;
+  margin-top: 14px;
   border-radius: var(--radius-full);
   background: var(--color-track);
   overflow: hidden;
@@ -534,7 +617,7 @@ ul.card-flush {
   height: 100%;
   border-radius: inherit;
   transform-origin: left center;
-  transition: transform var(--duration-slow) var(--ease-out);
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .meter span {
@@ -549,16 +632,27 @@ ul.card-flush {
 }
 
 .breakdown > div {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  min-height: 56px;
-  padding: var(--space-sm) 0;
+  min-height: 54px;
+  padding: 6px 0;
 }
 
-.breakdown > div + div {
-  border-top: 1px solid var(--color-border);
+/* Séparateur décalé après l'icône, comme les listes iOS */
+.breakdown > div + div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 44px;
+  right: 0;
+  border-top: 1px solid var(--color-separator);
+}
+
+.breakdown > .breakdown-total::before {
+  left: 0;
 }
 
 .breakdown dt {
@@ -572,19 +666,17 @@ ul.card-flush {
   display: block;
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
-  line-height: var(--lh-13);
   color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
 .breakdown-total {
-  font-weight: 600;
-  font-size: var(--fs-17);
-  letter-spacing: var(--ls-17);
-  line-height: var(--lh-17);
+  font-weight: 700;
+  font-size: var(--fs-20);
+  letter-spacing: var(--ls-20);
 }
 
-/* Barres par catégorie */
+/* Barres par catégorie (couleur de la catégorie) */
 
 .bars {
   list-style: none;
@@ -599,31 +691,37 @@ ul.card-flush {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 6px var(--space-sm);
+  gap: 7px var(--space-sm);
 }
 
 .bar-label {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 10px;
   min-width: 0;
 }
 
-.bar-label svg {
+.bar-icon {
   flex: none;
-  color: var(--color-text-secondary);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  color: #ffffff;
 }
 
 .bar-track {
   grid-column: 1 / -1;
-  height: 6px;
+  height: 8px;
   border-radius: var(--radius-full);
   background: var(--color-track);
   overflow: hidden;
 }
 
-.bar-track span {
-  background: var(--color-bar);
+/* :where() laisse la couleur de catégorie (.cat-*) l'emporter. */
+:where(.bar-track) span {
+  background: var(--color-accent-text);
 }
 
 /* Totaux */
@@ -631,7 +729,7 @@ ul.card-flush {
 .totals {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm);
+  gap: 10px;
 }
 
 .totals > div {
@@ -639,25 +737,23 @@ ul.card-flush {
   flex-direction: column;
   gap: 2px;
   padding: 14px var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }
 
 .totals-label {
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
-  line-height: var(--lh-13);
   color: var(--color-text-secondary);
 }
 
 .totals .amount {
-  font-size: var(--fs-18);
-  letter-spacing: var(--ls-18);
-  line-height: var(--lh-18);
+  font-family: var(--font-rounded);
+  font-size: var(--fs-22);
+  letter-spacing: var(--ls-22);
+  font-weight: 700;
 }
 
-/* Listes */
+/* Listes groupées (inset grouped) */
 
 .list {
   list-style: none;
@@ -665,8 +761,19 @@ ul.card-flush {
   padding: 0;
 }
 
-.list li + li {
-  border-top: 1px solid var(--color-border);
+.list > li {
+  position: relative;
+}
+
+/* Séparateur décalé : commence après l'icône, comme dans les listes iOS. */
+.list > li + li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 64px;
+  right: 0;
+  z-index: 1;
+  border-top: 1px solid var(--color-separator);
 }
 
 .row {
@@ -675,7 +782,7 @@ ul.card-flush {
   gap: 12px;
   width: 100%;
   min-height: 60px;
-  padding: 10px var(--space-md);
+  padding: 9px var(--space-md);
   background: none;
   border: 0;
   text-align: left;
@@ -692,6 +799,7 @@ ul.card-flush {
   }
 }
 
+/* Pastille d'icône colorée, façon Réglages iOS */
 .row-icon {
   flex: none;
   display: grid;
@@ -700,13 +808,25 @@ ul.card-flush {
   height: 36px;
   border-radius: var(--radius-sm);
   background: var(--color-fill);
-  color: var(--color-text-secondary);
+  color: #ffffff;
 }
 
-.row-icon.revenu {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+.row-icon svg {
+  width: 20px;
+  height: 20px;
 }
+
+.cat-logement { background: var(--cat-logement); }
+.cat-courses { background: var(--cat-courses); }
+.cat-resto { background: var(--cat-resto); }
+.cat-abonnements { background: var(--cat-abonnements); }
+.cat-loisirs { background: var(--cat-loisirs); }
+.cat-epargne { background: var(--cat-epargne); }
+.cat-divers { background: var(--cat-divers); }
+.cat-revenu { background: var(--cat-revenu); }
+.cat-charges { background: var(--cat-charges); }
+.cat-variables { background: var(--cat-variables); }
+.cat-compte { background: var(--cat-compte); }
 
 .row-main {
   flex: 1;
@@ -716,7 +836,9 @@ ul.card-flush {
 }
 
 .row-title {
-  font-weight: 500;
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  line-height: var(--lh-17);
   overflow-wrap: anywhere;
 }
 
@@ -725,9 +847,9 @@ ul.card-flush {
   align-items: center;
   flex-wrap: wrap;
   gap: 2px var(--space-sm);
-  font-size: var(--fs-14);
-  letter-spacing: var(--ls-14);
-  line-height: var(--lh-14);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  line-height: var(--lh-15);
   color: var(--color-text-secondary);
 }
 
@@ -735,18 +857,21 @@ ul.card-flush {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 0 6px;
-  border-radius: 6px;
+  padding: 0 7px;
+  border-radius: var(--radius-full);
   background: var(--color-fill);
-  border: 1px solid var(--color-border);
   font-size: var(--fs-12);
   letter-spacing: var(--ls-12);
-  line-height: var(--lh-12);
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.row .amount {
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
 }
 
 .total-row {
-  min-height: 56px;
+  min-height: 54px;
 }
 
 .total-row .row-title {
@@ -763,22 +888,21 @@ ul.card-flush {
   height: 44px;
   border-radius: var(--radius-sm);
   background: var(--color-fill);
-  border: 1px solid var(--color-border);
-  font-weight: 600;
+  font-family: var(--font-rounded);
+  font-size: var(--fs-17);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
 }
 
 .day-badge.revenu {
-  background: var(--color-accent-soft);
-  border-color: transparent;
-  color: var(--color-accent-text);
+  background: var(--color-income-soft);
+  color: var(--color-income);
 }
 
 .day-badge small {
+  font-family: var(--font-sans);
   font-size: var(--fs-12);
-  letter-spacing: var(--ls-12);
-  line-height: var(--lh-12);
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -793,20 +917,21 @@ ul.card-flush {
   gap: var(--space-sm);
 }
 
+/* En-tête de jour posé sur le fond */
 .day-title {
   display: flex;
   justify-content: space-between;
   gap: var(--space-sm);
-  padding: 0 var(--space-xs);
+  padding: var(--space-sm) var(--space-md) 0;
   font-size: var(--fs-13);
+  letter-spacing: 0.04em;
   line-height: var(--lh-13);
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--color-text-on-bg);
 }
 
-/* Boutons */
+/* Boutons : capsules */
 
 .btn {
   display: inline-flex;
@@ -814,33 +939,52 @@ ul.card-flush {
   justify-content: center;
   gap: var(--space-sm);
   min-height: 50px;
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
+  padding: 12px 22px;
+  border-radius: var(--radius-full);
   border: 1px solid transparent;
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
   font-weight: 600;
   text-align: center;
 }
 
 /* Échelle gérée en spring par lib/press.ts ; l'assombrissement est immédiat. */
 .btn[data-pressed] {
-  filter: brightness(0.88);
+  filter: brightness(0.86);
 }
 
 @media (hover: hover) {
   .btn:hover:not(:disabled) {
-    filter: brightness(1.06);
+    filter: brightness(1.08);
   }
 }
 
 .btn-primary {
-  background: var(--color-accent);
+  background: linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 60%), var(--color-accent);
   color: var(--color-on-accent);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    0 6px 18px color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 
-.btn-secondary {
-  background: var(--color-surface-elevated);
-  border-color: var(--color-border);
+.glass-button {
+  width: 100%;
+}
+
+.glass-button-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: none;
   color: var(--color-text);
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  font-weight: 600;
 }
 
 .btn-danger {
@@ -854,28 +998,23 @@ ul.card-flush {
   padding: 0 var(--space-sm);
   margin-left: calc(var(--space-sm) * -1);
   background: none;
-  color: var(--color-text);
+  color: var(--color-accent-text);
   font-weight: 500;
 }
 
-.btn-ghost svg {
-  color: var(--color-text-secondary);
-}
-
 .btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   min-height: var(--touch);
   padding: 0 var(--space-sm);
   margin-right: calc(var(--space-sm) * -1);
   border: 0;
   background: none;
-  color: var(--color-text-secondary);
-  font-size: var(--fs-14);
-  letter-spacing: var(--ls-14);
-  line-height: var(--lh-14);
+  color: var(--color-accent-text);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
   font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
 }
 
 .btn-block {
@@ -886,10 +1025,10 @@ ul.card-flush {
   flex: 1;
 }
 
-/* Bouton d'action qui reste visible juste au-dessus de la barre d'onglets. */
+/* Bouton d'action qui reste visible juste au-dessus de la tab bar. */
 .sticky-action {
   position: sticky;
-  bottom: calc(var(--tab-height) + env(safe-area-inset-bottom) + 12px);
+  bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
   z-index: var(--z-sticky);
   box-shadow: var(--shadow-float);
 }
@@ -900,7 +1039,7 @@ ul.card-flush {
   place-items: center;
   width: var(--touch);
   height: var(--touch);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 0;
   background: transparent;
   color: var(--color-text);
@@ -911,14 +1050,16 @@ ul.card-flush {
   background: var(--color-pressed);
 }
 
-.month-switcher {
+/* Sélecteur de mois : capsule de verre */
+.month-switcher > .glass-surface__content {
+  padding: 3px;
+}
+
+.month-switcher-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  width: 100%;
 }
 
 .month-label {
@@ -926,9 +1067,11 @@ ul.card-flush {
   min-height: var(--touch);
   padding: 0 var(--space-xs);
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: none;
-  font-weight: 500;
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
@@ -937,134 +1080,169 @@ ul.card-flush {
   cursor: default;
 }
 
-.segmented {
+/* Contrôle segmenté : rail de verre et lentille qui glisse (layoutId). */
+.segmented > .glass-surface__content {
+  padding: 3px;
+}
+
+.segmented-inner {
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   gap: 2px;
-  padding: 2px;
-  border-radius: var(--radius-sm);
-  background: var(--color-segment-bg);
+  width: 100%;
+  height: 100%;
 }
 
 .segmented button {
   position: relative;
-  min-height: var(--touch);
+  min-height: 40px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  font-weight: 600;
 }
 
 .segmented button.active {
   color: var(--color-text);
-  font-weight: 600;
 }
 
-/* Indicateur qui glisse en spring d'une option à l'autre (layoutId). */
 .segment-indicator {
   position: absolute;
   inset: 0;
-  border-radius: 8px;
-  background: var(--color-segment-active);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+  border-radius: var(--radius-full);
+  background: var(--glass-lens);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 2px 8px rgb(0 0 10 / 22%);
 }
 
 .segment-label {
   position: relative;
 }
 
-/* Barre d'onglets */
+/* Tab bar : capsule de verre flottante + bouton d'ajout séparé (iOS 26). */
 
-.tab-bar {
+.tab-dock {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: var(--z-nav);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: stretch;
-  max-width: 560px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 480px;
   margin: 0 auto;
-  height: calc(var(--tab-height) + env(safe-area-inset-bottom));
-  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  /* Matériau translucide : le contenu défile dessous, flouté (skill apple-design §12). */
-  background: var(--color-material);
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
-/* Scroll edge effect au lieu d'une bordure : fondu là où le contenu passe sous la barre. */
-.tab-bar::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  height: 24px;
+  padding: 0 max(var(--space-md), env(safe-area-inset-right)) var(--dock-bottom)
+    max(var(--space-md), env(safe-area-inset-left));
   pointer-events: none;
-  background: linear-gradient(to top, var(--color-edge), transparent);
-  opacity: 0;
 }
 
-.tab-bar[data-edge='on']::before {
-  opacity: 1;
-}
-
-@media (min-width: 560px) {
-  .tab-bar {
-    bottom: var(--space-md);
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
+@media (min-width: 768px) {
+  .tab-dock {
+    max-width: 560px;
   }
 }
 
+/* Scroll edge effect : le contenu se fond sous le dock, seulement quand il passe dessous. */
+.tab-dock::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 100vw;
+  height: calc(var(--dock-height) + var(--dock-bottom) + 28px);
+  transform: translateX(-50%);
+  background: linear-gradient(to top, var(--color-edge), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tab-dock[data-edge='on']::before {
+  opacity: 1;
+}
+
+.tab-bar {
+  flex: 1;
+  box-shadow: var(--shadow-float);
+  pointer-events: auto;
+}
+
+.tab-bar > .glass-surface__content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 4px;
+}
+
 .tab {
-  /* Sur un matériau, le texte gagne en contraste et en graisse (vibrancy). */
+  position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   min-width: var(--touch);
   border: 0;
+  border-radius: var(--radius-full);
   background: none;
-  color: var(--color-tab-inactive);
+  color: var(--color-text);
   font-size: var(--fs-12);
-  letter-spacing: 0.01em;
-  line-height: var(--lh-12);
+  letter-spacing: -0.01em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tab.active .tab-label {
   font-weight: 600;
+}
+
+.tab svg,
+.tab-label {
+  position: relative;
 }
 
 .tab.active {
-  color: var(--color-text);
-  font-weight: 600;
+  color: var(--color-accent-text);
 }
 
-.tab-add-slot {
-  display: grid;
-  place-items: center;
+/* Lentille de verre sous l'onglet actif (glisse d'un onglet à l'autre). */
+.tab-lens {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: var(--glass-lens);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
 }
 
+.tab-add-glass {
+  box-shadow: var(--shadow-float);
+  pointer-events: auto;
+}
+
+/* Verre teinté de l'accent : la réfraction reste visible à travers. */
 .tab-add {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 100%;
+  height: 100%;
   border: 0;
   border-radius: 50%;
-  background: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 78%, transparent);
   color: var(--color-on-accent);
 }
 
-/* Toast */
+/* Toast : capsule de verre au-dessus du dock */
 
 .toast-region {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tab-height) + env(safe-area-inset-bottom) + var(--space-md));
+  bottom: calc(var(--dock-height) + var(--dock-bottom) + 14px);
   z-index: var(--z-toast);
   display: flex;
   justify-content: center;
@@ -1072,42 +1250,46 @@ ul.card-flush {
   pointer-events: none;
 }
 
-.toast {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
+.toast-motion {
   width: 100%;
   max-width: 448px;
-  min-height: 52px;
-  padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-md);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-float);
   pointer-events: auto;
+}
+
+.toast {
+  box-shadow: var(--shadow-float);
+}
+
+.toast > .glass-surface__content {
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-xs) var(--space-xs) 18px;
 }
 
 .toast-icon {
   flex: none;
-  color: var(--color-accent-text);
+  color: var(--color-income);
 }
 
 .toast-message {
   flex: 1;
-  font-weight: 500;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  font-weight: 600;
 }
 
 .toast-action {
   min-height: var(--touch);
   padding: 0 var(--space-md);
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: none;
   color: var(--color-accent-text);
-  font-weight: 600;
+  font-size: var(--fs-15);
+  font-weight: 700;
 }
 
-/* Bottom sheet (animée et glissable via motion, voir components/Sheet.tsx) */
+/* Bottom sheet (animée et glissable via motion, voir components/Sheet.tsx) : verre épais. */
 
 .sheet-layer {
   position: fixed;
@@ -1140,11 +1322,14 @@ ul.card-flush {
   width: 100%;
   max-width: 560px;
   max-height: 92dvh;
-  border-radius: 20px 20px 0 0;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--glass-sheet);
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--glass-edge);
   border-bottom: 0;
-  box-shadow: var(--shadow-sheet);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 -12px 40px rgb(0 0 12 / 35%);
   will-change: transform;
 }
 
@@ -1155,7 +1340,7 @@ ul.card-flush {
 /* Zone de préhension : le navigateur ne gère aucun geste ici, on suit le doigt 1:1. */
 .sheet-grabber {
   flex: none;
-  padding: var(--space-sm) var(--space-md) 0;
+  padding: 7px var(--space-md) 0;
   touch-action: none;
   cursor: grab;
 }
@@ -1175,7 +1360,7 @@ ul.card-flush {
 .sheet-handle {
   width: 36px;
   height: 5px;
-  margin: 0 auto var(--space-sm);
+  margin: 0 auto 10px;
   border-radius: var(--radius-full);
   background: var(--color-text-tertiary);
 }
@@ -1185,14 +1370,25 @@ ul.card-flush {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 10px;
 }
 
 .sheet-header h2 {
   font-size: var(--fs-20);
   letter-spacing: var(--ls-20);
   line-height: var(--lh-20);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.sheet-header .icon-button {
+  width: 36px;
+  height: 36px;
+  min-width: var(--touch);
+  min-height: var(--touch);
+  background: var(--color-fill);
+  background-clip: content-box;
+  padding: 4px;
+  color: var(--color-text-secondary);
 }
 
 /* Glissement pour supprimer */
@@ -1204,15 +1400,20 @@ ul.card-flush {
   touch-action: pan-y;
 }
 
+/* Le fond rouge n'occupe que la zone découverte par le glissement (largeur pilotée par SwipeRow). */
 .swipe-action {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-sm);
   padding: 0 var(--space-lg);
-  background: var(--color-danger);
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--color-danger-fill);
   color: #ffffff;
   font-weight: 600;
 }
@@ -1224,7 +1425,6 @@ ul.card-flush {
 
 .swipe-content {
   position: relative;
-  background: var(--color-surface);
   /* Vertical : défilement natif ; horizontal : suivi 1:1 par le geste. */
   touch-action: pan-y;
   will-change: transform;
@@ -1248,13 +1448,13 @@ ul.card-flush {
 
 .field-label {
   display: block;
-  font-size: var(--fs-13);
-  line-height: var(--lh-13);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
   margin-bottom: var(--space-xs);
+  padding: 0 var(--space-xs);
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
 .fieldset .field-label {
@@ -1282,22 +1482,21 @@ ul.card-flush {
   width: 100%;
   min-height: 48px;
   padding: 12px 14px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border-input);
-  background: var(--color-surface);
-  font-size: var(--fs-16);
-  letter-spacing: var(--ls-16);
-  line-height: var(--lh-16);
+  background: var(--color-fill);
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
   transition:
-    border-color var(--duration) ease,
-    box-shadow var(--duration) ease;
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .field input:focus,
 .field select:focus {
   outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-soft);
+  border-color: var(--color-accent-text);
+  box-shadow: 0 0 0 4px var(--color-accent-soft);
 }
 
 .field input[aria-invalid='true'] {
@@ -1311,10 +1510,9 @@ ul.card-flush {
 
 .field-error {
   color: var(--color-danger);
-  font-size: var(--fs-14);
-  letter-spacing: var(--ls-14);
-  line-height: var(--lh-14);
-  font-weight: 500;
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  font-weight: 600;
 }
 
 .amount-field {
@@ -1329,11 +1527,11 @@ ul.card-flush {
   gap: 6px;
   padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--color-border-input);
-  transition: border-color var(--duration) ease;
+  transition: border-color 200ms ease;
 }
 
 .amount-input:focus-within {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-text);
 }
 
 .amount-field.invalid .amount-input {
@@ -1349,25 +1547,25 @@ ul.card-flush {
   background: none;
   outline: none;
   text-align: right;
-  font-size: var(--fs-44);
-  letter-spacing: var(--ls-44);
-  line-height: var(--lh-44);
-  font-weight: 600;
+  font-family: var(--font-rounded);
+  font-size: var(--fs-52);
+  letter-spacing: var(--ls-52);
+  line-height: 1.15;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  caret-color: var(--color-accent);
+  caret-color: var(--color-accent-text);
 }
 
 .amount-field.revenu input {
-  color: var(--color-accent-text);
+  color: var(--color-income);
 }
 
 .currency {
   flex: 1;
   text-align: left;
-  font-size: var(--fs-28);
-  letter-spacing: var(--ls-28);
-  line-height: var(--lh-28);
-  font-weight: 500;
+  font-family: var(--font-rounded);
+  font-size: 2rem;
+  font-weight: 600;
   color: var(--color-text-secondary);
 }
 
@@ -1386,17 +1584,41 @@ ul.card-flush {
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-elevated);
+  border: 1px solid var(--material-content-edge);
+  background: var(--color-fill);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
   font-weight: 500;
   text-align: left;
 }
 
+/* Les puces de catégorie gardent la couleur de leur catégorie sur l'icône seulement. */
+.choice[class*='cat-'] {
+  background: var(--color-fill);
+}
+
 .choice {
   min-height: 52px;
-  padding: var(--space-sm) 12px;
+  padding: var(--space-sm) 10px;
   border-radius: var(--radius-md);
 }
+
+.choice svg {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  padding: 6px;
+  border-radius: 8px;
+  color: #ffffff;
+}
+
+.choice.cat-logement svg { background: var(--cat-logement); }
+.choice.cat-courses svg { background: var(--cat-courses); }
+.choice.cat-resto svg { background: var(--cat-resto); }
+.choice.cat-abonnements svg { background: var(--cat-abonnements); }
+.choice.cat-loisirs svg { background: var(--cat-loisirs); }
+.choice.cat-epargne svg { background: var(--cat-epargne); }
+.choice.cat-divers svg { background: var(--cat-divers); }
 
 .choice span,
 .chip span {
@@ -1405,7 +1627,6 @@ ul.card-flush {
   text-overflow: ellipsis;
 }
 
-.choice svg,
 .chip svg {
   flex: none;
   color: var(--color-text-secondary);
@@ -1413,12 +1634,12 @@ ul.card-flush {
 
 .choice[aria-checked='true'],
 .chip[aria-checked='true'] {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-text);
   background: var(--color-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--color-accent-text);
   font-weight: 600;
 }
 
-.choice[aria-checked='true'] svg,
 .chip[aria-checked='true'] svg {
   color: var(--color-accent-text);
 }
@@ -1447,8 +1668,7 @@ ul.card-flush {
   bottom: calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
   margin: 0 calc(-1 * var(--space-md)) calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
   padding: 12px var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
-  background: var(--color-surface-elevated);
-  border-top: 1px solid var(--color-border);
+  background: linear-gradient(to top, var(--glass-sheet) 70%, transparent);
 }
 
 .backup-actions {
@@ -1464,11 +1684,13 @@ ul.card-flush {
 
 .status {
   margin-top: 12px;
-  font-weight: 500;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  font-weight: 600;
 }
 
 .status.success {
-  color: var(--color-accent-text);
+  color: var(--color-income);
 }
 
 .status.error {
@@ -1477,38 +1699,88 @@ ul.card-flush {
 
 /* Transparence réduite : matériaux opaques, plus de flou. */
 @media (prefers-reduced-transparency: reduce) {
-  .tab-bar {
-    background: var(--color-bg);
-    backdrop-filter: none;
-    border-top: 1px solid var(--color-border);
+  :root {
+    --material-content: #151829;
+    --glass: #1c2036;
+    --glass-strong: #1c2036;
+    --glass-sheet: #181b2e;
   }
 
-  .tab-bar::before {
+  :root[data-theme='light'] {
+    --material-content: #ffffff;
+    --glass: #f7f8fc;
+    --glass-strong: #f7f8fc;
+    --glass-sheet: #f7f8fc;
+  }
+
+  .card,
+  .totals > div,
+  .hero,
+  .sheet {
+    backdrop-filter: none;
+  }
+
+  /* Liquid Glass : verre opaque, sans réfraction. */
+  .glass-surface,
+  .glass-surface__frame {
+    background: var(--glass-strong) !important;
+    backdrop-filter: none !important;
+  }
+
+  .glass-surface__canvas {
+    display: none;
+  }
+
+  .tab-dock::before {
     display: none;
   }
 }
 
-/* Contraste renforcé : fonds quasi pleins, bordures franches, texte secondaire plus marqué. */
+/* Contraste renforcé : fonds pleins, bordures franches, libellés plus marqués. */
 @media (prefers-contrast: more) {
   :root {
-    --color-border: #707076;
-    --color-text-secondary: #aeaeb2;
-    --color-tab-inactive: #c7c7cc;
+    --material-content: #10121f;
+    --glass: #181b2d;
+    --glass-strong: #181b2d;
+    --glass-sheet: #141626;
+    --material-content-edge: #8e8e93;
+    --glass-edge: #aeaeb2;
+    --color-text-secondary: rgb(235 235 245 / 86%);
+    --color-text-on-bg: #ffffff;
+    --color-separator: rgb(255 255 255 / 30%);
   }
 
   :root[data-theme='light'] {
-    --color-border: #8a8a8e;
-    --color-text-secondary: #3a3a3c;
-    --color-tab-inactive: #3a3a3c;
+    --material-content: #ffffff;
+    --glass: #ffffff;
+    --glass-strong: #ffffff;
+    --glass-sheet: #ffffff;
+    --material-content-edge: #8a8a8e;
+    --glass-edge: #6c6c70;
+    --color-text-secondary: rgb(40 40 46);
+    --color-text-on-bg: #000000;
+    --color-separator: rgb(60 60 67 / 40%);
   }
 
-  .tab-bar {
-    background: var(--color-bg);
+  .card,
+  .totals > div,
+  .hero,
+  .sheet {
     backdrop-filter: none;
-    border-top: 1px solid var(--color-text-secondary);
   }
 
-  .tab-bar::before {
+  /* Liquid Glass : verre opaque, sans réfraction. */
+  .glass-surface,
+  .glass-surface__frame {
+    background: var(--glass-strong) !important;
+    backdrop-filter: none !important;
+  }
+
+  .glass-surface__canvas {
+    display: none;
+  }
+
+  .tab-dock::before {
     display: none;
   }
 }

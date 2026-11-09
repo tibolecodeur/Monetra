@@ -165,6 +165,36 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(hit).toBeNull()
   })
 
+  test('Liquid Glass : réfraction SVG sur Chrome', async ({ page }) => {
+    await openWithDemo(page)
+    const glass = page.locator('.glass-surface')
+    await expect(glass.first()).toBeVisible()
+    expect(await page.locator('.glass-surface--svg').count()).toBeGreaterThanOrEqual(4)
+    expect(await page.locator('.glass-surface--webgl, .glass-surface--fallback').count()).toBe(0)
+  })
+
+  test.describe('sur iPhone (Safari)', () => {
+    test.use({
+      userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+    })
+
+    test('Liquid Glass : réfraction WebGL du fond plasma', async ({ page }) => {
+      const errors: string[] = []
+      page.on('pageerror', (e) => errors.push(String(e)))
+      await page.goto('/#/accueil')
+      // Safari ne gère pas la réfraction SVG : chaque verre réfracte le canvas plasma en WebGL.
+      await expect.poll(() => page.locator('.glass-surface--webgl').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(4)
+      expect(await page.locator('.glass-surface--svg, .glass-surface--fallback').count()).toBe(0)
+      const canvas = page.locator('.tab-bar .glass-surface__canvas')
+      await expect(canvas).toBeVisible()
+      expect(await canvas.evaluate((c: HTMLCanvasElement) => c.width * c.height)).toBeGreaterThan(0)
+      // Le fond plasma expose son numéro d'image, que le verre suit.
+      await expect.poll(() => page.getByTestId('app-background').locator('canvas').getAttribute('data-frame')).not.toBeNull()
+      expect(errors).toEqual([])
+    })
+  })
+
   test.describe('avec prefers-reduced-motion', () => {
     test.use({ reducedMotion: 'reduce' })
 

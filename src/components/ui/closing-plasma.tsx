@@ -155,6 +155,8 @@ export interface ClosingPlasmaProps extends React.HTMLAttributes<HTMLDivElement>
   paused?: boolean;
   /** Monetra : densité de pixels maximale du rendu (coût GPU). */
   maxDpr?: number;
+  /** Monetra : cadence maximale (images/s) ; le plasma est lent, 30 suffit. */
+  maxFps?: number;
   darkColorA?: string;
   darkColorB?: string;
   darkColorC?: string;
@@ -176,6 +178,7 @@ export function ClosingPlasma({
   interactive = true,
   paused = false,
   maxDpr = 1.75,
+  maxFps = 60,
   darkColorA = DARK_A,
   darkColorB = DARK_B,
   darkColorC = DARK_C,
@@ -274,7 +277,13 @@ export function ClosingPlasma({
     container.addEventListener("pointerleave", handlePointerLeave);
 
     // Monetra : le shader sort une couleur non prémultipliée ; sans ce réglage, opacity < 1 surexpose le rendu.
-    const gl = canvas.getContext("webgl", { antialias: false, alpha: true, premultipliedAlpha: false });
+    // Monetra : preserveDrawingBuffer garde la dernière image lisible par le verre (GlassSurface en WebGL), même en pause.
+    const gl = canvas.getContext("webgl", {
+      antialias: false,
+      alpha: true,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: true,
+    });
     if (!gl) {
       return () => {
         container.removeEventListener("pointermove", handlePointerMove);
@@ -423,11 +432,19 @@ export function ClosingPlasma({
       gl.uniform1f(uVignette, settings.vignette);
       gl.uniform1f(uOpacity, settings.opacity);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      // Monetra : numéro d'image lu par GlassSurface, qui ne réfracte à nouveau que si le plasma a changé.
+      canvas.dataset.frame = String(++frameCount);
     };
 
-    // Monetra : boucle pilotable, arrêtée quand l'onglet est caché ou en pause (batterie).
+    // Monetra : boucle pilotable, arrêtée quand l'onglet est caché ou en pause (batterie),
+    // et limitée à maxFps.
+    let frameCount = 0;
+    let lastDraw = -Infinity;
     const loop = (now: number) => {
-      draw(now);
+      if (now - lastDraw >= 1000 / maxFps - 1) {
+        lastDraw = now;
+        draw(now);
+      }
       rafId = requestAnimationFrame(loop);
     };
     const startLoop = () => {
@@ -459,7 +476,7 @@ export function ClosingPlasma({
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);
     };
-  }, [settings, maxDpr]);
+  }, [settings, maxDpr, maxFps]);
 
   return (
     <div

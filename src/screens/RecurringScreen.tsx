@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { GlassButton } from '../components/GlassButton'
 import { SwipeRow } from '../components/SwipeRow'
 import { getCategory } from '../lib/categories'
 import { formatShortDate, today } from '../lib/dates'
@@ -8,6 +9,7 @@ import { accountLabels, useAccounts, useRecurring } from '../lib/hooks'
 import { deleteRecurring, restoreRecurring } from '../lib/mutations'
 import { useToast } from '../lib/toast'
 import type { Recurring } from '../lib/types'
+import { NavHeader } from '../components/NavHeader'
 
 interface Props {
   onAdd: () => void
@@ -73,9 +75,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <h1 tabIndex={-1}>Récurrents</h1>
-      </header>
+      <NavHeader title="Récurrents" />
 
       <section className="totals" aria-label="Total mensuel des récurrents actifs">
         <div>
@@ -99,10 +99,10 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
         renderList(active)
       )}
 
-      <button type="button" className="btn btn-secondary btn-block sticky-action" onClick={onAdd}>
+      <GlassButton glassClassName="sticky-action" onClick={onAdd}>
         <Plus size={20} aria-hidden="true" />
         Nouveau récurrent
-      </button>
+      </GlassButton>
 
       {ended.length > 0 && (
         <>

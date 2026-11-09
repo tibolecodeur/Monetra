@@ -1,5 +1,8 @@
 import { House, ListOrdered, Plus, Repeat, Settings2, type LucideIcon } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect, useRef } from 'react'
+import { SPRINGS } from '../lib/motion'
+import { Glass } from './Glass'
 
 export type Screen = 'accueil' | 'operations' | 'recurrents' | 'reglages'
 
@@ -40,28 +43,33 @@ function useScrollEdge() {
 
 export function BottomNav({ current, onChange, onAdd }: Props) {
   const nav = useScrollEdge()
-  const renderItem = ({ id, label, icon: Icon }: (typeof ITEMS)[number]) => (
-    <button
-      key={id}
-      type="button"
-      className={`tab${current === id ? ' active' : ''}`}
-      aria-current={current === id ? 'page' : undefined}
-      onClick={() => onChange(id)}
-    >
-      <Icon size={24} strokeWidth={current === id ? 2.4 : 2} aria-hidden="true" />
-      <span>{label}</span>
-    </button>
-  )
 
   return (
-    <nav ref={nav} className="tab-bar" aria-label="Navigation principale">
-      {ITEMS.slice(0, 2).map(renderItem)}
-      <div className="tab-add-slot">
+    <nav ref={nav} className="tab-dock" aria-label="Navigation principale">
+      <Glass className="tab-bar" height="var(--dock-height)" radius={30} frost={0.55}>
+        {ITEMS.map(({ id, label, icon: Icon }) => {
+          const active = current === id
+          return (
+            <button
+              key={id}
+              type="button"
+              className={`tab${active ? ' active' : ''}`}
+              aria-current={active ? 'page' : undefined}
+              onClick={() => onChange(id)}
+            >
+              {/* Lentille de verre qui glisse en spring d'un onglet à l'autre. */}
+              {active && <motion.span layoutId="tab-lens" className="tab-lens" transition={SPRINGS.default()} />}
+              <Icon size={24} strokeWidth={active ? 2.3 : 2} aria-hidden="true" />
+              <span className="tab-label">{label}</span>
+            </button>
+          )
+        })}
+      </Glass>
+      <Glass className="tab-add-glass glass-press" width="var(--dock-add)" height="var(--dock-add)" radius={28} frost={0}>
         <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">
-          <Plus size={28} strokeWidth={2.5} aria-hidden="true" />
+          <Plus size={28} strokeWidth={2.4} aria-hidden="true" />
         </button>
-      </div>
-      {ITEMS.slice(2).map(renderItem)}
+      </Glass>
     </nav>
   )
 }

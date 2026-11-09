@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useId } from 'react'
 import { SPRINGS } from '../lib/motion'
+import { Glass } from './Glass'
 
 interface Props<T extends string> {
   value: T
@@ -13,7 +14,8 @@ interface Props<T extends string> {
 export function Segmented<T extends string>({ value, options, onChange, label }: Props<T>) {
   const id = useId()
   return (
-    <div className="segmented" role="radiogroup" aria-label={label}>
+    <Glass className="segmented" height={46} radius={23}>
+    <div className="segmented-inner" role="radiogroup" aria-label={label}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -30,5 +32,6 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
         </button>
       ))}
     </div>
+    </Glass>
   )
 }

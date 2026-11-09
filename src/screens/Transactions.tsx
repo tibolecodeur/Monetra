@@ -9,6 +9,7 @@ import { accountLabels, useAccounts, useMonthTransactions } from '../lib/hooks'
 import { deleteTransaction, restoreTransaction } from '../lib/mutations'
 import { useToast } from '../lib/toast'
 import type { Transaction, TransactionType } from '../lib/types'
+import { NavHeader } from '../components/NavHeader'
 
 interface Props {
   month: MonthKey
@@ -50,9 +51,7 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <h1 tabIndex={-1}>Opérations</h1>
-      </header>
+      <NavHeader title="Opérations" />
       <MonthSwitcher month={month} onChange={onMonthChange} />
 
       <section className="totals" aria-label="Totaux du mois">

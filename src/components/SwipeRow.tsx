@@ -37,6 +37,8 @@ export function SwipeRow({ label, onDelete, children }: Props) {
 
   // L'action se révèle et grandit dans la direction du geste.
   const actionOpacity = useTransform(x, [-48, -8], [1, 0])
+  // Le fond rouge n'occupe que la zone découverte : la ligne reste transparente sur le verre de la carte.
+  const actionWidth = useTransform(x, (v) => Math.max(0, -v))
   const iconScale = useTransform(x, (v) => (v < -width() * THRESHOLD ? 1.15 : 0.85))
 
   useMotionValueEvent(x, 'change', (v) => {
@@ -79,7 +81,7 @@ export function SwipeRow({ label, onDelete, children }: Props) {
 
   return (
     <div className="swipe-row">
-      <motion.div className={`swipe-action${armed ? ' armed' : ''}`} style={{ opacity: actionOpacity }} aria-hidden="true">
+      <motion.div className={`swipe-action${armed ? ' armed' : ''}`} style={{ opacity: actionOpacity, width: actionWidth }} aria-hidden="true">
         <motion.span style={{ scale: iconScale }} className="swipe-action-icon">
           <Trash2 size={20} />
         </motion.span>

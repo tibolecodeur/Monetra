@@ -13,6 +13,7 @@ import { upcomingOccurrences } from '../lib/recurring'
 import { useMonthPager } from '../lib/useMonthPager'
 import { summarize } from '../lib/summary'
 import type { Transaction } from '../lib/types'
+import { NavHeader } from '../components/NavHeader'
 
 interface Props {
   month: MonthKey
@@ -47,11 +48,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <h1 tabIndex={-1}>
-          Monetra
-        </h1>
-      </header>
+      <NavHeader title="Monetra" />
       <MonthSwitcher
         month={month}
         onChange={(m) => (m === addMonths(month, 1) ? pager.go(1) : m === addMonths(month, -1) ? pager.go(-1) : onMonthChange(m))}
@@ -118,7 +115,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
         <dl className="breakdown">
           <div>
             <dt>
-              <span className="row-icon revenu">
+              <span className="row-icon revenu cat-revenu">
                 <ArrowDownLeft size={20} aria-hidden="true" />
               </span>
               <span>
@@ -132,7 +129,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
           </div>
           <div>
             <dt>
-              <span className="row-icon">
+              <span className="row-icon cat-charges">
                 <Repeat size={20} aria-hidden="true" />
               </span>
               <span>
@@ -146,7 +143,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
           </div>
           <div>
             <dt>
-              <span className="row-icon">
+              <span className="row-icon cat-variables">
                 <ShoppingBag size={20} aria-hidden="true" />
               </span>
               <span>Dépenses variables</span>
@@ -169,12 +166,14 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
             {summary.parCategorie.map(({ categorie, total }) => (
               <li key={categorie}>
                 <span className="bar-label">
-                  <CategoryIcon categorie={categorie} size={18} />
+                  <span className={`bar-icon cat-${categorie}`}>
+                    <CategoryIcon categorie={categorie} size={14} />
+                  </span>
                   {getCategory(categorie).label}
                 </span>
                 <span className="amount">{formatMoney(total)}</span>
                 <span className="bar-track" aria-hidden="true">
-                  <span style={{ transform: `scaleX(${maxCat ? total / maxCat : 0})` }} />
+                  <span className={`cat-${categorie}`} style={{ transform: `scaleX(${maxCat ? total / maxCat : 0})` }} />
                 </span>
               </li>
             ))}
@@ -190,7 +189,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
           <ul className="list">
             {upcoming.map(({ recurring: r, date }) => (
               <li key={r.id} className="row static">
-                <span className={`row-icon ${r.type}`}>
+                <span className={`row-icon ${r.type} cat-${r.categorie}`}>
                   <CategoryIcon categorie={r.categorie} />
                 </span>
                 <span className="row-main">

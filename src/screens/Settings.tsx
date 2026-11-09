@@ -1,6 +1,7 @@
 import { Download, Plus, ShieldCheck, Upload } from 'lucide-react'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { AccountIcon } from '../components/CategoryIcon'
+import { GlassButton } from '../components/GlassButton'
 import { Segmented } from '../components/Segmented'
 import { downloadBackup, parseBackup, restoreBackup } from '../lib/backup'
 import { accountTypeLabel } from '../lib/categories'
@@ -9,6 +10,7 @@ import { useAccounts } from '../lib/hooks'
 import { getTheme, setTheme, type Theme } from '../lib/prefs'
 import { generateRecurring } from '../lib/recurring'
 import type { Account } from '../lib/types'
+import { NavHeader } from '../components/NavHeader'
 
 interface Props {
   onAddAccount: () => void
@@ -69,9 +71,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <h1 tabIndex={-1}>Réglages</h1>
-      </header>
+      <NavHeader title="Réglages" />
 
       <section aria-labelledby="accounts-title" className="stack">
         <h2 id="accounts-title" className="section-title">
@@ -86,7 +86,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
             {accounts.map((a) => (
               <li key={a.id}>
                 <button type="button" className="row" onClick={() => onSelectAccount(a)}>
-                  <span className="row-icon">
+                  <span className="row-icon cat-compte">
                     <AccountIcon type={a.type} />
                   </span>
                   <span className="row-main">
@@ -105,10 +105,10 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
             </li>
           </ul>
         )}
-        <button type="button" className="btn btn-secondary btn-block" onClick={onAddAccount}>
+        <GlassButton onClick={onAddAccount}>
           <Plus size={20} aria-hidden="true" />
           Ajouter un compte
-        </button>
+        </GlassButton>
       </section>
 
       <section aria-labelledby="appearance-title" className="stack">
@@ -142,10 +142,10 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
               <Download size={20} aria-hidden="true" />
               Exporter
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
+            <GlassButton onClick={() => fileInput.current?.click()} disabled={busy}>
               <Upload size={20} aria-hidden="true" />
               Importer
-            </button>
+            </GlassButton>
             <input
               ref={fileInput}
               type="file"
