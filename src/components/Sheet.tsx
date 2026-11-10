@@ -19,7 +19,8 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react'
-import { GlassRim } from './LiquidGlass'
+import { SceneContext } from '../lib/glass/react'
+import { GlassRim } from './Glass'
 import { GESTURE_SLOP, project, REDUCED_FADE, rubberband, SPRINGS, VelocityTracker } from '../lib/motion'
 
 interface Props {
@@ -139,7 +140,7 @@ export function Sheet({ title, onClose, children }: Props) {
     dragged.current = false
     drag.current = { pointerId: e.pointerId, startPointer: e.clientY, startY: y.get(), active: false }
     tracker.current.reset()
-    tracker.current.add(0, e.clientY)
+    tracker.current.add(0, e.clientY, e.timeStamp)
   }
 
   const onPointerMove = (e: ReactPointerEvent) => {
@@ -152,7 +153,7 @@ export function Sheet({ title, onClose, children }: Props) {
       d.startPointer = e.clientY
       e.currentTarget.setPointerCapture(e.pointerId)
     }
-    tracker.current.add(0, e.clientY)
+    tracker.current.add(0, e.clientY, e.timeStamp)
     const raw = d.startY + (e.clientY - d.startPointer)
     // Vers le haut, il n'y a rien : résistance progressive (rubber-band).
     y.set(raw >= 0 ? raw : rubberband(raw, height.get()))
@@ -167,7 +168,7 @@ export function Sheet({ title, onClose, children }: Props) {
       if (y.get() !== 0) run(y, 0, SPRINGS.default())
       return
     }
-    const velocity = e.type === 'pointercancel' ? 0 : tracker.current.velocity().y
+    const velocity = e.type === 'pointercancel' ? 0 : tracker.current.velocity(e.timeStamp).y
     const current = y.get()
     const projected = current + project(velocity)
     const shouldClose =
@@ -216,9 +217,12 @@ export function Sheet({ title, onClose, children }: Props) {
           </header>
         </div>
         <div className="sheet-body">
-          <SheetDismissContext.Provider value={dismiss}>
-            <SheetContent render={children} />
-          </SheetDismissContext.Provider>
+          {/* Rien de la scène ne passe sous la feuille : son verre est un matériau, sans lentille. */}
+          <SceneContext.Provider value={null}>
+            <SheetDismissContext.Provider value={dismiss}>
+              <SheetContent render={children} />
+            </SheetDismissContext.Provider>
+          </SceneContext.Provider>
         </div>
       </motion.div>
     </div>

@@ -1,4 +1,5 @@
 import { motion, useScroll, useTransform } from 'motion/react'
+import { useScroller } from '../lib/glass/react'
 
 /**
  * Grand titre façon iOS : il défile avec le contenu, et une barre compacte (titre centré)
@@ -8,7 +9,8 @@ import { motion, useScroll, useTransform } from 'motion/react'
  * Le h1 reste le titre de l'écran pour les lecteurs d'écran ; la barre compacte est décorative.
  */
 export function NavHeader({ title }: { title: string }) {
-  const { scrollY } = useScroll()
+  const scroller = useScroller()
+  const { scrollY } = useScroll(scroller ? { container: scroller } : undefined)
   const barOpacity = useTransform(scrollY, [18, 46], [0, 1])
   const titleScale = useTransform(scrollY, [-120, 0], [1.08, 1])
 

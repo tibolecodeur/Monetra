@@ -22,6 +22,9 @@ type Point = { x: number; y: number }
 /**
  * Glissement tactile réel (CDP) : `duration` règle la vélocité au relâcher,
  * `hold` immobilise le doigt avant de lever (vélocité nulle).
+ * Chaque événement porte l'heure à laquelle le doigt y est (option `timestamp`), comme un vrai écran
+ * tactile : l'app calcule la vélocité sur `e.timeStamp`, et le geste garde sa vitesse même si la machine
+ * de test, en rendu logiciel, met du temps à accuser réception de chaque événement.
  */
 export async function touchDrag(
   page: Page,
@@ -30,22 +33,27 @@ export async function touchDrag(
   { duration = 300, steps = 16, hold = 0, release = true } = {},
 ) {
   const cdp = await page.context().newCDPSession(page)
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: from.x, y: from.y }] })
+  const start = Date.now() / 1000
+  const at = (ms: number) => start + ms / 1000
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: from.x, y: from.y }], timestamp: at(0) })
   for (let i = 1; i <= steps; i++) {
     const t = i / steps
     await cdp.send('Input.dispatchTouchEvent', {
       type: 'touchMove',
       touchPoints: [{ x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t }],
+      timestamp: at(duration * t),
     })
     // Pas d'attente après le dernier pas : un flick se relâche en mouvement.
     if (i < steps) await page.waitForTimeout(duration / steps)
   }
   if (hold) await page.waitForTimeout(hold)
-  if (release) await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  const end = { type: 'touchEnd' as const, touchPoints: [] }
+  if (release) await cdp.send('Input.dispatchTouchEvent', { ...end, timestamp: at(duration + hold) })
   // Doigt toujours posé : on laisse passer une image pour que la position soit peinte.
   else await page.waitForTimeout(50)
   return {
-    release: () => cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }),
+    // Relâcher plus tard (doigt resté immobile) : horodaté à l'instant réel.
+    release: () => cdp.send('Input.dispatchTouchEvent', { ...end, timestamp: Date.now() / 1000 }),
   }
 }
 

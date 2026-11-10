@@ -1,6 +1,7 @@
 import { CircleCheck } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SPRINGS } from '../lib/motion'
+import { LENS } from '../lib/glass/presets'
 import { Glass } from './Glass'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ToastContext, type ToastOptions } from '../lib/toast'
@@ -31,11 +32,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <motion.div
             className="toast-motion"
             key={toast.id}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0, transition: SPRINGS.default() }}
-            exit={{ opacity: 0, y: 24, transition: { duration: 0.15, ease: 'easeIn' } }}
+            initial={{ opacity: 0, y: 24, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1, transition: SPRINGS.default() }}
+            exit={{ opacity: 0, y: 16, scale: 0.96, transition: { duration: 0.18, ease: 'easeIn' } }}
           >
-            <Glass className="toast" height={54} radius={27} frost={0.6}>
+            <Glass className="toast" lens={{ ...LENS.chrome, z: 2 }} fade>
               <CircleCheck size={20} aria-hidden="true" className="toast-icon" />
               <span className="toast-message">{toast.message}</span>
               {toast.action && (

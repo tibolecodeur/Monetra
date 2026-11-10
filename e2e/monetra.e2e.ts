@@ -7,6 +7,8 @@ const heroValue = async (page: Page) => Number(await page.locator('.hero-value')
 const heroText = async (page: Page) =>
   (await page.locator('.hero-value > span[aria-hidden]').innerText()).replace(/[\u00a0\u202f]/g, ' ')
 const sheetY = (page: Page) => translateY(page, '[data-testid="sheet"]')
+// L'app défile dans .scroller (la fenêtre ne défile pas : voir App.tsx).
+const scrollTo = (page: Page, y: number) => page.locator('.scroller').evaluate((el, top) => el.scrollTo(0, top), y)
 
 test.describe('Monetra en émulation iPhone', () => {
   test('ajout d’une transaction et mise à jour du reste à vivre', async ({ page }) => {
@@ -80,7 +82,7 @@ test.describe('Monetra en émulation iPhone', () => {
     await expect(page.locator('.swipe-content', { hasText: 'Kebab' })).toBeVisible()
 
     // Même geste sur un récurrent. La tab bar s'est réduite au défilement : on remonte pour la rouvrir.
-    await page.evaluate(() => window.scrollTo(0, 0))
+    await scrollTo(page, 0)
     await page.getByRole('button', { name: 'Récurrents' }).tap()
     // L'écran Opérations a aussi une ligne « Forfait mobile » (transaction générée) : on attend le bon écran.
     await expect(page.getByRole('heading', { name: 'Récurrents', level: 1 })).toBeVisible()
@@ -166,27 +168,73 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(hit).toBeNull()
   })
 
-  test('Liquid Glass : réfraction SVG sur Chrome', async ({ page }) => {
+  test('Liquid Glass : une scène filtrée, une lentille par surface de verre', async ({ page }) => {
     await openWithDemo(page)
-    const bar = page.locator('.tab-bar')
-    await expect(bar).toBeVisible()
-    expect(await page.locator('.lg--svg').count()).toBeGreaterThanOrEqual(3)
-    expect(await page.locator('.lg--webgl, .lg--frost').count()).toBe(0)
-    // Le verre filtre son arrière-plan avec un filtre SVG : carte de déplacement calculée + flou + saturation.
-    const glass = await bar.evaluate((el) => {
-      const id = getComputedStyle(el).backdropFilter.match(/url\("?#([^")]+)/)?.[1] ?? ''
+    await expect(page.locator('.tab-bar')).toHaveAttribute('data-glass', 'live')
+    // Le filtre est posé sur le contenu (pas un backdrop-filter) : c'est ce qui le rend possible sur Safari.
+    const scene = await page.locator('.scene').evaluate((el) => {
+      const id = el.style.filter.match(/#([^")]+)/)?.[1] ?? ''
       const filter = document.getElementById(id)
+      const maps = [...(filter?.querySelectorAll('feImage') ?? [])]
+      const bar = document.querySelector('.tab-bar')!.getBoundingClientRect()
       return {
         id,
-        scale: Number(filter?.querySelector('feDisplacementMap')?.getAttribute('scale')),
-        map: filter?.querySelector('feImage')?.getAttribute('href')?.slice(0, 22),
-        specular: getComputedStyle(el.querySelector('.lg-specular')!).backgroundImage.slice(0, 26),
+        units: filter?.getAttribute('primitiveUnits'),
+        maps: maps.map((m) => m.getAttribute('href')?.slice(0, 22)),
+        // La lentille de la tab bar suit sa position réelle à l'écran.
+        barLens: maps.some(
+          (m) => Math.abs(Number(m.getAttribute('x')) - bar.x) < 2 && Math.abs(Number(m.getAttribute('y')) - bar.y) < 2,
+        ),
+        maxScale: Math.max(...[...(filter?.querySelectorAll('feDisplacementMap') ?? [])].map((d) => Number(d.getAttribute('scale')))),
+        backdrop: getComputedStyle(document.querySelector('.tab-bar')!).backdropFilter,
       }
     })
-    expect(glass.id).not.toBe('')
-    expect(glass.scale).toBeGreaterThan(4)
-    expect(glass.map).toBe('data:image/png;base64,')
-    expect(glass.specular).toContain('data:image/png')
+    expect(scene.id).not.toBe('')
+    expect(scene.units).toBe('userSpaceOnUse')
+    expect(scene.maps.length).toBeGreaterThanOrEqual(3)
+    expect(scene.maps.every((m) => m === 'data:image/png;base64,')).toBe(true)
+    expect(scene.barLens).toBe(true)
+    expect(scene.maxScale).toBeGreaterThan(10)
+    expect(scene.backdrop).toBe('none')
+
+    // Au défilement, la lentille du sélecteur de mois suit le contrôle.
+    const before = await page.locator('.month-switcher').boundingBox()
+    await scrollTo(page, 60)
+    await expect
+      .poll(() =>
+        page.locator('.scene').evaluate((el, y) => {
+          const id = el.style.filter.match(/#([^")]+)/)?.[1] ?? ''
+          return [...document.getElementById(id)!.querySelectorAll('feImage')].some(
+            (m) => Math.abs(Number(m.getAttribute('y')) - y) < 2,
+          )
+        }, before!.y - 60),
+      )
+      .toBe(true)
+  })
+
+  test('lentille de sélection : on fait glisser la bulle de la tab bar d\'un onglet à l\'autre', async ({ page }) => {
+    await openWithDemo(page)
+    const bubble = page.locator('.tab-bubble')
+    const start = (await bubble.boundingBox())!
+    const tabs = (await page.locator('.tab-items').boundingBox())!
+    const step = tabs.width / 4
+    const y = start.y + start.height / 2
+    // Doigt posé sur l'onglet actif, glissé vers « Récurrents » : la bulle suit le doigt, soulevée.
+    const held = await touchDrag(page, { x: start.x + start.width / 2, y }, { x: start.x + start.width / 2 + step * 2, y }, { duration: 400, release: false })
+    await expect(bubble).toHaveAttribute('data-lifted', '')
+    const during = (await bubble.boundingBox())!
+    expect(during.x + during.width / 2).toBeGreaterThan(start.x + start.width / 2 + step * 1.5)
+    await page.waitForTimeout(150)
+    await held.release()
+    await expect(page.getByRole('heading', { name: 'Récurrents', level: 1 })).toBeVisible()
+    await expect(bubble).not.toHaveAttribute('data-lifted', '')
+    // Elle se pose sur l'onglet choisi.
+    await expect
+      .poll(async () => {
+        const b = (await bubble.boundingBox())!
+        return Math.round(b.x + b.width / 2 - (tabs.x + step * 2.5))
+      })
+      .toBe(0)
   })
 
   test('Liquid Glass interactif : le verre gonfle et s\'éclaire sous le doigt', async ({ page }) => {
@@ -207,15 +255,15 @@ test.describe('Monetra en émulation iPhone', () => {
     const dock = page.locator('.tab-dock')
     const bar = page.locator('.tab-bar')
     const full = (await bar.boundingBox())!.width
-    await page.evaluate(() => window.scrollTo(0, 500))
+    await scrollTo(page, 500)
     await expect(dock).toHaveAttribute('data-minimized', 'true')
     await expect.poll(async () => (await bar.boundingBox())!.width).toBeLessThan(80)
     await expect(page.getByRole('button', { name: 'Opérations' })).toBeHidden()
     // Remonter un peu suffit à la rouvrir.
-    await page.evaluate(() => window.scrollTo(0, 440))
+    await scrollTo(page, 440)
     await expect(dock).not.toHaveAttribute('data-minimized')
     // Toucher l'onglet de la barre réduite la rouvre aussi, sans changer d'écran.
-    await page.evaluate(() => window.scrollTo(0, 800))
+    await scrollTo(page, 800)
     await expect(dock).toHaveAttribute('data-minimized', 'true')
     await page.getByRole('button', { name: 'Accueil' }).tap()
     await expect(dock).not.toHaveAttribute('data-minimized')
@@ -228,19 +276,30 @@ test.describe('Monetra en émulation iPhone', () => {
         'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
     })
 
-    test('Liquid Glass : réfraction WebGL du fond plasma', async ({ page }) => {
+    test('Liquid Glass : même scène, avec un nouvel identifiant de filtre à chaque changement', async ({ page }) => {
       const errors: string[] = []
       page.on('pageerror', (e) => errors.push(String(e)))
-      await page.goto('/#/accueil')
-      // Safari ne gère pas la réfraction SVG : chaque verre réfracte le canvas plasma en WebGL.
-      await expect.poll(() => page.locator('.lg--webgl').count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(3)
-      expect(await page.locator('.lg--svg, .lg--frost').count()).toBe(0)
-      const canvas = page.locator('.tab-bar .lg-canvas')
-      await expect(canvas).toBeVisible()
-      expect(await canvas.evaluate((c: HTMLCanvasElement) => c.width * c.height)).toBeGreaterThan(0)
-      // Le fond plasma expose son numéro d'image, que le verre suit.
-      await expect.poll(() => page.getByTestId('app-background').locator('canvas').getAttribute('data-frame')).not.toBeNull()
+      await openWithDemo(page)
+      // Safari garde en cache le résultat d'un filtre par identifiant : la scène en change à chaque mise à jour.
+      const id = () => page.locator('.scene').evaluate((el) => el.style.filter)
+      const first = await id()
+      expect(first).toMatch(/url\("?#lg-scene-\d+-v\d+/)
+      await scrollTo(page, 80)
+      await expect.poll(id).not.toBe(first)
+      expect(await page.locator('[data-glass="live"]').count()).toBeGreaterThanOrEqual(3)
       expect(errors).toEqual([])
+    })
+  })
+
+  test.describe('avec un contraste renforcé', () => {
+    test.use({ contrast: 'more' })
+
+    test('verre opaque, sans réfraction', async ({ page }) => {
+      await openWithDemo(page)
+      await expect(page.locator('.tab-bar')).toHaveAttribute('data-glass', 'material')
+      expect(await page.locator('.scene').evaluate((el) => el.style.filter)).toBe('')
+      const bg = await page.locator('.tab-bar').evaluate((el) => getComputedStyle(el).backgroundColor)
+      expect(bg).toMatch(/^rgb\(/) // couleur pleine, sans transparence
     })
   })
 
@@ -259,9 +318,17 @@ test.describe('Monetra en émulation iPhone', () => {
       await page.getByRole('radio', { name: 'Courses' }).tap()
       await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
 
-      // Le chiffre change directement, sans animation intermédiaire.
+      // Le chiffre change directement, sans animation intermédiaire : seules l'ancienne et la nouvelle valeur s'affichent.
       await expect.poll(() => heroValue(page)).toBe(469.62)
-      expect(await heroText(page)).toBe('469,62 €')
+      const seen = new Set<string>()
+      await expect
+        .poll(async () => {
+          const text = await heroText(page)
+          seen.add(text)
+          return text
+        })
+        .toBe('469,62 €')
+      expect([...seen].every((t) => t === '482,52 €' || t === '469,62 €')).toBe(true)
 
       // Le changement de mois est un fondu : le contenu ne se translate pas.
       const c = await center(page, '.hero')

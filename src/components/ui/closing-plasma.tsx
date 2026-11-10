@@ -277,12 +277,10 @@ export function ClosingPlasma({
     container.addEventListener("pointerleave", handlePointerLeave);
 
     // Monetra : le shader sort une couleur non prémultipliée ; sans ce réglage, opacity < 1 surexpose le rendu.
-    // Monetra : preserveDrawingBuffer garde la dernière image lisible par le verre (LiquidGlass en WebGL), même en pause.
     const gl = canvas.getContext("webgl", {
       antialias: false,
       alpha: true,
       premultipliedAlpha: false,
-      preserveDrawingBuffer: true,
     });
     if (!gl) {
       return () => {
@@ -432,13 +430,10 @@ export function ClosingPlasma({
       gl.uniform1f(uVignette, settings.vignette);
       gl.uniform1f(uOpacity, settings.opacity);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      // Monetra : numéro d'image lu par LiquidGlass, qui ne réfracte à nouveau que si le plasma a changé.
-      canvas.dataset.frame = String(++frameCount);
     };
 
     // Monetra : boucle pilotable, arrêtée quand l'onglet est caché ou en pause (batterie),
     // et limitée à maxFps.
-    let frameCount = 0;
     let lastDraw = -Infinity;
     const loop = (now: number) => {
       if (now - lastDraw >= 1000 / maxFps - 1) {
