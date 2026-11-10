@@ -7,7 +7,8 @@ import { useHorizontalDrag } from './useHorizontalDrag'
 /**
  * Changement de mois par glissement horizontal : le contenu suit le doigt, la projection
  * du momentum décide s'il faut changer de mois (snap) ou revenir. Le mois suivant entre
- * par le côté opposé, dans la continuité du geste. Les chevrons utilisent le même chemin.
+ * par le côté opposé, dans la continuité du geste.
+ * Les chevrons, eux, n'appliquent aucune force : pas de glissement, un fondu enchaîné court.
  */
 export function useMonthPager(month: MonthKey, onChange: (m: MonthKey) => void, area: RefObject<HTMLElement | null>) {
   const x = useMotionValue(0)
@@ -18,11 +19,11 @@ export function useMonthPager(month: MonthKey, onChange: (m: MonthKey) => void, 
 
   const stop = () => animation.current?.stop()
 
-  const go = (delta: 1 | -1, velocity = 0) => {
+  const go = (delta: 1 | -1, velocity?: number) => {
     stop()
     const next = addMonths(month, delta)
-    if (reduced) {
-      // Mouvement réduit : fondu enchaîné au lieu d'un glissement.
+    if (reduced || velocity === undefined) {
+      // Chevron, ou mouvement réduit : fondu enchaîné au lieu d'un glissement.
       x.set(0)
       animation.current = animate(opacity, 0, {
         ...REDUCED_FADE,

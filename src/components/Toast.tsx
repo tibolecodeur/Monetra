@@ -1,8 +1,6 @@
 import { CircleCheck } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SPRINGS } from '../lib/motion'
-import { LENS } from '../lib/glass/presets'
-import { Glass } from './Glass'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ToastContext, type ToastOptions } from '../lib/toast'
 
@@ -30,13 +28,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <AnimatePresence>
         {toast && (
           <motion.div
-            className="toast-motion"
             key={toast.id}
-            initial={{ opacity: 0, y: 24, scale: 0.92 }}
+            className="toast"
+            // Entre et sort par le bas (même axe) ; la sortie est plus courte que l'entrée, sans ease-in.
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1, transition: SPRINGS.default() }}
-            exit={{ opacity: 0, y: 16, scale: 0.96, transition: { duration: 0.18, ease: 'easeIn' } }}
+            exit={{ opacity: 0, y: 16, transition: { duration: 0.15, ease: [0.23, 1, 0.32, 1] } }}
           >
-            <Glass className="toast" lens={{ ...LENS.chrome, z: 2 }} fade>
               <CircleCheck size={20} aria-hidden="true" className="toast-icon" />
               <span className="toast-message">{toast.message}</span>
               {toast.action && (
@@ -51,7 +49,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   {toast.action.label}
                 </button>
               )}
-            </Glass>
           </motion.div>
         )}
         </AnimatePresence>

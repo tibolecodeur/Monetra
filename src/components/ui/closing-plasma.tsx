@@ -490,5 +490,3 @@ export function ClosingPlasma({
     </div>
   );
 }
-
-export default ClosingPlasma;

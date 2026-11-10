@@ -40,6 +40,8 @@ export function useHorizontalDrag({ x, onGrab, map = (v) => v, onRelease }: Opti
       s.locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v'
       if (s.locked === 'v') return
       dragged.current = true
+      // Pendant le glissement, les lignes et boutons touchés ne restent pas surlignés (voir index.css).
+      e.currentTarget.dataset.dragging = ''
       // On repart de la position actuelle du doigt : pas de saut au moment du verrouillage.
       s.sx = e.clientX
       e.currentTarget.setPointerCapture(e.pointerId)
@@ -53,6 +55,7 @@ export function useHorizontalDrag({ x, onGrab, map = (v) => v, onRelease }: Opti
     const s = state.current
     if (!s || s.id !== e.pointerId) return
     state.current = null
+    delete e.currentTarget.dataset.dragging
     if (s.locked !== 'h') {
       if (x.get() !== s.startX) onRelease(0)
       return

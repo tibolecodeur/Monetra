@@ -9,7 +9,7 @@ import type { Transition } from 'motion/react'
  * Spring défini comme chez Apple : `dampingRatio` (1 = pas de rebond) et `response`
  * (secondes, ce n'est pas une durée). Converti en raideur/amortissement pour une masse de 1.
  */
-export function spring(dampingRatio: number, response: number, velocity = 0): Transition {
+function spring(dampingRatio: number, response: number, velocity = 0): Transition {
   const omega = (2 * Math.PI) / response
   return {
     type: 'spring',
@@ -32,8 +32,6 @@ export const SPRINGS = {
   sheet: (velocity = 0) => spring(0.8, 0.3, velocity),
   /** Retour élastique après un flick. */
   flick: (velocity = 0) => spring(0.8, 0.35, velocity),
-  /** Retour visuel au toucher : très court, critique. */
-  press: () => spring(1, 0.15),
   /** Chiffres qui changent. */
   number: () => spring(1, 0.5),
 }
@@ -83,10 +81,6 @@ export class VelocityTracker {
   reset() {
     this.samples = []
   }
-}
-
-export function prefersReducedMotion(): boolean {
-  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 /** Petit retour haptique, réservé aux moments qui comptent (seuil franchi, suppression). */

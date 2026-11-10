@@ -19,8 +19,6 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react'
-import { SceneContext } from '../lib/glass/react'
-import { GlassRim } from './Glass'
 import { GESTURE_SLOP, project, REDUCED_FADE, rubberband, SPRINGS, VelocityTracker } from '../lib/motion'
 
 interface Props {
@@ -197,8 +195,6 @@ export function Sheet({ title, onClose, children }: Props) {
         style={{ y, opacity: fade }}
         data-testid="sheet"
       >
-        {/* Sheet partielle iOS 26 : verre flottant, décollé des bords, avec son liseré. */}
-        <GlassRim radius={34} />
         <div
           className="sheet-grabber"
           data-testid="sheet-grabber"
@@ -217,12 +213,9 @@ export function Sheet({ title, onClose, children }: Props) {
           </header>
         </div>
         <div className="sheet-body">
-          {/* Rien de la scène ne passe sous la feuille : son verre est un matériau, sans lentille. */}
-          <SceneContext.Provider value={null}>
-            <SheetDismissContext.Provider value={dismiss}>
-              <SheetContent render={children} />
-            </SheetDismissContext.Provider>
-          </SceneContext.Provider>
+          <SheetDismissContext.Provider value={dismiss}>
+            <SheetContent render={children} />
+          </SheetDismissContext.Provider>
         </div>
       </motion.div>
     </div>
