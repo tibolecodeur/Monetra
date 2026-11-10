@@ -7,8 +7,7 @@ const heroValue = async (page: Page) => Number(await page.locator('.hero-value')
 const heroText = async (page: Page) =>
   (await page.locator('.hero-value > span[aria-hidden]').innerText()).replace(/[\u00a0\u202f]/g, ' ')
 const sheetY = (page: Page) => translateY(page, '[data-testid="sheet"]')
-// L'app défile dans .scroller (la fenêtre ne défile pas : voir App.tsx).
-const scrollTo = (page: Page, y: number) => page.locator('.scroller').evaluate((el, top) => el.scrollTo(0, top), y)
+const scrollTo = (page: Page, y: number) => page.evaluate((top) => window.scrollTo(0, top), y)
 
 test.describe('Monetra en émulation iPhone', () => {
   test('ajout d’une transaction et mise à jour du reste à vivre', async ({ page }) => {
@@ -81,8 +80,7 @@ test.describe('Monetra en émulation iPhone', () => {
     await page.getByRole('button', { name: 'Annuler' }).tap()
     await expect(page.locator('.swipe-content', { hasText: 'Kebab' })).toBeVisible()
 
-    // Même geste sur un récurrent. La tab bar s'est réduite au défilement : on remonte pour la rouvrir.
-    await scrollTo(page, 0)
+    // Même geste sur un récurrent.
     await page.getByRole('button', { name: 'Récurrents' }).tap()
     // L'écran Opérations a aussi une ligne « Forfait mobile » (transaction générée) : on attend le bon écran.
     await expect(page.getByRole('heading', { name: 'Récurrents', level: 1 })).toBeVisible()
@@ -168,138 +166,99 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(hit).toBeNull()
   })
 
-  test('Liquid Glass : une scène filtrée, une lentille par surface de verre', async ({ page }) => {
+  test('barre d\'onglets : fixe en bas, toujours entière, sans rien masquer', async ({ page }) => {
     await openWithDemo(page)
-    await expect(page.locator('.tab-bar')).toHaveAttribute('data-glass', 'live')
-    // Le filtre est posé sur le contenu (pas un backdrop-filter) : c'est ce qui le rend possible sur Safari.
-    const scene = await page.locator('.scene').evaluate((el) => {
-      const id = el.style.filter.match(/#([^")]+)/)?.[1] ?? ''
-      const filter = document.getElementById(id)
-      const maps = [...(filter?.querySelectorAll('feImage') ?? [])]
-      const bar = document.querySelector('.tab-bar')!.getBoundingClientRect()
-      return {
-        id,
-        units: filter?.getAttribute('primitiveUnits'),
-        maps: maps.map((m) => m.getAttribute('href')?.slice(0, 22)),
-        // La lentille de la tab bar suit sa position réelle à l'écran.
-        barLens: maps.some(
-          (m) => Math.abs(Number(m.getAttribute('x')) - bar.x) < 2 && Math.abs(Number(m.getAttribute('y')) - bar.y) < 2,
-        ),
-        maxScale: Math.max(...[...(filter?.querySelectorAll('feDisplacementMap') ?? [])].map((d) => Number(d.getAttribute('scale')))),
-        backdrop: getComputedStyle(document.querySelector('.tab-bar')!).backdropFilter,
-      }
+    const bar = page.locator('.tab-bar')
+    const box = (await bar.boundingBox())!
+    expect(Math.round(box.y + box.height)).toBe(844)
+    expect(Math.round(box.width)).toBe(390)
+    // Un seul matériau, flouté par un backdrop-filter standard (pas de filtre SVG, pas de WebGL).
+    const style = await bar.evaluate((el) => {
+      const cs = getComputedStyle(el)
+      return { position: cs.position, backdrop: cs.backdropFilter, filter: cs.filter }
     })
-    expect(scene.id).not.toBe('')
-    expect(scene.units).toBe('userSpaceOnUse')
-    expect(scene.maps.length).toBeGreaterThanOrEqual(3)
-    expect(scene.maps.every((m) => m === 'data:image/png;base64,')).toBe(true)
-    expect(scene.barLens).toBe(true)
-    expect(scene.maxScale).toBeGreaterThan(10)
-    expect(scene.backdrop).toBe('none')
+    expect(style.position).toBe('fixed')
+    expect(style.backdrop).toContain('blur(20px)')
+    expect(style.filter).toBe('none')
 
-    // Au défilement, la lentille du sélecteur de mois suit le contrôle.
-    const before = await page.locator('.month-switcher').boundingBox()
-    await scrollTo(page, 60)
-    await expect
-      .poll(() =>
-        page.locator('.scene').evaluate((el, y) => {
-          const id = el.style.filter.match(/#([^")]+)/)?.[1] ?? ''
-          return [...document.getElementById(id)!.querySelectorAll('feImage')].some(
-            (m) => Math.abs(Number(m.getAttribute('y')) - y) < 2,
-          )
-        }, before!.y - 60),
-      )
-      .toBe(true)
+    // Au défilement, la barre ne bouge pas et garde ses quatre onglets et le bouton d'ajout.
+    await scrollTo(page, 600)
+    expect((await bar.boundingBox())!.y).toBe(box.y)
+    for (const name of ['Accueil', 'Opérations', 'Récurrents', 'Réglages', 'Ajouter une transaction']) {
+      const target = (await page.getByRole('button', { name }).boundingBox())!
+      expect(target.width).toBeGreaterThanOrEqual(44)
+      expect(target.height).toBeGreaterThanOrEqual(44)
+    }
+
+    // Sur chaque écran, tout en bas, le dernier élément finit au-dessus de la barre.
+    for (const tab of ['Accueil', 'Opérations', 'Récurrents', 'Réglages']) {
+      await page.getByRole('button', { name: tab }).tap()
+      await expect(page.getByRole('button', { name: tab })).toHaveAttribute('aria-current', 'page')
+      // L'écran charge ses données (IndexedDB) : on attend son titre avant de mesurer.
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await expect
+        .poll(async () => {
+          await scrollTo(page, 100_000)
+          return page.locator('.screen').evaluate((el) => el.lastElementChild?.getBoundingClientRect().bottom ?? Infinity)
+        })
+        .toBeLessThanOrEqual(box.y)
+    }
   })
 
-  test('lentille de sélection : on fait glisser la bulle de la tab bar d\'un onglet à l\'autre', async ({ page }) => {
+  test('retour à l\'appui en CSS, changement d\'onglet et curseur du segmented', async ({ page }) => {
     await openWithDemo(page)
-    const bubble = page.locator('.tab-bubble')
-    const start = (await bubble.boundingBox())!
-    const tabs = (await page.locator('.tab-items').boundingBox())!
-    const step = tabs.width / 4
-    const y = start.y + start.height / 2
-    // Doigt posé sur l'onglet actif, glissé vers « Récurrents » : la bulle suit le doigt, soulevée.
-    const held = await touchDrag(page, { x: start.x + start.width / 2, y }, { x: start.x + start.width / 2 + step * 2, y }, { duration: 400, release: false })
-    await expect(bubble).toHaveAttribute('data-lifted', '')
-    const during = (await bubble.boundingBox())!
-    expect(during.x + during.width / 2).toBeGreaterThan(start.x + start.width / 2 + step * 1.5)
-    await page.waitForTimeout(150)
-    await held.release()
-    await expect(page.getByRole('heading', { name: 'Récurrents', level: 1 })).toBeVisible()
-    await expect(bubble).not.toHaveAttribute('data-lifted', '')
-    // Elle se pose sur l'onglet choisi.
-    await expect
-      .poll(async () => {
-        const b = (await bubble.boundingBox())!
-        return Math.round(b.x + b.width / 2 - (tabs.x + step * 2.5))
-      })
-      .toBe(0)
-  })
-
-  test('Liquid Glass interactif : le verre gonfle et s\'éclaire sous le doigt', async ({ page }) => {
-    await openWithDemo(page)
-    const add = page.locator('.tab-add-glass')
+    // Le bouton d'ajout se réduit dès l'appui (pas au relâcher), puis revient.
+    const add = page.locator('.tab-add')
     const box = (await add.boundingBox())!
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.mouse.down()
-    await expect(add).toHaveAttribute('data-pressed', 'true')
-    await expect.poll(() => add.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(box.width + 1)
-    expect(await add.evaluate((el) => getComputedStyle(el).getPropertyValue('--lg-x'))).not.toBe('')
+    await expect.poll(async () => (await add.boundingBox())!.width).toBeLessThan(box.width - 1)
+    await page.mouse.move(0, 0)
     await page.mouse.up()
-    await expect(add).not.toHaveAttribute('data-pressed')
-  })
+    await expect.poll(async () => (await add.boundingBox())!.width).toBeGreaterThan(box.width - 0.5)
 
-  test('tab bar réduite au défilement vers le bas, rouverte en remontant ou au toucher', async ({ page }) => {
-    await openWithDemo(page)
-    const dock = page.locator('.tab-dock')
-    const bar = page.locator('.tab-bar')
-    const full = (await bar.boundingBox())!.width
-    await scrollTo(page, 500)
-    await expect(dock).toHaveAttribute('data-minimized', 'true')
-    await expect.poll(async () => (await bar.boundingBox())!.width).toBeLessThan(80)
-    await expect(page.getByRole('button', { name: 'Opérations' })).toBeHidden()
-    // Remonter un peu suffit à la rouvrir.
-    await scrollTo(page, 440)
-    await expect(dock).not.toHaveAttribute('data-minimized')
-    // Toucher l'onglet de la barre réduite la rouvre aussi, sans changer d'écran.
-    await scrollTo(page, 800)
-    await expect(dock).toHaveAttribute('data-minimized', 'true')
-    await page.getByRole('button', { name: 'Accueil' }).tap()
-    await expect(dock).not.toHaveAttribute('data-minimized')
-    await expect.poll(async () => (await bar.boundingBox())!.width).toBeGreaterThan(full - 2)
-  })
+    // Changer d'onglet ne déclenche aucune transition : la teinte est déjà la bonne à l'image suivante.
+    const tab = page.getByRole('button', { name: 'Opérations' })
+    const active = await page.getByRole('button', { name: 'Accueil' }).evaluate((el) => getComputedStyle(el).color)
+    await tab.tap()
+    expect(await tab.evaluate((el) => getComputedStyle(el).color)).toBe(active)
+    expect(await tab.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s')
 
-  test.describe('sur iPhone (Safari)', () => {
-    test.use({
-      userAgent:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
-    })
-
-    test('Liquid Glass : même scène, avec un nouvel identifiant de filtre à chaque changement', async ({ page }) => {
-      const errors: string[] = []
-      page.on('pageerror', (e) => errors.push(String(e)))
-      await openWithDemo(page)
-      // Safari garde en cache le résultat d'un filtre par identifiant : la scène en change à chaque mise à jour.
-      const id = () => page.locator('.scene').evaluate((el) => el.style.filter)
-      const first = await id()
-      expect(first).toMatch(/url\("?#lg-scene-\d+-v\d+/)
-      await scrollTo(page, 80)
-      await expect.poll(id).not.toBe(first)
-      expect(await page.locator('[data-glass="live"]').count()).toBeGreaterThanOrEqual(3)
-      expect(errors).toEqual([])
-    })
+    // Le curseur du segmented glisse sous l'option choisie.
+    const thumb = page.locator('.segment-thumb')
+    const option = page.getByRole('radio', { name: 'Revenus' })
+    await option.tap()
+    await expect(option).toHaveAttribute('aria-checked', 'true')
+    await expect
+      .poll(async () => {
+        const t = (await thumb.boundingBox())!
+        const o = (await option.boundingBox())!
+        return Math.abs(t.x - o.x) < 1 && Math.abs(t.width - o.width) < 1
+      })
+      .toBe(true)
   })
 
   test.describe('avec un contraste renforcé', () => {
     test.use({ contrast: 'more' })
 
-    test('verre opaque, sans réfraction', async ({ page }) => {
+    test('barres opaques, sans flou, dans les deux thèmes', async ({ page }) => {
       await openWithDemo(page)
-      await expect(page.locator('.tab-bar')).toHaveAttribute('data-glass', 'material')
-      expect(await page.locator('.scene').evaluate((el) => el.style.filter)).toBe('')
-      const bg = await page.locator('.tab-bar').evaluate((el) => getComputedStyle(el).backgroundColor)
-      expect(bg).toMatch(/^rgb\(/) // couleur pleine, sans transparence
+      const read = () =>
+        page.locator('.tab-bar').evaluate((el) => {
+          const cs = getComputedStyle(el)
+          return { background: cs.backgroundColor, backdrop: cs.backdropFilter }
+        })
+      const dark = await read()
+      expect(dark.background).toMatch(/^rgb\(/) // couleur pleine, sans transparence
+      expect(dark.backdrop).toBe('none')
+
+      await page.getByRole('button', { name: 'Réglages' }).tap()
+      await page.getByRole('radio', { name: 'Clair' }).tap()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      const light = await read()
+      expect(light.background).toMatch(/^rgb\(/)
+      expect(light.background).not.toBe(dark.background)
+      expect(light.backdrop).toBe('none')
     })
   })
 

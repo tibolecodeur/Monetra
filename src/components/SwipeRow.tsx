@@ -37,9 +37,9 @@ export function SwipeRow({ label, onDelete, children }: Props) {
 
   // L'action se révèle et grandit dans la direction du geste.
   const actionOpacity = useTransform(x, [-48, -8], [1, 0])
-  // Le fond rouge n'occupe que la zone découverte : la ligne reste transparente sur le verre de la carte.
-  const actionWidth = useTransform(x, (v) => Math.max(0, -v))
-  const iconScale = useTransform(x, (v) => (v < -width() * THRESHOLD ? 1.15 : 0.85))
+  // Le fond rouge n'occupe que la zone découverte (la ligne est translucide sur sa carte) :
+  // un clip-path, pas une largeur, pour ne pas refaire la mise en page à chaque image du geste.
+  const actionClip = useTransform(x, (v) => `inset(0 0 0 calc(100% - ${Math.max(0, -v)}px))`)
 
   useMotionValueEvent(x, 'change', (v) => {
     const next = v < -width() * THRESHOLD
@@ -81,10 +81,10 @@ export function SwipeRow({ label, onDelete, children }: Props) {
 
   return (
     <div className="swipe-row">
-      <motion.div className={`swipe-action${armed ? ' armed' : ''}`} style={{ opacity: actionOpacity, width: actionWidth }} aria-hidden="true">
-        <motion.span style={{ scale: iconScale }} className="swipe-action-icon">
+      <motion.div className={`swipe-action${armed ? ' armed' : ''}`} style={{ opacity: actionOpacity, clipPath: actionClip }} aria-hidden="true">
+        <span className="swipe-action-icon">
           <Trash2 size={20} />
-        </motion.span>
+        </span>
         <span>Supprimer</span>
       </motion.div>
       <motion.div ref={content} className="swipe-content" style={{ x }} {...handlers} data-swipe-label={label}>

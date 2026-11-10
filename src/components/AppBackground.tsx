@@ -36,7 +36,7 @@ function useSheetOpen(): boolean {
 export function AppBackground() {
   const theme = useDocumentTheme()
   const reduced = useReducedMotion()
-  // Figé sous une feuille : le fond est voilé, et le flou de la feuille n'a plus à être recalculé à chaque image.
+  // Figé sous une feuille : le fond est voilé, inutile de le recalculer.
   const sheetOpen = useSheetOpen()
   return (
     <ClosingPlasma

@@ -1,7 +1,5 @@
 import { Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { createPortal } from 'react-dom'
-import { GlassButton } from '../components/GlassButton'
 import { SwipeRow } from '../components/SwipeRow'
 import { getCategory } from '../lib/categories'
 import { formatShortDate, today } from '../lib/dates'
@@ -21,7 +19,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
   const recurring = useRecurring()
   const accounts = useAccounts()
   const toast = useToast()
-  if (!recurring || !accounts) return <div className="screen screen--action" aria-busy="true" />
+  if (!recurring || !accounts) return <div className="screen" aria-busy="true" />
 
   const now = today()
   const accountNames = accountLabels(accounts, recurring)
@@ -75,7 +73,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
   )
 
   return (
-    <div className="screen screen--action">
+    <div className="screen">
       <NavHeader title="Récurrents" />
 
       <section className="totals" aria-label="Total mensuel des récurrents actifs">
@@ -100,17 +98,11 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
         renderList(active)
       )}
 
-      {/* Bouton flottant au-dessus de la tab bar, hors de la scène : son verre réfracte la liste
-          qui passe dessous sans flouter son propre libellé. */}
-      {createPortal(
-        <div className="floating-action">
-          <GlassButton floating onClick={onAdd}>
-            <Plus size={20} aria-hidden="true" />
-            Nouveau récurrent
-          </GlassButton>
-        </div>,
-        document.body,
-      )}
+      {/* Reste visible juste au-dessus de la barre d'onglets pendant le défilement. */}
+      <button type="button" className="btn btn-secondary sticky-action" onClick={onAdd}>
+        <Plus size={20} aria-hidden="true" />
+        Nouveau récurrent
+      </button>
 
       {ended.length > 0 && (
         <>

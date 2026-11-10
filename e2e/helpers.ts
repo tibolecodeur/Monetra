@@ -48,7 +48,12 @@ export async function touchDrag(
   }
   if (hold) await page.waitForTimeout(hold)
   const end = { type: 'touchEnd' as const, touchPoints: [] }
-  if (release) await cdp.send('Input.dispatchTouchEvent', { ...end, timestamp: at(duration + hold) })
+  if (release) {
+    await cdp.send('Input.dispatchTouchEvent', { ...end, timestamp: at(duration + hold) })
+    // Un doigt ne retouche pas l'écran dans l'instant : sans ce délai, Chromium ignore le toucher
+    // qui suit immédiatement un relâcher horodaté (le clic n'est jamais émis).
+    await page.waitForTimeout(150)
+  }
   // Doigt toujours posé : on laisse passer une image pour que la position soit peinte.
   else await page.waitForTimeout(50)
   return {

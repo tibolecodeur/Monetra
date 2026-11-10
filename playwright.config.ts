@@ -8,10 +8,6 @@ const iphone = {
   deviceScaleFactor: 3,
   isMobile: true,
   hasTouch: true,
-  // User agent Chrome mobile : le Liquid Glass y utilise la réfraction SVG (contenu réel).
-  // Avec un user agent Safari, il passe en WebGL (fond plasma) ; ce chemin a son propre test.
-  userAgent:
-    'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',
   locale: 'fr-FR',
   timezoneId: 'Europe/Paris',
   // Rendu GPU logiciel : le compositing headless par défaut floute mal le bas des matériaux (backdrop-filter).

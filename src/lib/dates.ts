@@ -3,7 +3,7 @@ export type MonthKey = string
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-export function toISODate(d: Date): string {
+function toISODate(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 

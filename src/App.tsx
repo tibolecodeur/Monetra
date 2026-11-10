@@ -4,11 +4,8 @@ import { AppBackground } from './components/AppBackground'
 import { BottomNav, type Screen } from './components/BottomNav'
 import { RecurringForm } from './components/RecurringForm'
 import { Sheet } from './components/Sheet'
-import { ToastProvider } from './components/Toast'
 import { TransactionForm } from './components/TransactionForm'
-import { SceneContext, ScrollerContext, useGlassLive, useGlassScene } from './lib/glass/react'
 import { currentMonth, type MonthKey } from './lib/dates'
-import { installPressFeedback } from './lib/press'
 import { generateRecurring } from './lib/recurring'
 import type { Account, Recurring, Transaction } from './lib/types'
 import { Dashboard } from './screens/Dashboard'
@@ -34,12 +31,6 @@ export default function App() {
   const [month, setMonth] = useState<MonthKey>(currentMonth)
   const [modal, setModal] = useState<Modal>(null)
   const main = useRef<HTMLElement>(null)
-  // Scène de verre : le contenu qui défile est réfracté par chaque surface de verre (lib/glass).
-  // L'app défile dans ce conteneur (et non la fenêtre) : le filtre ne porte ainsi que sur l'écran visible,
-  // ce que Safari exige pour garder un filtre SVG rapide.
-  const scene = useRef<HTMLDivElement>(null)
-  const defs = useRef<HTMLDivElement>(null)
-  const glass = useGlassScene(scene, defs, { enabled: useGlassLive() })
   const firstRender = useRef(true)
 
   useEffect(() => {
@@ -66,14 +57,6 @@ export default function App() {
     return () => cancelAnimationFrame(frame)
   }, [screen])
 
-  // Sous une feuille, le verre est voilé et ne réfracte plus rien d'utile : la scène se met en veille
-  // (le CSS peint le même verre, sans filtre), pour que le flou de la feuille ne la recalcule pas à chaque image.
-  const sheetOpen = modal !== null
-  useEffect(() => glass?.setActive(!sheetOpen), [glass, sheetOpen])
-
-  // Retour visuel au pointer-down sur tous les éléments touchables.
-  useEffect(() => installPressFeedback(), [])
-
   // Génère les récurrents au lancement et quand l'app revient au premier plan.
   useEffect(() => {
     generateRecurring()
@@ -84,19 +67,15 @@ export default function App() {
 
   const navigate = (s: Screen) => {
     location.hash = `#/${s}`
-    main.current?.scrollTo(0, 0)
+    window.scrollTo(0, 0)
   }
   const close = useCallback(() => setModal(null), [])
   const editTransaction = (transaction: Transaction) => setModal({ kind: 'transaction', transaction })
   const addAccount = () => setModal({ kind: 'account' })
 
   return (
-    <ScrollerContext.Provider value={main}>
-    <SceneContext.Provider value={glass}>
-    <ToastProvider>
+    <>
       <AppBackground />
-      <div className="scene" ref={scene}>
-      <main id="contenu" className="scroller" ref={main}>
       <div className="app">
         <a
           href="#contenu"
@@ -108,6 +87,7 @@ export default function App() {
         >
           Aller au contenu
         </a>
+        <main id="contenu" ref={main}>
           {screen === 'accueil' && (
             <Dashboard
               month={month}
@@ -127,11 +107,8 @@ export default function App() {
           {screen === 'reglages' && (
             <Settings onAddAccount={addAccount} onSelectAccount={(account) => setModal({ kind: 'account', account })} />
           )}
-      </div>
-      </main>
-      </div>
-      <div ref={defs} className="lg-defs" />
-      <div className="chrome">
+        </main>
+
         <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
 
         {modal?.kind === 'transaction' && (
@@ -150,8 +127,6 @@ export default function App() {
           </Sheet>
         )}
       </div>
-    </ToastProvider>
-    </SceneContext.Provider>
-    </ScrollerContext.Provider>
+    </>
   )
 }

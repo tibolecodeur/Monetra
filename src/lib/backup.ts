@@ -2,9 +2,9 @@ import { db } from './db'
 import { today } from './dates'
 import type { Account, Budget, Goal, Recurring, Transaction } from './types'
 
-export const BACKUP_VERSION = 1
+const BACKUP_VERSION = 1
 
-export interface BackupData {
+interface BackupData {
   accounts: Account[]
   transactions: Transaction[]
   recurring: Recurring[]
@@ -19,7 +19,7 @@ export interface Backup {
   data: BackupData
 }
 
-export async function createBackup(): Promise<Backup> {
+async function createBackup(): Promise<Backup> {
   const [accounts, transactions, recurring, budgets, goals] = await Promise.all([
     db.accounts.toArray(),
     db.transactions.toArray(),

@@ -5,7 +5,8 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
-    <meta name="theme-color" content="#000000" />
+    <!-- Couleur de la barre d'état : celle du haut de la page (mise à jour par lib/prefs.ts au changement de thème). -->
+    <meta name="theme-color" content="#05060c" />
     <meta name="description" content="Monetra : gestion de finances personnelles, 100 % locale." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Monetra" />
@@ -16,7 +17,7 @@
       try {
         if (localStorage.getItem('monetra:theme') === 'light') {
           document.documentElement.dataset.theme = 'light'
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f2f2f7')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#eef0f8')
         }
       } catch (e) {}
     </script>
