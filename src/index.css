@@ -31,21 +31,23 @@
   --color-danger-soft: rgb(255 69 58 / 18%);
 
   /* Matériaux */
-  --material-content: rgb(17 20 36 / 60%);
+  --material-content: rgb(17 20 36 / 66%);
   --material-content-edge: rgb(255 255 255 / 9%);
   --material-content-highlight: rgb(255 255 255 / 7%);
-  --glass: rgb(32 37 62 / 48%);
-  --glass-strong: rgb(26 30 50 / 72%);
-  --glass-edge: rgb(255 255 255 / 16%);
-  --glass-highlight: rgb(255 255 255 / 24%);
-  --glass-lens: rgb(255 255 255 / 14%);
+  /* Liquid Glass (lib/glass) : teintes en rgb() avec virgules (lues par le filtre SVG). */
+  --glass-strong: rgb(26 30 50);
   --glass-sheet: rgb(22 25 42 / 86%);
-  --glass-fill: rgb(10 12 24);
-  --glass-fill-frost: rgb(26 30 50);
-  --glass-specular: 0.8;
-  --shadow-glass: 0 8px 26px rgb(0 0 12 / 38%);
-  --blur-content: blur(22px) saturate(160%);
-  --blur-glass: blur(26px) saturate(190%);
+  --glass-tint-chrome: rgb(10, 12, 26);
+  --glass-tint-chrome-opacity: 0.6;
+  --glass-tint-control: rgb(44, 52, 92);
+  --glass-tint-control-opacity: 0.3;
+  --glass-tint-accent: rgb(84, 104, 224);
+  --glass-tint-accent-opacity: 0.95;
+  --glass-tint-lens: rgb(255, 255, 255);
+  --glass-tint-lens-opacity: 0.1;
+  --glass-specular: 0.85;
+  --glass-shadow: rgb(0, 0, 12);
+  --glass-shadow-opacity: 0.38;
 
   /* Remplissages, séparateurs, états */
   --color-fill: rgb(120 132 180 / 20%);
@@ -55,7 +57,7 @@
   --color-scrim: rgb(2 3 12 / 48%);
   --color-track: rgb(255 255 255 / 12%);
   --color-meter: #ffffff;
-  --color-edge: rgb(5 6 12 / 72%);
+  --color-edge: rgb(5 6 12 / 84%);
   --shadow-float: 0 10px 32px rgb(0 0 12 / 45%);
   --shadow-card: 0 8px 28px rgb(0 0 12 / 28%);
 
@@ -172,19 +174,22 @@
   --color-danger: #d70015;
   --color-danger-fill: #ff3b30;
   --color-danger-soft: rgb(255 59 48 / 12%);
-  --material-content: rgb(255 255 255 / 66%);
+  --material-content: rgb(255 255 255 / 76%);
   --material-content-edge: rgb(255 255 255 / 80%);
   --material-content-highlight: rgb(255 255 255 / 70%);
-  --glass: rgb(255 255 255 / 52%);
-  --glass-strong: rgb(250 251 255 / 78%);
-  --glass-edge: rgb(255 255 255 / 85%);
-  --glass-highlight: rgb(255 255 255 / 95%);
-  --glass-lens: rgb(255 255 255 / 85%);
+  --glass-strong: rgb(250 251 255);
   --glass-sheet: rgb(247 248 253 / 90%);
-  --glass-fill: rgb(255 255 255);
-  --glass-fill-frost: rgb(250 251 255);
+  --glass-tint-chrome: rgb(255, 255, 255);
+  --glass-tint-chrome-opacity: 0.74;
+  --glass-tint-control: rgb(255, 255, 255);
+  --glass-tint-control-opacity: 0.42;
+  --glass-tint-accent: rgb(74, 94, 224);
+  --glass-tint-accent-opacity: 0.9;
+  --glass-tint-lens: rgb(44, 52, 110);
+  --glass-tint-lens-opacity: 0.07;
   --glass-specular: 1;
-  --shadow-glass: 0 6px 22px rgb(40 50 110 / 13%);
+  --glass-shadow: rgb(40, 50, 110);
+  --glass-shadow-opacity: 0.2;
   --color-fill: rgb(116 116 140 / 13%);
   --color-separator: rgb(60 60 67 / 14%);
   --color-border-input: rgb(60 60 67 / 52%);
@@ -192,7 +197,7 @@
   --color-scrim: rgb(20 24 50 / 22%);
   --color-track: rgb(60 60 67 / 14%);
   --color-meter: #1c1c1e;
-  --color-edge: rgb(238 240 248 / 78%);
+  --color-edge: rgb(238 240 248 / 88%);
   --shadow-float: 0 10px 30px rgb(40 50 110 / 16%);
   --shadow-card: 0 6px 24px rgb(40 50 110 / 10%);
   --cat-logement: #ff9500;
@@ -218,21 +223,18 @@
   box-sizing: border-box;
 }
 
-html {
-  /* Le focus clavier ne doit jamais finir sous la tab bar ni sous la barre de titre. */
-  scroll-padding-top: calc(env(safe-area-inset-top) + var(--nav-height) + var(--space-sm));
-  scroll-padding-bottom: var(--content-bottom);
-}
-
+/* La fenêtre ne défile pas : l'app défile dans .scroller, à l'intérieur de la scène de verre (App.tsx). */
 html,
 body {
   margin: 0;
-  min-height: 100dvh;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--color-bg);
 }
 
-body.no-scroll {
-  overflow: hidden;
+#root {
+  height: 100%;
 }
 
 button,
@@ -311,39 +313,67 @@ fieldset {
 
 /* Recettes de matériaux */
 
-/* Contenu : dépoli, discret, sur sa propre couche. */
+/* Contenu : dépoli, discret, sur sa propre couche. Pas de backdrop-filter : dans la scène de verre,
+   il n'y aurait rien à flouter (le fond plasma est sous la scène), et le fond est déjà flou. */
 .card,
 .totals > div,
 .hero {
   background: var(--material-content);
-  backdrop-filter: var(--blur-content);
   border: 1px solid var(--material-content-edge);
   box-shadow:
     inset 0 1px 0 var(--material-content-highlight),
     var(--shadow-card);
 }
 
-/* Navigation et contrôles : Liquid Glass (components/LiquidGlass.tsx, physique dans lib/liquidGlass.ts).
-   Couches, de bas en haut : fond réfracté (filtre SVG sur Chrome, canvas WebGL ailleurs),
-   voile ou teinte, liseré spéculaire, lueur de toucher, contenu. */
+/* Liquid Glass (components/Glass.tsx, moteur dans lib/glass/scene.ts).
+   En direct (data-glass='live'), le corps du verre est peint par le filtre SVG de la scène :
+   réfraction du contenu, teinte, reflet et ombre, réglés ici par les variables --lg-*.
+   L'élément lui-même reste transparent ; seul son contenu (icônes, libellés) est dans le DOM. */
 .lg {
-  --lg-fill: var(--glass-fill);
+  --lg-tint: var(--glass-tint-control);
+  --lg-tint-opacity: var(--glass-tint-control-opacity);
+  --lg-specular: var(--glass-specular);
+  --lg-shadow-color: var(--glass-shadow);
+  --lg-shadow-opacity: var(--glass-shadow-opacity);
+  --lg-shadow-blur: 9;
+  --lg-shadow-y: 5;
   position: relative;
   flex: none;
   display: flex;
+  align-items: center;
   isolation: isolate;
-  overflow: clip;
-  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-full);
 }
 
-/* Safari, Firefox : le centre floute le contenu réel ; le biseau réfracté est peint par le canvas. */
-.lg--webgl,
-.lg--frost {
-  backdrop-filter: blur(6px) saturate(170%);
+/* Ombre portée du verre : en CSS dans tous les cas (moins coûteuse qu'un flou dans le filtre de la scène). */
+.lg[data-glass] {
+  box-shadow: 0 calc(var(--lg-shadow-y) * 1px) calc(var(--lg-shadow-blur) * 2px)
+    color-mix(in srgb, var(--lg-shadow-color) calc(var(--lg-shadow-opacity) * 100%), transparent);
 }
 
-.lg--frost {
-  --lg-fill: var(--glass-fill-frost);
+/* Verre pressé (lib/press.ts) : la scène relit ces valeurs, le verre s'éclaire. */
+.lg[data-pressed] {
+  --lg-specular: calc(var(--glass-specular) * 1.7);
+}
+
+.lg[data-lit] {
+  --lg-specular: calc(var(--glass-specular) * 1.3);
+}
+
+/* Scène en veille sous une feuille ouverte (App.tsx) : le verre garde sa teinte, peinte en CSS. */
+body.no-scroll .lg[data-glass='live'] {
+  background: color-mix(in srgb, var(--lg-tint) min(100%, calc(var(--lg-tint-opacity) * 100% + 22%)), transparent);
+}
+
+/* Matériau : feuilles, ou verre hors scène (même liseré, flou d'arrière-plan à la place de la réfraction). */
+.lg[data-glass='material'] {
+  background: color-mix(in srgb, var(--lg-tint) min(100%, calc(var(--lg-tint-opacity) * 100% + 22%)), transparent);
+  backdrop-filter: blur(14px) saturate(180%);
+}
+
+.lg > :not(.lg-rim, .lg-glow) {
+  position: relative;
+  z-index: 2;
 }
 
 .lg-defs {
@@ -353,28 +383,20 @@ fieldset {
   overflow: hidden;
 }
 
-.lg-canvas,
-.lg-tint,
-.lg-specular,
+.lg-rim,
 .lg-glow {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  z-index: 1;
   border-radius: inherit;
   pointer-events: none;
 }
 
-.lg-tint {
-  background: color-mix(in srgb, var(--lg-tint, var(--lg-fill)) calc(var(--lg-frost) * 100%), transparent);
-}
-
-/* Liseré spéculaire : calculé par pixel (angle de la normale face à la lumière). */
-.lg-specular {
+/* Liseré spéculaire du matériau (canal bleu de la même carte que le verre réfractant). */
+.lg-rim {
   background-size: 100% 100%;
-  opacity: var(--glass-specular);
+  opacity: var(--lg-specular, var(--glass-specular));
   mix-blend-mode: plus-lighter;
-  transition: opacity 0.3s ease-out;
 }
 
 /* Verre interactif (glassEffect(.regular.interactive())) : la lumière naît sous le doigt. */
@@ -401,21 +423,6 @@ fieldset {
   transition-duration: 0.12s;
 }
 
-.lg[data-pressed] > .lg-specular {
-  opacity: 1;
-  transition-duration: 0.08s;
-}
-
-.lg-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-}
-
 /* Fond plasma (components/AppBackground.tsx) : fixe, derrière tout le contenu. */
 .app-background {
   position: fixed;
@@ -431,12 +438,37 @@ fieldset {
 
 /* Gabarit */
 
+/* Scène de verre : le contenu réfracté par la tab bar, le bouton +, le toast et les contrôles. */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.scroller {
+  position: absolute;
+  inset: 0;
+  overflow: hidden auto;
+  overscroll-behavior-y: contain;
+  /* Le focus clavier ne doit jamais finir sous la tab bar ni sous la barre de titre. */
+  scroll-padding-top: calc(env(safe-area-inset-top) + var(--nav-height) + var(--space-sm));
+  scroll-padding-bottom: var(--content-bottom);
+}
+
+/* Sous une feuille, le contenu ne défile plus. */
+body.no-scroll .scroller {
+  overflow: hidden;
+}
+
+.chrome {
+  display: contents;
+}
+
 .app {
   position: relative;
-  z-index: 1;
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100dvh;
+  min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -493,10 +525,10 @@ fieldset {
 .nav-bar-edge::before {
   content: '';
   position: absolute;
-  inset: 0 0 -22px;
-  background: linear-gradient(to bottom, var(--color-edge) 0%, var(--color-edge) 55%, transparent);
-  backdrop-filter: blur(14px) saturate(170%);
-  mask: linear-gradient(to bottom, #000 60%, transparent);
+  inset: 0 0 -26px;
+  background: linear-gradient(to bottom, var(--color-edge) 0%, var(--color-edge) 62%, transparent);
+  backdrop-filter: blur(18px) saturate(170%);
+  mask: linear-gradient(to bottom, #000 66%, transparent);
 }
 
 .nav-bar-title {
@@ -962,6 +994,14 @@ ul.card-flush {
   color: var(--color-text-secondary);
 }
 
+/* Une seule ligne, tronquée (comptes) : la ligne garde sa hauteur iOS de 60 px. */
+.row-meta--single {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .row-tag {
   display: inline-flex;
   align-items: center;
@@ -1101,6 +1141,13 @@ ul.card-flush {
 
 .glass-button {
   width: 100%;
+  height: 50px;
+}
+
+/* Bouton qui flotte au-dessus d'une liste : voile du verre de navigation. */
+.glass-button--floating {
+  --lg-tint: var(--glass-tint-chrome);
+  --lg-tint-opacity: var(--glass-tint-chrome-opacity);
 }
 
 .glass-button-inner {
@@ -1157,12 +1204,26 @@ ul.card-flush {
   flex: 1;
 }
 
-/* Bouton d'action qui reste visible juste au-dessus de la tab bar. */
-.sticky-action {
-  position: sticky;
+/* Bouton d'action qui flotte juste au-dessus de la tab bar (hors scène, voir RecurringScreen). */
+.floating-action {
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
-  z-index: var(--z-sticky);
-  box-shadow: var(--shadow-float);
+  z-index: var(--z-nav);
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 max(var(--space-md), env(safe-area-inset-right)) 0 max(var(--space-md), env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.floating-action .glass-button {
+  pointer-events: auto;
+}
+
+/* L'écran réserve la place du bouton flottant en plus de celle du dock. */
+.screen--action {
+  padding-bottom: calc(var(--content-bottom) + 62px);
 }
 
 .icon-button {
@@ -1183,7 +1244,9 @@ ul.card-flush {
 }
 
 /* Sélecteur de mois : capsule de verre */
-.month-switcher > .lg-content {
+.month-switcher {
+  width: 100%;
+  height: 50px;
   padding: 3px;
 }
 
@@ -1212,16 +1275,70 @@ ul.card-flush {
   cursor: default;
 }
 
-/* Contrôle segmenté : rail de verre et lentille qui glisse (layoutId). */
-.segmented > .lg-content {
+/* Contrôle segmenté : rail de verre, curseur en lentille qui glisse et se fait glisser. */
+.segmented {
+  width: 100%;
+  height: 46px;
   padding: 3px;
+  --lg-tint-opacity: calc(var(--glass-tint-control-opacity) + 0.12);
+}
+
+/* Dans une feuille, le rail est un simple remplissage, comme les champs. */
+.segmented--sheet[data-glass='material'] {
+  background: var(--color-fill);
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.segmented--sheet > .lg-rim {
+  display: none;
+}
+
+.segmented-rail {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+}
+
+.segment-thumb {
+  --lg-tint: var(--glass-tint-lens);
+  --lg-tint-opacity: calc(var(--glass-tint-lens-opacity) + 0.05);
+  --lg-specular: var(--glass-specular);
+  --lg-shadow-color: var(--glass-shadow);
+  --lg-shadow-opacity: calc(var(--glass-shadow-opacity) * 0.8);
+  --lg-shadow-blur: 4;
+  --lg-shadow-y: 2;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--radius-full);
+  box-shadow: 0 calc(var(--lg-shadow-y) * 1px) calc(var(--lg-shadow-blur) * 2px)
+    color-mix(in srgb, var(--lg-shadow-color) calc(var(--lg-shadow-opacity) * 100%), transparent);
+  pointer-events: none;
+  transform-origin: center;
+}
+
+:root[data-theme='light'] .segment-thumb {
+  --lg-tint: rgb(255, 255, 255);
+  --lg-tint-opacity: 0.96;
+}
+
+.segment-thumb[data-glass='material'],
+.tab-bubble[data-glass='material'] {
+  background: color-mix(in srgb, var(--lg-tint) calc(var(--lg-tint-opacity) * 100% + 6%), transparent);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 calc(var(--lg-shadow-y, 2) * 1px) calc(var(--lg-shadow-blur, 4) * 2px)
+      color-mix(in srgb, var(--lg-shadow-color, black) calc(var(--lg-shadow-opacity, 0.18) * 100%), transparent);
 }
 
 .segmented-inner {
+  position: relative;
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
-  gap: 2px;
   width: 100%;
   height: 100%;
 }
@@ -1238,18 +1355,9 @@ ul.card-flush {
   font-weight: 600;
 }
 
-.segmented button.active {
+.segmented button.active,
+.segmented button.hover {
   color: var(--color-text);
-}
-
-.segment-indicator {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-full);
-  background: var(--glass-lens);
-  box-shadow:
-    inset 0 1px 0 var(--glass-highlight),
-    0 2px 8px rgb(0 0 10 / 22%);
 }
 
 .segment-label {
@@ -1259,6 +1367,8 @@ ul.card-flush {
 /* Tab bar : capsule de verre flottante + bouton d'ajout séparé (iOS 26). */
 
 .tab-dock {
+  --tab-gap: 10px;
+  --tab-bar-width: calc(100% - var(--dock-add) - var(--tab-gap));
   position: fixed;
   left: 0;
   right: 0;
@@ -1266,7 +1376,7 @@ ul.card-flush {
   z-index: var(--z-nav);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   max-width: 480px;
   margin: 0 auto;
   padding: 0 max(var(--space-md), env(safe-area-inset-right)) var(--dock-bottom)
@@ -1295,38 +1405,71 @@ ul.card-flush {
 }
 
 .tab-dock[data-edge='on']::before {
-  opacity: 1;
-}
-
-.tab-dock {
-  --tab-bar-width: calc(100% - var(--dock-add) - 8px);
+  opacity: 0.7;
 }
 
 /* tabBarMinimizeBehavior(.onScrollDown) : au défilement vers le bas, la barre se réduit à l'onglet courant. */
 .tab-dock[data-minimized] {
-  --tab-bar-width: 68px;
-  justify-content: space-between;
+  --tab-bar-width: var(--dock-height);
 }
 
 .tab-bar {
-  box-shadow: var(--shadow-float);
+  --lg-tint: var(--glass-tint-chrome);
+  --lg-tint-opacity: var(--glass-tint-chrome-opacity);
+  --lg-shadow-blur: 10;
+  --lg-shadow-y: 6;
+  width: var(--tab-bar-width);
+  height: var(--dock-height);
   pointer-events: auto;
   transition: width 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.tab-dock[data-minimized] .tab-bar > .lg-content {
-  grid-template-columns: 1fr;
+/* La bulle de l'onglet actif est une lentille qu'on fait glisser au doigt. */
+.tab-rail {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  touch-action: none;
 }
 
-.tab-dock[data-minimized] .tab:not(.active),
+/* Surface filtrée d'une lentille de sélection : plus grande que le rail, car Chrome coupe la sortie
+   du filtre aux bords de l'élément et la lentille soulevée déborde. */
+.lens-surface {
+  position: relative;
+  height: calc(100% + 24px);
+  margin: -12px;
+  padding: 12px;
+}
+
+.tab-items {
+  position: relative;
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  height: 100%;
+}
+
+.tab-bubble {
+  --lg-tint: var(--glass-tint-lens);
+  --lg-tint-opacity: var(--glass-tint-lens-opacity);
+  --lg-specular: var(--glass-specular);
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+/* Soulevée (doigt posé), la bulle s'éclaircit un peu. */
+.tab-bubble[data-lifted] {
+  --lg-tint-opacity: calc(var(--glass-tint-lens-opacity) * 0.6);
+  --lg-specular: calc(var(--glass-specular) * 1.4);
+}
+
 .tab-dock[data-minimized] .tab-label {
   display: none;
-}
-
-.tab-bar > .lg-content {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 4px;
 }
 
 .tab {
@@ -1337,13 +1480,14 @@ ul.card-flush {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: var(--touch);
+  min-width: 0;
+  padding: 0 2px;
   border: 0;
   border-radius: var(--radius-full);
   background: none;
   color: var(--color-text);
   font-size: var(--fs-12);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1352,26 +1496,26 @@ ul.card-flush {
   font-weight: 600;
 }
 
-.tab svg,
-.tab-label {
-  position: relative;
-}
-
-.tab.active {
+.tab.active,
+.tab.hover {
   color: var(--color-accent-text);
 }
 
-/* Lentille de verre sous l'onglet actif (glisse d'un onglet à l'autre). */
-.tab-lens {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-full);
-  background: var(--glass-lens);
-  box-shadow: inset 0 1px 0 var(--glass-highlight);
+/* Clair : le contenu coloré qui passe sous la tab bar éclaircit le verre ; l'accent est foncé pour rester ≥ 4,5:1. */
+:root[data-theme='light'] .tab.active,
+:root[data-theme='light'] .tab.hover {
+  color: #2737a8;
 }
 
 .tab-add-glass {
-  box-shadow: var(--shadow-float);
+  --lg-tint: var(--glass-tint-accent);
+  --lg-tint-opacity: var(--glass-tint-accent-opacity);
+  --lg-shadow-color: var(--glass-tint-accent);
+  --lg-shadow-opacity: 0.4;
+  --lg-shadow-blur: 10;
+  --lg-shadow-y: 6;
+  width: var(--dock-add);
+  height: var(--dock-add);
   pointer-events: auto;
 }
 
@@ -1408,11 +1552,10 @@ ul.card-flush {
 }
 
 .toast {
-  box-shadow: var(--shadow-float);
-}
-
-.toast > .lg-content {
-  justify-content: flex-start;
+  --lg-tint: var(--glass-tint-chrome);
+  --lg-tint-opacity: calc(var(--glass-tint-chrome-opacity) + 0.06);
+  width: 100%;
+  height: 54px;
   gap: var(--space-sm);
   padding: var(--space-xs) var(--space-xs) var(--space-xs) 18px;
 }
@@ -1483,8 +1626,9 @@ ul.card-flush {
   will-change: transform;
 }
 
-.lg-rim {
-  z-index: 2;
+.sheet > .lg-rim {
+  z-index: 3;
+  --lg-specular: var(--glass-specular);
 }
 
 .sheet:focus {
@@ -1821,8 +1965,10 @@ ul.card-flush {
   position: sticky;
   bottom: calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
   margin: 0 calc(-1 * var(--space-md)) calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
-  padding: 12px var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--glass-sheet) 70%, transparent);
+  padding: 20px var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--glass-sheet) 0, var(--glass-sheet) calc(100% - 22px), transparent);
+  backdrop-filter: blur(10px);
+  mask: linear-gradient(to bottom, transparent, #000 18px);
 }
 
 .backup-actions {
@@ -1855,14 +2001,12 @@ ul.card-flush {
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --material-content: #151829;
-    --glass: #1c2036;
     --glass-strong: #1c2036;
     --glass-sheet: #181b2e;
   }
 
   :root[data-theme='light'] {
     --material-content: #ffffff;
-    --glass: #f7f8fc;
     --glass-strong: #f7f8fc;
     --glass-sheet: #f7f8fc;
   }
@@ -1874,16 +2018,23 @@ ul.card-flush {
     backdrop-filter: none;
   }
 
-  /* Liquid Glass : verre opaque, sans réfraction. */
-  .lg {
+  /* Liquid Glass : verre opaque, sans réfraction (la scène n'est pas créée, voir useGlassLive). */
+  .lg[data-glass] {
     background: var(--glass-strong) !important;
     backdrop-filter: none !important;
   }
 
-  .lg-canvas,
-  .lg-tint,
-  .lg-specular {
+  .lg-rim {
     display: none;
+  }
+
+  .tab-bubble[data-glass],
+  .segment-thumb[data-glass] {
+    background: var(--color-fill) !important;
+  }
+
+  .lg.tab-add-glass[data-glass] {
+    background: var(--color-accent) !important;
   }
 
   .tab-dock::before {
@@ -1899,11 +2050,9 @@ ul.card-flush {
 @media (prefers-contrast: more) {
   :root {
     --material-content: #10121f;
-    --glass: #181b2d;
     --glass-strong: #181b2d;
     --glass-sheet: #141626;
     --material-content-edge: #8e8e93;
-    --glass-edge: #aeaeb2;
     --color-text-secondary: rgb(235 235 245 / 86%);
     --color-text-on-bg: #ffffff;
     --color-separator: rgb(255 255 255 / 30%);
@@ -1911,11 +2060,9 @@ ul.card-flush {
 
   :root[data-theme='light'] {
     --material-content: #ffffff;
-    --glass: #ffffff;
     --glass-strong: #ffffff;
     --glass-sheet: #ffffff;
     --material-content-edge: #8a8a8e;
-    --glass-edge: #6c6c70;
     --color-text-secondary: rgb(40 40 46);
     --color-text-on-bg: #000000;
     --color-separator: rgb(60 60 67 / 40%);
@@ -1928,16 +2075,23 @@ ul.card-flush {
     backdrop-filter: none;
   }
 
-  /* Liquid Glass : verre opaque, sans réfraction. */
-  .lg {
+  /* Liquid Glass : verre opaque, sans réfraction (la scène n'est pas créée, voir useGlassLive). */
+  .lg[data-glass] {
     background: var(--glass-strong) !important;
     backdrop-filter: none !important;
   }
 
-  .lg-canvas,
-  .lg-tint,
-  .lg-specular {
+  .lg-rim {
     display: none;
+  }
+
+  .tab-bubble[data-glass],
+  .segment-thumb[data-glass] {
+    background: var(--color-fill) !important;
+  }
+
+  .lg.tab-add-glass[data-glass] {
+    background: var(--color-accent) !important;
   }
 
   .tab-dock::before {

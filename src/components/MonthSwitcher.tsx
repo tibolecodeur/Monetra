@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { addMonths, currentMonth, formatMonth, type MonthKey } from '../lib/dates'
+import { LENS } from '../lib/glass/presets'
 import { Glass } from './Glass'
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 export function MonthSwitcher({ month, onChange }: Props) {
   const isCurrent = month === currentMonth()
   return (
-    <Glass className="month-switcher" height={50} radius={25}>
+    <Glass className="month-switcher" lens={LENS.control}>
     <div className="month-switcher-inner" role="group" aria-label="Mois affiché">
       <button
         type="button"

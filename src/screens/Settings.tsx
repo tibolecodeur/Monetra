@@ -91,7 +91,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
                   </span>
                   <span className="row-main">
                     <span className="row-title">{a.nom}</span>
-                    <span className="row-meta">{[accountTypeLabel(a.type), a.banque].filter(Boolean).join(' · ')}</span>
+                    <span className="row-meta row-meta--single">{[accountTypeLabel(a.type), a.banque].filter(Boolean).join(' · ')}</span>
                   </span>
                   <span className={`amount${a.solde < 0 ? ' negative' : ''}`}>{formatMoney(a.solde)}</span>
                 </button>

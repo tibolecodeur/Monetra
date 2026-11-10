@@ -25,9 +25,10 @@ Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
 L'interface suit le design system [`design-system/monetra/MASTER.md`](design-system/monetra/MASTER.md), généré avec le skill UI UX Pro Max puis révisé :
 
-- **Liquid Glass sur fond plasma** : navigation et contrôles en verre qui réfracte vraiment ce qu'il y a derrière (bord bombé en squircle, loi de Snell, liseré spéculaire), interactif au toucher ; contenu sur des cartes dépolies, grand titre repliable avec scroll edge effect. Sombre par défaut, clair dans Réglages.
+- **Liquid Glass sur fond plasma** : navigation et contrôles en verre qui réfracte vraiment le contenu qui passe dessous (biseau, frange chromatique, reflet, ombre), identique sur Safari, iPhone, Chrome et Firefox ; contenu sur des cartes dépolies, grand titre repliable avec scroll edge effect. Sombre par défaut, clair dans Réglages.
+- **Lentilles de sélection** : la bulle de l'onglet actif et le curseur du contrôle segmenté grossissent les libellés qu'ils traversent, et se font glisser au doigt comme sur iOS 26.
 
-<img src="docs/screenshots/glass/zoom-dock.png" width="480" alt="Tab bar en Liquid Glass : le contenu se courbe dans le biseau">
+<img src="docs/screenshots/glass/zoom-dock.png" width="480" alt="Tab bar en Liquid Glass : le contenu qui passe dessous est flouté et courbé dans le biseau"> <img src="docs/screenshots/glass/09-bulle-glissee-dark.png" width="480" alt="Bulle de la tab bar glissée vers Opérations : elle grossit le libellé">
 - **Palette tirée du fond** : accent pervenche, vert pour les revenus, pastilles de catégorie colorées façon iOS.
 - **Inter** pour toute l'interface, auto-hébergée (aucune requête externe) ; montants en chiffres tabulaires.
 - Icônes SVG Lucide, sans emojis.
@@ -43,6 +44,7 @@ Les principes du skill `apple-design` (`.claude/skills/apple-design/SKILL.md`), 
 - **Swipe horizontal** sur l'accueil pour changer de mois, avec snap et momentum.
 - **Retour visuel au pointer-down** partout ; reste à vivre animé en spring.
 - **Verre interactif** : il gonfle et s'éclaire sous le doigt, puis rebondit ; la lumière rayonne vers le verre voisin du dock.
+- **Bulle de la tab bar glissable** : doigt posé, elle se soulève ; on la fait glisser d'un onglet à l'autre (rubber-band, momentum, étirement selon la vitesse). Même chose pour le curseur du contrôle segmenté.
 - **Tab bar réduite au défilement** (comme `tabBarMinimizeBehavior(.onScrollDown)`), rouverte en remontant ou au toucher.
 - **Sheets en verre flottant**, décollées des bords, et boutons principaux en « glass prominent ».
 - Règles tirées du skill [`liquid-glass`](https://github.com/haider-nawaz/liquid-glass-skill) (SwiftUI), copié dans `.claude/skills/liquid-glass/`.
@@ -58,7 +60,7 @@ Vidéos des gestes : [`docs/videos/`](docs/videos).
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
 - [Motion](https://motion.dev/) : springs et gestes
 - Fond animé [`@componentry/closing-plasma`](https://componentry.dev) (WebGL), installé via `shadcn`
-- Liquid Glass maison (`src/lib/liquidGlass.ts`) : carte de déplacement SVG sur Chrome, shader WebGL sur Safari, d'après [kube.io](https://kube.io/blog/liquid-glass-css-svg/)
+- Liquid Glass (`src/lib/glass/`) : technique de [liquid-glass-web-react](https://github.com/PallavAg/liquid-glass-web-react) (MIT), étendue à une scène à plusieurs lentilles. Le filtre SVG est posé sur le contenu et non en `backdrop-filter`, ce qui le rend compatible Safari. L'app défile donc dans un conteneur (`.scroller`) et non dans la fenêtre.
 - [Lucide](https://lucide.dev/) : icônes SVG ; police système (SF Pro), [Inter](https://rsms.me/inter/) auto-hébergée en repli
 - [Playwright](https://playwright.dev/) : tests e2e tactiles
 

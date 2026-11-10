@@ -10,6 +10,7 @@
 **Generated:** 2026-10-29 15:12:45 (ui-ux-pro-max)
 **Revised:** 2026-10-29 : thème sombre pro, puis version fluide « style Apple » (springs, gestes)
 **Revised:** 2026-11-09 : **Liquid Glass physique sur fond plasma** (réfraction de Snell, liseré spéculaire, palette tirée du plasma)
+**Revised:** 2026-11-10 : **nouveau Liquid Glass, scène filtrée** d'après [liquid-glass-web-react](https://github.com/PallavAg/liquid-glass-web-react) (même rendu sur Safari, Chrome et Firefox), lentilles de sélection glissables, défilement dans un conteneur
 **Sources :** skill `ui-ux-pro-max` (style « liquid-glass », composants) et skill `apple-design` (`.claude/skills/apple-design/SKILL.md`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-design` prime.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -20,7 +21,8 @@ En cas de conflit sur **le mouvement, la typographie ou les matériaux, `apple-d
 
 Le fond plasma animé donne la palette et la profondeur. Comme sur iOS 26 :
 
-- **Liquid Glass réel pour la navigation et les contrôles** : tab bar, bouton +, barre de titre compacte, sélecteur de mois, contrôle segmenté, toast, boutons secondaires. Le verre réfracte ce qui est derrière.
+- **Liquid Glass réel pour la navigation et les contrôles** : tab bar, bouton +, toast, bouton flottant « Nouveau récurrent », sélecteur de mois, contrôle segmenté, boutons secondaires. Le verre qui flotte réfracte le contenu qui passe dessous.
+- **Lentilles de sélection** : la bulle de l'onglet actif et le curseur du segmented sont des lentilles qui grossissent et courbent les libellés qu'elles traversent ; on les fait glisser au doigt (iOS 26).
 - **Matériau dépoli pour le contenu** (cartes) : il reste sur sa propre couche, plus calme que le verre (règle du style « liquid-glass » : le verre est réservé à la navigation et aux contrôles).
 - **Sheets** en verre épais dépoli (grande surface déplacée au doigt : pas de réfraction, trop coûteuse).
 
@@ -82,6 +84,9 @@ Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (pl
 
 - **Sombre** : tous les styles ≥ 4,93:1.
 - **Clair** : tous les styles ≥ 4,59:1.
+- **Libellés sur le verre** (mesure du 10/11/2026, nouveau verre, même méthode, contraste calculé pixel par pixel avec l'alpha du texte, textes masqués par le dock exclus) :
+  - sombre : onglet actif 5,0 ; segmented inactif 5,3 ; segmented actif 6,1 ; sélecteur de mois 11,7 ; boutons de verre 11,3 ; onglets inactifs 15,2 ;
+  - clair : segmented inactif 5,2 ; onglet actif 5,8 (accent foncé `#2737a8` sur la tab bar) ; boutons de verre 17,0 ; sélecteur de mois 16,7.
 - Les bordures des champs restent au-dessus de 3:1.
 
 ### Typographie (apple-design §15)
@@ -112,26 +117,50 @@ Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (pl
 
 ---
 
-## Liquid Glass (physique, maison)
+## Liquid Glass : scène filtrée (lib/glass)
 
-D'après la doc Apple [Applying Liquid Glass to custom views](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views) et l'article [Liquid Glass in the Browser](https://kube.io/blog/liquid-glass-css-svg/). Physique dans `src/lib/liquidGlass.ts` (testée), rendu dans `src/components/LiquidGlass.tsx`, toujours utilisé via `src/components/Glass.tsx` :
+Technique de [liquid-glass-web-react](https://github.com/PallavAg/liquid-glass-web-react) (Pallav Agarwal, MIT, d'après l'article d'Aave *Building Glass for the Web*), portée et étendue dans `src/lib/glass/`. Toujours utilisé via `Glass` / `GlassButton` / `Segmented` / la tab bar :
 
 ```tsx
-<Glass className="month-switcher" height={50} radius={25} frost={0.12} tint="var(--color-accent)">…</Glass>
+<Glass className="month-switcher" lens={LENS.control}>…</Glass>
 ```
 
-- **Modèle** : une plaque de verre (indice 1,5) posée sur le contenu, au **bord bombé en squircle** `y = ⁴√(1 − (1 − x)⁴)`. Le centre est plat (le fond passe tel quel) ; dans le biseau, chaque rayon est dévié par la **loi de Snell**, convexe : le fond est « tiré » vers l'intérieur, comme dans une lentille.
-- **Carte de déplacement** calculée par forme et par taille (mise en cache) : R = x, G = y, 128 = neutre ; l'échelle est le déplacement maximal en px.
-- **Liseré spéculaire** calculé par pixel : intensité selon l'angle entre la normale du bord et une lumière fixe (haut-gauche), plus faible à contre-jour (bas-droite) ; il s'avive au toucher.
-- **Matériau** : léger flou (2,5 px) + saturation 170 % + voile (`frost`) ou teinte (`tint`, comme `.tint()`).
-- **Deux rendus selon le navigateur** :
-  - **Chrome / Android** : filtre SVG en `backdrop-filter` (`feGaussianBlur` → `feDisplacementMap` → `feColorMatrix`) : réfraction du contenu réel.
-  - **Safari / iPhone, Firefox** : pas de filtre SVG en `backdrop-filter`. Un shader WebGL applique la même carte au fond plasma dans le biseau ; le centre garde le flou CSS du contenu réel.
-  - Transparence réduite ou contraste renforcé : verre opaque, sans réfraction ni liseré.
-- **Interactif** (`.glass-press`, comme `.interactive()`) : au toucher, le verre gonfle (≈ 4 px sur son grand côté), la lumière naît sous le doigt, puis il rebondit au relâcher (spring 0,55 / 0,42 s).
-- **Usage, comme Apple** : le verre est réservé à ce qui flotte au-dessus du contenu (tab bar, bouton +, sélecteur de mois, segmented, toast, boutons secondaires). Les cartes restent du contenu dépoli ; la barre de titre est un **scroll edge effect** (flou progressif), pas une plaque de verre.
-- **Voile (`frost`)** : `0.12` sur le plasma, `0.32` pour le segmented, `0.6` sur ce que le contenu traverse (tab bar, toast). Contraste AA mesuré sur rendu réel : pire cas 4,70.
-- **Performance** : le plasma tourne à 30 images/s et expose `data-frame` ; le verre WebGL ne redessine que lorsqu'une nouvelle image existe (5 lectures de texture par pixel).
+- **Pourquoi ce choix** : Safari refuse un filtre SVG en `backdrop-filter`. Ici, le filtre est posé **sur le contenu lui-même** (`filter: url(#…)`) : même rendu sur Safari, iPhone, Chrome, Android et Firefox, sans chemin de repli WebGL.
+- **Scène** : le contenu de l'app défile dans `.scroller`, à l'intérieur de `.scene` (fixe, taille de l'écran). Un seul filtre SVG sur `.scene` porte **une lentille par surface de verre** ; chaque lentille ne traite que sa zone (sous-région du filtre), le reste du contenu sort intact. L'écran entier n'est jamais filtré au-delà de sa taille, comme Safari l'exige.
+- **Une lentille** (`lib/glass/scene.ts`) :
+  - **carte de déplacement** calculée par taille (`displacementMap.ts`, portée de la bibliothèque, rendue rectangulaire) : R/G = déplacement, B = reflet, alpha = forme exacte (capsule ou rayon) ;
+  - contenu flouté (`blur`), déplacé une ou trois fois (`chromatic` : frange colorée), puis **teinte** du verre (`glassEffect(.regular.tint(…))`) par-dessus (`tintMode: 'over'`, verre qui flotte) ou dessous (`'under'`, quand le contenu est le libellé du contrôle) ;
+  - **reflet** (canal bleu), **découpe** à la forme ; l'**ombre portée** est un `box-shadow` CSS (un flou dans le filtre coûte bien plus cher) ;
+  - verre plat (`flat`, contrôles) : ni carte de déplacement ni flou, seulement teinte, reflet et découpe ;
+  - une lentille sortie de l'écran (défilement) quitte le filtre ; plus aucune lentille visible : plus de filtre du tout ;
+  - la lentille suit à chaque image la position réelle de son élément (défilement, springs, pression), et son opacité si `fade` (toast).
+- **Optiques** (`lib/glass/presets.ts`) :
+
+| Rôle | Où | Réfraction | Flou | Frange | Teinte |
+|---|---|---|---|---|---|
+| `chrome` | tab bar, bouton +, toast, bouton flottant | 34 px, biseau 18 px | 2,5 px | 0,45 | par-dessus |
+| `control` | sélecteur de mois, boutons secondaires, rail du segmented | 0 (rien derrière : le plasma est sous la scène) | 0 | 0 | dessous |
+| `selection` | bulle de la tab bar, curseur du segmented | 0 au repos → 14 px doigt posé ou en mouvement (dôme 0,6) | 0 | 0,12 | dessous |
+
+- **Couleurs en CSS**, par composant et par thème : `--lg-tint`, `--lg-tint-opacity`, `--lg-specular` (lues par le filtre), `--lg-shadow-color`, `--lg-shadow-opacity`, `--lg-shadow-blur`, `--lg-shadow-y` (box-shadow) (valeurs de base `--glass-tint-chrome|control|accent|lens`). Les teintes s'écrivent `rgb(r, g, b)` (lues par le filtre SVG).
+
+| Teinte (opacité) | Sombre | Clair |
+|---|---|---|
+| Verre de navigation (`chrome`) | `rgb(10, 12, 26)` 0,60 | `rgb(255, 255, 255)` 0,74 |
+| Contrôles (`control`) | `rgb(44, 52, 92)` 0,30 | `rgb(255, 255, 255)` 0,42 |
+| Bouton + (`accent`) | `rgb(84, 104, 224)` 0,95 | `rgb(74, 94, 224)` 0,90 |
+| Lentille de sélection (`lens`) | `rgb(255, 255, 255)` 0,10 | `rgb(44, 52, 110)` 0,07 |
+
+- **Lentilles de sélection** (`useSelectionLens`) : spring vers le segment choisi ; doigt posé, la bulle se soulève (×1,1 / ×1,16) ; glissement 1:1 avec rubber-band, projection du momentum au relâcher, vélocité passée au spring ; étirement proportionnel à la vitesse. Au repos, sa scène est en veille (pas de filtre) et la bulle est peinte en CSS avec la même teinte.
+- **Safari** : le filtre reçoit un nouvel identifiant à chaque changement (Safari garde le résultat en cache par identifiant) ; unités `userSpaceOnUse` partout (le chemin éprouvé sur iOS).
+- **Interactif** (`.glass-press`, comme `.interactive()`) : le verre gonfle (≈ 4 px), la lumière naît sous le doigt, le reflet s'avive (`--lg-specular` × 1,7), puis il rebondit (spring 0,55 / 0,42 s).
+- **Matériau de repli** (`data-glass='material'`) : feuilles, verre hors scène (contrôles dans une feuille). Flou d'arrière-plan + teinte + même liseré (`GlassRim`, canal bleu de la même carte).
+- **Transparence réduite / contraste renforcé** : la scène n'est pas créée ; tout le verre devient opaque (`--glass-strong`), le bouton + garde l'accent plein.
+- **Performance** (mesurée en rendu logiciel, le pire cas) :
+  - au repos, 16,7 ms par image avec le verre, autant que sans (le coût venait des ombres floutées dans le filtre, désormais en CSS) ;
+  - Chrome rejoue le filtre à chaque image du plasma (30 images/s), sur le GPU d'un téléphone ;
+  - les scènes des lentilles de sélection dorment au repos, et la scène principale sous une feuille ouverte (le CSS peint alors le même verre, sans filtre) ;
+  - sur WebKit, la scène est gardée en cache entre deux défilements.
 
 ### Correspondance avec SwiftUI (skill `liquid-glass`)
 
@@ -139,10 +168,11 @@ Règles du skill [`haider-nawaz/liquid-glass-skill`](https://github.com/haider-n
 
 | SwiftUI | Monetra |
 |---|---|
-| `.glassEffect(.regular, in: .capsule)` | `<Glass radius={h / 2}>` (réfraction + liseré) |
-| `.regular.tint(color)` | `<Glass tint="…">` (bouton +) |
+| `.glassEffect(.regular, in: .capsule)` | `<Glass lens={LENS.chrome}>` (capsule par défaut, `radius` sinon) |
+| `.regular.tint(color)` | `--lg-tint` / `--lg-tint-opacity` en CSS (bouton + : accent) |
 | `.regular.interactive()` | `.glass-press` : gonfle, s'éclaire sous le doigt, rebondit |
-| `GlassEffectContainer` | `.glass-container` (dock) : la lumière du toucher rayonne vers le verre voisin |
+| `GlassEffectContainer` | `.glass-container` (dock) : la lumière du toucher rayonne vers le verre voisin ; une scène = un conteneur, le verre ne réfracte pas le verre |
+| Tab bar iOS 26 (bulle qui grossit, glissable) | lentille de sélection de la tab bar (`useSelectionLens`) |
 | `.buttonStyle(.glassProminent)` | `.btn-primary` : verre teinté de l'accent, liseré, lumière au toucher |
 | `.tabBarMinimizeBehavior(.onScrollDown)` | tab bar réduite à l'onglet courant en descendant ; remonter ou toucher la rouvre |
 | Sheet partielle (`.presentationDetents`) | sheet flottante, décollée de 8 px des bords, rayon 34 px, liseré spéculaire (`GlassRim`) |
@@ -156,29 +186,30 @@ Règles du skill [`haider-nawaz/liquid-glass-skill`](https://github.com/haider-n
 ### Navigation
 
 - **Grand titre repliable** (`NavHeader`) : 34px qui défile avec la page ; une barre compacte (scroll edge effect, flou progressif), titre 17px centré, apparaît en fondu dès qu'il passe sous le haut de l'écran.
-- **Dock** : tab bar en capsule flottante (60px, 4 onglets) + bouton + rond séparé (56px), posés au-dessus de l'indicateur d'accueil. Scroll edge effect (dégradé) seulement quand du contenu passe dessous. Chaque écran réserve la hauteur du dock en bas.
+- **Dock** : tab bar en capsule flottante (60px, 4 onglets) + bouton + rond séparé (56px, écart 10px), posés au-dessus de l'indicateur d'accueil. La bulle de l'onglet actif se fait glisser d'un onglet à l'autre. Scroll edge effect (dégradé) seulement quand du contenu passe dessous. Chaque écran réserve la hauteur du dock en bas.
+- **Bouton flottant** (« Nouveau récurrent ») : au-dessus du dock, hors de la scène, en verre de navigation ; l'écran réserve sa place en plus de celle du dock.
 
 ### Cartes et listes
 
-- Cartes en matériau dépoli, rayon 22px, arête claire en haut ; la carte du reste à vivre (rayon 28px) a un reflet supérieur, rouge si dépassement.
+- Cartes en matériau dépoli (`--material-content`, sans `backdrop-filter` : dans la scène il n'y aurait rien à flouter), rayon 22px, arête claire en haut ; méta des comptes sur une ligne, tronquée ; la carte du reste à vivre (rayon 28px) a un reflet supérieur, rouge si dépassement.
 - Listes « inset grouped » : séparateurs décalés après la pastille d'icône, lignes de 60px, surlignage au toucher.
 - Swipe pour supprimer : le rouge n'occupe que la zone découverte (la ligne reste transparente sur le verre).
 
 ### Boutons et contrôles
 
 - Capsules (`--radius-full`), 50px. Principal : accent plein avec reflet ; secondaire : Liquid Glass (`GlassButton`) ; danger : rouge à 18 %.
-- Sélecteur de mois et segmented : capsules de verre ; segmented avec lentille glissante.
+- Sélecteur de mois et segmented : capsules de verre ; curseur du segmented en lentille glissable (dans une feuille, le rail est un simple remplissage).
 - Champs : remplissage `--color-fill`, bordure ≥ 3:1, halo d'accent au focus.
 
 ### Sheets
 
-Verre épais dépoli, rayon 28px en haut, poignée, bouton fermer rond, bouton principal collé en bas sur un dégradé. Voile qui s'éclaircit avec le glissement.
+Verre épais dépoli, flottant, rayon 34px, liseré `GlassRim`, poignée, bouton fermer rond, bouton principal collé en bas sur un fond flouté qui se fond vers le haut. Voile qui s'éclaircit avec le glissement. Aucune lentille dans une feuille (rien de la scène ne passe dessous), sauf le curseur du segmented, qui a sa propre petite scène.
 
 ---
 
 ## Fond plasma (`@componentry/closing-plasma`)
 
-Fond WebGL fixe derrière tous les écrans (`AppBackground`), non interactif, `aria-hidden`. Palette d'origine (bleu nuit / gris bleuté pâle), opacité `0.9` en sombre et `1` en clair, `speed 0.5`, 30 images/s, rendu à 0,5×. Suit le thème ; figé en mouvement réduit et sous une sheet. Adaptations commentées « Monetra » : `themeMode` appliqué, `paused`, `maxDpr`, `maxFps`, `premultipliedAlpha: false`, `preserveDrawingBuffer` (lecture par le verre WebGL), `data-frame`.
+Fond WebGL fixe derrière tous les écrans (`AppBackground`), non interactif, `aria-hidden`. Palette d'origine (bleu nuit / gris bleuté pâle), opacité `0.9` en sombre et `1` en clair, `speed 0.5`, 30 images/s, rendu à 0,5×. Suit le thème ; figé en mouvement réduit et sous une sheet. Adaptations commentées « Monetra » : `themeMode` appliqué, `paused`, `maxDpr`, `maxFps`, `premultipliedAlpha: false`. Le fond est **sous** la scène de verre, pas dedans : un canvas WebGL n'est pas garanti dans un filtre SVG sur Safari.
 
 ---
 
@@ -219,6 +250,9 @@ Le rebond n'apparaît **que** si le geste avait de l'élan.
 | Sheet vers le bas | fermeture si projection > 40 % de la hauteur, ou flick vers le bas | bouton Fermer, Échap, voile |
 | Ligne vers la gauche (opérations, récurrents) | suppression si projection > 45 % de la largeur ; retour haptique au franchissement ; **annulation par toast**, pas de dialogue | bouton Supprimer dans la feuille d'édition |
 | Dashboard horizontal | mois suivant ou précédent si projection > 50 % de la largeur | chevrons du sélecteur de mois |
+| Bulle de la tab bar, curseur du segmented | segment le plus proche du point projeté (décélération 0,99) ; retour haptique à chaque segment franchi | toucher l'onglet ou l'option |
+
+La vélocité se calcule sur l'horodatage des événements (`e.timeStamp`), pas sur l'heure de traitement : fiable même si le fil principal est chargé.
 
 ---
 
@@ -230,7 +264,7 @@ Le rebond n'apparaît **que** si le geste avait de l'élan.
   - le changement de mois est un fondu enchaîné ;
   - les chiffres changent directement ;
   - `MotionConfig reducedMotion="user"` coupe les animations de transformation et de layout.
-- **`prefers-reduced-transparency: reduce`** : verre et matériaux deviennent opaques ; réfraction et flou coupés (canvas WebGL du verre masqué).
+- **`prefers-reduced-transparency: reduce`** : verre et matériaux deviennent opaques ; pas de scène de verre (ni réfraction ni flou).
 - **`prefers-contrast: more`** : fonds pleins, bordures franches, libellés secondaires renforcés ; verre opaque.
 
 ---
@@ -249,6 +283,9 @@ Le rebond n'apparaît **que** si le geste avait de l'élan.
 
 - ❌ Liquid Glass sur le contenu (cartes, listes) : le verre est réservé à la navigation et aux contrôles
 - ❌ Verre sans voile là où du contenu passe dessous (libellés illisibles)
+- ❌ Lentille réfractante sur un contrôle de la page : elle courberait ses propres libellés (optique `control` : réfraction 0)
+- ❌ Texte ou bouton flottant dans la scène avec une teinte « par-dessus » : il serait flouté par son propre verre (le sortir de la scène)
+- ❌ `window.scrollTo` / `window.scrollY` : l'app défile dans `.scroller` (`useScroller()`)
 - ❌ `-webkit-backdrop-filter` écrit à la main à côté de la propriété standard (le minifieur ne garde que la version préfixée)
 - ❌ Transitions CSS ou `@keyframes` sur un élément manipulé au doigt : utiliser un spring `motion`
 - ❌ Dialogue de confirmation pour une suppression annulable : préférer l'annulation par toast
@@ -262,7 +299,8 @@ Le rebond n'apparaît **que** si le geste avait de l'élan.
 
 - [ ] Verre via `Glass` / `GlassButton` uniquement, voile adapté à ce qui passe dessous
 - [ ] Contrastes AA mesurés sur le rendu réel, dans les deux thèmes
-- [ ] Chemin iPhone (verre WebGL) et chemin Chrome (verre SVG) vérifiés (`npm run test:e2e`)
+- [ ] Scène vérifiée avec user agent Chrome et iPhone (nouvel identifiant de filtre), contraste renforcé (`npm run test:e2e`)
+- [ ] Lentille de sélection glissée en e2e
 - [ ] Gestes testés en e2e : sheet, swipe-suppression + annulation, swipe de mois
 - [ ] Springs `motion` sur tout ce qui se manipule ; retour au pointer-down partout
 - [ ] Cibles tactiles ≥ 44px, libellés des onglets sans débordement à 375px

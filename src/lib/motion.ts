@@ -57,7 +57,11 @@ export function rubberband(overshoot: number, dimension: number, constant = 0.55
 /** Seuil de mouvement avant de s'engager dans une direction (hystérésis). */
 export const GESTURE_SLOP = 10
 
-/** Historique court des positions pour calculer la vélocité au relâcher. */
+/**
+ * Historique court des positions pour calculer la vélocité au relâcher.
+ * Passer l'horodatage de l'événement (`e.timeStamp`) plutôt que l'heure de traitement :
+ * si le fil principal est occupé, les événements arrivent groupés mais gardent leur vraie date.
+ */
 export class VelocityTracker {
   private samples: { t: number; x: number; y: number }[] = []
 

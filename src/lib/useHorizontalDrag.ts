@@ -27,7 +27,7 @@ export function useHorizontalDrag({ x, onGrab, map = (v) => v, onRelease }: Opti
     dragged.current = false
     state.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, startX: x.get(), locked: null }
     tracker.current.reset()
-    tracker.current.add(e.clientX, e.clientY)
+    tracker.current.add(e.clientX, e.clientY, e.timeStamp)
   }
 
   const onPointerMove = (e: PointerEvent<HTMLElement>) => {
@@ -45,7 +45,7 @@ export function useHorizontalDrag({ x, onGrab, map = (v) => v, onRelease }: Opti
       e.currentTarget.setPointerCapture(e.pointerId)
     }
     if (s.locked !== 'h') return
-    tracker.current.add(e.clientX, e.clientY)
+    tracker.current.add(e.clientX, e.clientY, e.timeStamp)
     x.set(map(s.startX + (e.clientX - s.sx)))
   }
 
@@ -57,7 +57,7 @@ export function useHorizontalDrag({ x, onGrab, map = (v) => v, onRelease }: Opti
       if (x.get() !== s.startX) onRelease(0)
       return
     }
-    onRelease(e.type === 'pointercancel' ? 0 : tracker.current.velocity().x)
+    onRelease(e.type === 'pointercancel' ? 0 : tracker.current.velocity(e.timeStamp).x)
   }
 
   const onClickCapture = (e: MouseEvent) => {
