@@ -89,10 +89,55 @@ export class VelocityTracker {
   }
 }
 
-/** Petit retour haptique, réservé aux moments qui comptent (seuil franchi, suppression). */
-export function haptic(pattern: number | number[] = 8) {
+/**
+ * Safari sur iPhone n'implémente pas l'API Vibration, mais iOS 18 joue le retour haptique du système
+ * quand on bascule un interrupteur natif (`<input type="checkbox" switch>`). On en bascule un, invisible,
+ * le temps d'un clic. Ailleurs (Android), l'API Vibration fait le travail.
+ */
+function iosTap() {
+  const label = document.createElement('label')
+  label.ariaHidden = 'true'
+  label.style.display = 'none'
+  const input = document.createElement('input')
+  input.type = 'checkbox'
+  input.setAttribute('switch', '')
+  label.appendChild(input)
+  document.head.appendChild(label)
+  label.click()
+  label.remove()
+}
+
+type HapticKind = 'selection' | 'success' | 'error'
+
+/** Rythmes : un tap (sélection, seuil franchi), deux (réussite), trois (erreur), comme les retours d'iOS. */
+const PATTERNS: Record<HapticKind, number[]> = {
+  selection: [8],
+  success: [6, 70, 6],
+  error: [8, 60, 8, 60, 8],
+}
+
+/**
+ * Retour haptique, réservé aux moments qui comptent : seuil franchi, appui long, mois changé,
+ * enregistrement réussi, erreur de saisie. Appelé dans le gestionnaire de l'événement qui le cause,
+ * pour que vibration et image arrivent ensemble.
+ */
+export function haptic(kind: HapticKind = 'selection') {
+  const pattern = PATTERNS[kind]
   try {
-    navigator.vibrate?.(pattern)
+    if (typeof navigator.vibrate === 'function') {
+      navigator.vibrate(pattern)
+      return
+    }
+    // iOS : un tap par impulsion du rythme, espacés comme lui.
+    let delay = 0
+    pattern.forEach((value, i) => {
+      if (i % 2 === 1) {
+        delay += value
+        return
+      }
+      if (delay === 0) iosTap()
+      else window.setTimeout(iosTap, delay)
+    })
   } catch {
     /* non supporté */
   }

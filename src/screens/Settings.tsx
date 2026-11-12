@@ -127,10 +127,12 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
             setTheme(t)
           }}
           options={[
+            { value: 'auto', label: 'Auto' },
             { value: 'dark', label: 'Sombre' },
             { value: 'light', label: 'Clair' },
           ]}
         />
+        <p className="hint section-hint">Auto suit l'apparence de votre téléphone, de jour comme de nuit.</p>
       </section>
 
       <section aria-labelledby="backup-title" className="stack">

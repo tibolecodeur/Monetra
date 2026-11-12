@@ -46,6 +46,7 @@
   --color-pressed: rgb(255 255 255 / 6%);
   --color-scrim: rgb(0 0 0 / 60%);
   --color-segment: #2e2a3a;
+  --color-menu: #201d29;
   --shadow-float: 0 12px 36px rgb(0 0 0 / 55%);
   --shadow-card: none;
 
@@ -89,6 +90,7 @@
   --z-nav: 10;
   --z-toast: 30;
   --z-sheet: 40;
+  --z-menu: 50;
 
   /* Gabarit : capsule d'onglets flottante (64 px) posée 10 px au-dessus de l'indicateur d'accueil,
      sous un fondu de 14 px qui efface le contenu qui passe dessous. */
@@ -173,6 +175,7 @@
   --color-pressed: rgb(30 20 70 / 5%);
   --color-scrim: rgb(14 8 30 / 34%);
   --color-segment: #ffffff;
+  --color-menu: #ffffff;
   --shadow-float: 0 12px 32px rgb(40 20 100 / 16%);
   --shadow-card: 0 1px 2px rgb(40 20 100 / 4%), 0 8px 24px rgb(40 20 100 / 6%);
   --cat-logement: #b45f00;
@@ -454,6 +457,10 @@ fieldset {
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
   line-height: var(--lh-13);
+}
+
+.section-hint {
+  padding: 0 var(--space-xs);
 }
 
 .footnote {
@@ -1616,6 +1623,89 @@ button.row:active,
   color: var(--color-text-secondary);
 }
 
+/* Menu contextuel (components/ContextMenu.tsx) : appui long sur une ligne, comme sur iOS.
+   Fond flouté et assombri, ligne soulevée, menu opaque (jamais un verre posé sur un autre verre). */
+
+.cm-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-menu);
+}
+
+.cm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 38%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+:root[data-theme='light'] .cm-backdrop {
+  background: rgb(30 20 70 / 18%);
+}
+
+.cm-preview {
+  position: fixed;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--surface-1);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 45%);
+  pointer-events: none;
+}
+
+.cm-preview > .row {
+  height: 100%;
+}
+
+/* La ligne d'origine s'efface pendant que son aperçu est soulevé. */
+[data-lifted] {
+  visibility: hidden;
+}
+
+.cm-menu {
+  position: fixed;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--color-menu);
+  border: 1px solid var(--material-bar-edge);
+  box-shadow: var(--shadow-float);
+}
+
+.cm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  text-align: left;
+}
+
+.cm-item + .cm-item {
+  border-top: 1px solid var(--color-separator);
+}
+
+.cm-item:active,
+.cm-item:focus-visible {
+  background: var(--color-pressed);
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cm-item:hover {
+    background: var(--color-pressed);
+  }
+}
+
+.cm-item.destructive {
+  color: var(--color-danger);
+}
+
 /* Glissement pour supprimer */
 
 .swipe-row {
@@ -1937,6 +2027,11 @@ button.row:active,
 
 /* Transparence réduite : barres opaques, plus de flou. */
 @media (prefers-reduced-transparency: reduce) {
+  .cm-backdrop {
+    backdrop-filter: none;
+    background: rgb(0 0 0 / 60%);
+  }
+
   :root,
   :root[data-theme='light'] {
     --material-bar: var(--material-bar-solid);

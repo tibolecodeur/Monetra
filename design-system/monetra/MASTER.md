@@ -13,6 +13,7 @@
 **Revised:** 2026-11-10 : **nouveau Liquid Glass, scène filtrée** d'après [liquid-glass-web-react](https://github.com/PallavAg/liquid-glass-web-react) (même rendu sur Safari, Chrome et Firefox), lentilles de sélection glissables, défilement dans un conteneur
 **Revised:** 2026-11-10 : **retrait du Liquid Glass** (trop fragile selon les navigateurs) ; barre d'onglets classique, un seul matériau de barre, retour au toucher en CSS, règles des skills d'Emil Kowalski
 **Revised:** 2026-11-12 : **refonte « Noir & Violet »** : fond noir uni (plasma retiré), accent violet unique, îlots graphiques (reste à vivre embrasé, bulles de dépenses), registre d'opérations, capsule d'onglets flottante, titres en serif éditoriale. Inspirée de trois maquettes bancaires (panneau « Spent » noir → orange, bulles « Expenses » bleues, registre « Transactions » noir et blanc).
+**Revised:** 2026-11-12 : **expérience iOS** : menu contextuel à l'appui long, retours haptiques sur iPhone, onglet actif qui remonte, toast balayable, thème Automatique (voir « Réflexes iOS »).
 **Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -266,6 +267,34 @@ Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'appliqu
 
 ---
 
+## Réflexes iOS (skill `apple-design` : familiarité, agency, multimodal)
+
+Ce qu'un utilisateur d'iPhone fait sans y penser doit marcher ici aussi.
+
+| Réflexe | Comportement | Où |
+|---|---|---|
+| **Appui long** | Après 450 ms sans bouger (> 10 px annule), la ligne se soulève (aperçu, échelle 1,02, spring critique) au-dessus d'un fond flouté (14 px) et assombri ; un menu opaque sort d'elle (origine au coin le plus proche), sous la ligne si la place le permet, sinon au-dessus, sinon la ligne remonte. Retour haptique à l'ouverture. Le clic qui suit l'appui long est avalé (la fiche ne s'ouvre pas). | `useLongPress`, `ContextMenu` ; opérations (Modifier, Dupliquer aujourd'hui, Supprimer) et récurrents (Modifier, Supprimer) |
+| Fermer le menu | Un **nouveau** toucher sur le fond (`pointerdown`, pas `click` : le doigt qui a ouvert le menu se lève sur le fond), Échap, Tab ; le focus revient à la ligne, sauf si une action l'a emmené ailleurs. | |
+| Clavier / souris | Clic droit ou touche Menu ouvrent le même menu ; flèches haut/bas entre les actions, focus sur la première. | |
+| **Onglet actif touché** | Remonte en haut de l'écran en défilant (instantané en mouvement réduit). | `App.navigate` |
+| **Toast** | Se balaie vers le bas pour le fermer (part dans le prolongement du doigt) ; résiste vers le haut ; ne se ferme pas tout seul tant qu'on le tient. | `Toast` |
+| **Thème Auto** | Suit l'apparence du système, en direct ; appliqué avant le premier rendu. Le sombre reste le défaut. | Réglages, `prefs.ts`, `index.html` |
+| Supprimer | Toujours annulable par le toast, jamais de dialogue (swipe et menu prennent le même chemin). | |
+
+### Haptique
+
+Safari sur iPhone n'a pas l'API Vibration : `haptic()` bascule un interrupteur natif invisible (`<input type="checkbox" switch>`, iOS 18+), ce qui joue le retour du système ; ailleurs, `navigator.vibrate`. Toujours appelé dans le gestionnaire de l'événement qui le cause (même image que le visuel).
+
+| Rythme | Quand |
+|---|---|
+| `selection` (1 tap) | seuil de suppression franchi, mois changé au doigt, menu contextuel ouvert |
+| `success` (2 taps) | ligne supprimée au doigt, opération enregistrée |
+| `error` (3 taps) | saisie refusée (montant, catégorie) |
+
+Jamais au changement d'onglet, au segmented ni au défilement : l'haptique se réserve aux moments qui comptent.
+
+---
+
 ## Sentir le natif sur téléphone (skill `mobile-native`)
 
 - `viewport-fit=cover` + `env(safe-area-inset-*)` sur la barre d'onglets, la barre de titre et les feuilles ; hauteurs en `dvh`.
@@ -316,6 +345,7 @@ Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'appliqu
 - ❌ `-webkit-backdrop-filter` écrit à la main à côté de la propriété standard (le minifieur ne garde que la version préfixée)
 - ❌ `@keyframes` sur un élément manipulé au doigt : utiliser un spring `motion`
 - ❌ Dialogue de confirmation pour une suppression annulable : préférer l'annulation par toast
+- ❌ Fermer un menu contextuel sur `click` (le doigt qui l'a ouvert se lève dessus) ; haptique sur une action fréquente (onglets, défilement)
 - ❌ Couleur seule pour identifier une catégorie (toujours le libellé)
 - ❌ **Emojis comme icônes** ; chiffres proportionnels pour les montants
 - ❌ Contenu masqué par la barre d'onglets ; **focus invisible** ; cibles tactiles de moins de 44px

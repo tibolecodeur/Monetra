@@ -16,6 +16,7 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 - **Opérations du mois** : liste par jour, édition et suppression.
 - **Comptes** : courant, livret, PEL, PER, assurance-vie, parts sociales ; le solde suit les transactions.
 - **Export / import JSON** de toute la base.
+- **Réflexes iOS** : appui long sur une opération pour Modifier / Dupliquer / Supprimer, retours haptiques (iPhone compris), toucher l'onglet actif pour remonter, toast qu'on balaie, thème Automatique.
 
 Aucune donnée n'est écrite en dur : tout se saisit depuis l'app.
 
