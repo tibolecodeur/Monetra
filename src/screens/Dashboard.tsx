@@ -8,6 +8,7 @@ import { MonthSwitcher } from '../components/MonthSwitcher'
 import { NavHeader } from '../components/NavHeader'
 import { TransactionRow } from '../components/TransactionRow'
 import { getCategory } from '../lib/categories'
+import { SPRINGS } from '../lib/motion'
 import { addMonths, currentMonth, daysInMonth, formatShortDate, today, type MonthKey } from '../lib/dates'
 import { formatMoney } from '../lib/format'
 import { accountLabels, useAccounts, useMonthTransactions, useRecurring } from '../lib/hooks'
@@ -175,10 +176,16 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
                 <Money value={totalDepenses} />
               </p>
             </div>
-            <CategoryBubbles items={summary.parCategorie} />
-            <ul className="cat-tiles">
+            {/* Clé = mois : au changement de mois, rien ne glisse (le contenu entier glisse déjà avec le geste). */}
+            <CategoryBubbles key={`bubbles-${month}`} items={summary.parCategorie} />
+            <ul className="cat-tiles" key={`tiles-${month}`}>
               {summary.parCategorie.map(({ categorie, total }) => (
-                <li key={categorie} className={`cat-tile tint-${categorie}`}>
+                <motion.li
+                  key={categorie}
+                  className={`cat-tile tint-${categorie}`}
+                  layout="position"
+                  transition={SPRINGS.data()}
+                >
                   <span className="cat-tile-top">
                     <span className="cat-tile-label">{getCategory(categorie).label}</span>
                     <span className="dot-icon">
@@ -189,7 +196,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
                     <Money value={total} />
                   </span>
                   <span className="cat-tile-share">{percentFmt.format(total / totalDepenses)}</span>
-                </li>
+                </motion.li>
               ))}
             </ul>
           </section>

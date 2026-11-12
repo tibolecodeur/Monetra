@@ -13,7 +13,7 @@
 **Revised:** 2026-11-10 : **nouveau Liquid Glass, scène filtrée** d'après [liquid-glass-web-react](https://github.com/PallavAg/liquid-glass-web-react) (même rendu sur Safari, Chrome et Firefox), lentilles de sélection glissables, défilement dans un conteneur
 **Revised:** 2026-11-10 : **retrait du Liquid Glass** (trop fragile selon les navigateurs) ; barre d'onglets classique, un seul matériau de barre, retour au toucher en CSS, règles des skills d'Emil Kowalski
 **Revised:** 2026-11-12 : **refonte « Noir & Violet »** : fond noir uni (plasma retiré), accent violet unique, îlots graphiques (reste à vivre embrasé, bulles de dépenses), registre d'opérations, capsule d'onglets flottante, titres en serif éditoriale. Inspirée de trois maquettes bancaires (panneau « Spent » noir → orange, bulles « Expenses » bleues, registre « Transactions » noir et blanc).
-**Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants).
+**Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
 
@@ -192,7 +192,7 @@ Le swipe horizontal de mois porte sur tout ce bloc (sauf l'en-tête).
 - Capsules. Principal : violet plein, halo violet. Secondaire : `--surface-2`. Sur îlot : blanc plein (`.btn-light`) ou verre (`.btn-glass`). Danger : rouge à 16 %.
 - Bouton rond cerclé (`.round-button`) : 44px, liseré et icône en accent-texte.
 - Sélecteur de mois : capsule compacte `--surface-2`, chevrons de 44px.
-- Segmented : rail capsule, curseur capsule qui glisse en 200 ms (3px de marge).
+- Segmented : rail capsule ; le curseur est rendu dans l'option choisie et partage un `layoutId` (unique par instance, `useId`) : Motion l'anime d'une option à l'autre, sans calcul de largeur ni de position.
 - Champs : remplissage, bordure ≥ 3:1, halo d'accent au focus, 17px.
 
 ### Saisie
@@ -216,14 +216,14 @@ Collées au bas de l'écran, opaques, rayon 32px en haut, poignée, titre serif,
 | Cent fois par jour, ou au clavier | Aucune animation | changement d'onglet, navigation, Échap |
 | Dizaines de fois par jour | Réduite, à peine perceptible | retour à l'appui (140 ms), curseur du segmented (200 ms), chevrons de mois (fondu de 270 ms) |
 | Occasionnelle | Animation normale | sheet, toast, suppression d'une ligne |
-| Donnée lue ou manipulée | Seulement un vrai changement de valeur | reste à vivre qui glisse vers sa nouvelle valeur, jauges (250 ms) ; jamais rejoué au chargement |
+| Donnée lue ou manipulée | Seulement un vrai changement de valeur | reste à vivre qui glisse vers sa nouvelle valeur, jauges (250 ms), bulles qui glissent et grossissent, tuiles de catégories qui se réordonnent ; jamais rejoué au chargement ni au changement de mois (composants recréés par mois : le contenu glisse déjà avec le geste) |
 
 Chaque animation a une raison : retour au toucher, cohérence spatiale, indication d'état, ou éviter un changement brutal. « C'est joli » n'en est pas une.
 
 ### Deux outils
 
-- **CSS** pour ce qui est prédéterminé : retour à l'appui (`:active`, `transform: scale(0.97)`, `--press-duration` 140 ms), curseur du segmented, jauges. Courbe `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`. Jamais `transition: all`, jamais `ease-in`, jamais plus de 300 ms, uniquement `transform`, `opacity` ou `clip-path`.
-- **Springs `motion`** pour ce qui suit un geste et doit pouvoir être rattrapé : sheet, swipe d'une ligne, swipe de mois. Pas de `@keyframes` sur ces éléments.
+- **CSS** pour ce qui est prédéterminé : retour à l'appui (`:active`, `transform: scale(0.97)`, `--press-duration` 140 ms), jauges. Courbe `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`. Jamais `transition: all`, jamais `ease-in`, jamais plus de 300 ms, uniquement `transform`, `opacity` ou `clip-path`.
+- **Springs `motion`** pour ce qui suit un geste et doit pouvoir être rattrapé (sheet, swipe d'une ligne, swipe de mois), et pour ce que CSS ne sait pas animer : élément qui change de place (`layoutId` du curseur du segmented), liste qui se réordonne (`layout` des tuiles), attributs SVG (`r`, position et arc des bulles). Pas de `@keyframes` sur ces éléments.
 
 ### Springs (damping ratio + response, convertis pour Motion : k = (2π/response)², c = 4π·ζ/response)
 
@@ -233,6 +233,8 @@ Chaque animation a une raison : retour au toucher, cohérence spatiale, indicati
 | Repositionnement | 1.0 | 0.4 s | fermeture de sheet, sortie d'une ligne supprimée, changement de mois au doigt |
 | Sheet après un geste avec élan | 0.8 | 0.3 s | retour de la sheet après un flick |
 | Flick | 0.8 | 0.35 s | retour élastique d'une ligne ou d'un mois après un geste rapide |
+| Curseur du segmented | 1.0 | 0.25 s | `layoutId` |
+| Données qui se réorganisent | 1.0 | 0.45 s | bulles, tuiles de catégories |
 | Chiffres | 1.0 | 0.5 s | reste à vivre |
 
 Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'applique aucune force, donc aucun rebond.

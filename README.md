@@ -56,7 +56,7 @@ Vidéos des gestes : [`docs/videos/`](docs/videos).
 - [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
 - [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) : manifest, service worker, offline
 - [Dexie.js](https://dexie.org/) : stockage IndexedDB
-- [Motion](https://motion.dev/) : springs et gestes (le reste du mouvement est en CSS)
+- [Motion](https://motion.dev/) : springs, gestes, `layoutId` / `layout` et animations SVG (le reste du mouvement est en CSS) ; [Motion AI Kit](https://motion.dev/docs/ai-kit) installé pour les agents (skill `motion` et agent `motion-reviewer` dans `.claude/`, serveurs MCP dans `.mcp.json`)
 - [Lucide](https://lucide.dev/) : icônes SVG ; police système (SF Pro), [Inter](https://rsms.me/inter/) auto-hébergée en repli, [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) pour les titres
 - [Playwright](https://playwright.dev/) : tests e2e tactiles
 

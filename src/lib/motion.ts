@@ -32,6 +32,10 @@ export const SPRINGS = {
   sheet: (velocity = 0) => spring(0.8, 0.3, velocity),
   /** Retour élastique après un flick. */
   flick: (velocity = 0) => spring(0.8, 0.35, velocity),
+  /** Curseur du segmented : critique et vif (≈ 200 ms perçues). */
+  segment: () => spring(1, 0.25),
+  /** Données qui se réorganisent (bulles, tuiles) : critique, sans rebond. */
+  data: () => spring(1, 0.45),
   /** Chiffres qui changent. */
   number: () => spring(1, 0.5),
 }

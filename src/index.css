@@ -1326,13 +1326,14 @@ button.row:active,
 
 .segment-thumb {
   position: absolute;
-  top: 3px;
-  bottom: 3px;
-  left: 3px;
+  inset: 0;
   border-radius: var(--radius-full);
   background: var(--color-segment);
   box-shadow: 0 1px 3px rgb(0 0 10 / 18%);
-  transition: transform 200ms var(--ease-out);
+}
+
+.segment-label {
+  position: relative;
 }
 
 .segmented button {
@@ -1960,7 +1961,6 @@ button.row:active,
   .tab-add,
   .toast-action,
   .round-button,
-  .segment-thumb,
   .swipe-action-icon,
   .meter span {
     transition: none;
