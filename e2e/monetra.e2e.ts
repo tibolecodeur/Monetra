@@ -234,6 +234,17 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(await tab.evaluate((el) => getComputedStyle(el).color)).toBe(active)
     expect(await tab.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s')
 
+    // La pastille glisse jusqu'à l'onglet choisi (layoutId), en passant sous le bouton d'ajout.
+    const indicator = page.locator('.tab-indicator')
+    await expect(indicator).toHaveCount(1)
+    await expect
+      .poll(async () => {
+        const i = (await indicator.boundingBox())!
+        const t = (await tab.boundingBox())!
+        return Math.abs(i.x - t.x) < 1 && Math.abs(i.width - t.width) < 1
+      })
+      .toBe(true)
+
     // Le curseur du segmented glisse sous l'option choisie.
     const thumb = page.locator('.segment-thumb')
     const option = page.getByRole('radio', { name: 'Revenus' })

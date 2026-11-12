@@ -39,7 +39,7 @@ L'interface suit le design system [`design-system/monetra/MASTER.md`](design-sys
 
 Les règles viennent des skills d'[Emil Kowalski](https://github.com/emilkowalski/skills) (`emil-design-eng`, `gestures`, `mobile-native`…) et du skill `apple-design`, installés dans `.agents/skills/`.
 
-- **Le mouvement se mérite** : changer d'onglet ne s'anime pas ; les retours à l'appui durent 140 ms ; rien ne dépasse 250 ms hors gestes.
+- **Le mouvement se mérite** : l'écran ne s'anime pas au changement d'onglet, seule la pastille glisse ; les retours à l'appui durent 140 ms ; les transitions restent courtes et sans rebond.
 - **Retour à l'appui, pas au relâcher**, en CSS (`:active`).
 - **Sheet glissable** : suivi 1:1, rubber-band vers le haut, fermeture décidée par la vélocité et la projection du momentum, voile qui suit le geste, rattrapable en pleine fermeture.
 - **Swipe pour supprimer** (opérations, récurrents) avec seuil, rubber-band et annulation depuis un toast.

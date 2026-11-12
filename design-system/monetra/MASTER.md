@@ -159,7 +159,7 @@ Calculés le 12/11/2026 sur les couleurs composées (alpha appliqué sur la surf
 ### Navigation
 
 - **En-tête** (`NavHeader`) : grand titre en serif, ou, sur l'accueil, logo rond violet + « Monetra » avec le sélecteur de mois à droite. Une barre compacte (titre 17px centré) apparaît en fondu au défilement.
-- **Capsule d'onglets** (`BottomNav`) : conteneur fixe pleine largeur (`.tab-bar`, transparent aux touchers, fondu vers le fond pour effacer le contenu qui passe dessous), capsule flottante de 64px (`.tab-pill`) à 10px au-dessus de l'indicateur d'accueil. Accueil, Opérations, **bouton d'ajout** (rond de 52px, violet, halo) au centre, Récurrents, Réglages. **Onglet actif : pastille pleine (blanche en sombre, noire en clair) avec icône et libellé** ; inactifs : icône seule, libellé gardé pour les lecteurs d'écran. **Aucune animation au changement d'onglet** : la pastille change de place à l'instant.
+- **Capsule d'onglets** (`BottomNav`) : conteneur fixe pleine largeur (`.tab-bar`, transparent aux touchers, fondu vers le fond pour effacer le contenu qui passe dessous), capsule flottante de 64px (`.tab-pill`) à 10px au-dessus de l'indicateur d'accueil. Accueil, Opérations, **bouton d'ajout** (rond de 52px, violet, halo) au centre, Récurrents, Réglages. **Onglet actif : pastille pleine (blanche en sombre, noire en clair) avec icône et libellé** ; inactifs : icône seule, libellé gardé pour les lecteurs d'écran. **La pastille glisse d'un onglet à l'autre** (`layoutId`, spring critique de 0,3 s, choix du 12/11/2026) ; les onglets, dont la largeur change avec le libellé, glissent avec elle (`layout="position"`). La teinte du texte change à l'instant. Le bouton d'ajout glisse dans un conteneur (`.tab-add-slot`, au-dessus de la pastille) pour garder son retour à l'appui en CSS.
 - **Bouton « Nouveau récurrent »** : capsule violette centrée, `position: sticky` au-dessus de la capsule d'onglets.
 - Chaque écran réserve la hauteur de la barre en bas (`--content-bottom`).
 
@@ -213,7 +213,7 @@ Collées au bas de l'écran, opaques, rayon 32px en haut, poignée, titre serif,
 
 | Fréquence | Décision | Dans Monetra |
 |---|---|---|
-| Cent fois par jour, ou au clavier | Aucune animation | changement d'onglet, navigation, Échap |
+| Cent fois par jour, ou au clavier | Aucune animation, sauf exception assumée | navigation entre écrans, Échap. **Exception** : la pastille d'onglet glisse (0,3 s, critique, interruptible), à la demande du produit |
 | Dizaines de fois par jour | Réduite, à peine perceptible | retour à l'appui (140 ms), curseur du segmented (200 ms), chevrons de mois (fondu de 270 ms) |
 | Occasionnelle | Animation normale | sheet, toast, suppression d'une ligne |
 | Donnée lue ou manipulée | Seulement un vrai changement de valeur | reste à vivre qui glisse vers sa nouvelle valeur, jauges (250 ms), bulles qui glissent et grossissent, tuiles de catégories qui se réordonnent ; jamais rejoué au chargement ni au changement de mois (composants recréés par mois : le contenu glisse déjà avec le geste) |
@@ -233,6 +233,7 @@ Chaque animation a une raison : retour au toucher, cohérence spatiale, indicati
 | Repositionnement | 1.0 | 0.4 s | fermeture de sheet, sortie d'une ligne supprimée, changement de mois au doigt |
 | Sheet après un geste avec élan | 0.8 | 0.3 s | retour de la sheet après un flick |
 | Flick | 0.8 | 0.35 s | retour élastique d'une ligne ou d'un mois après un geste rapide |
+| Pastille d'onglet | 1.0 | 0.3 s | `layoutId` + `layout="position"` |
 | Curseur du segmented | 1.0 | 0.25 s | `layoutId` |
 | Données qui se réorganisent | 1.0 | 0.45 s | bulles, tuiles de catégories |
 | Chiffres | 1.0 | 0.5 s | reste à vivre |
@@ -307,7 +308,7 @@ Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'appliqu
 - ❌ Lueur claire sous du texte : le pic de la lueur reste hors du panneau
 - ❌ Effets de verre réfractant (filtre SVG, WebGL, cartes de déplacement) : retirés, trop fragiles d'un navigateur à l'autre
 - ❌ Détection de navigateur par user agent ; préférer `@supports` et les media queries
-- ❌ Animation au changement d'onglet ou sur une action au clavier
+- ❌ Animation sur une action au clavier ; au changement d'onglet, seule la pastille (et les onglets qu'elle décale) glisse, rien d'autre (ni l'écran, ni les icônes)
 - ❌ `transition: all`, `ease-in`, durée > 300 ms, animation de `width` / `height` / `top` / `margin`
 - ❌ JavaScript pour un retour à l'appui que `:active` sait faire
 - ❌ Flou de plus de 20 px, ou flou sur une grande surface qui bouge (cartes, feuilles)

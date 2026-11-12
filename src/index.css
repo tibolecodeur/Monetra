@@ -1389,6 +1389,7 @@ button.row:active,
 }
 
 .tab {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1415,15 +1416,32 @@ button.row:active,
   clip-path: inset(50%);
 }
 
-/* Changer d'onglet est l'action la plus fréquente : aucune animation, la pastille change à l'instant. */
+/* La pastille (.tab-indicator) glisse d'un onglet à l'autre (BottomNav, layoutId) ; la teinte change à l'instant. */
 .tab.active {
   padding: 0 16px 0 14px;
-  background: var(--color-text);
   color: var(--color-bg);
+}
+
+.tab-indicator {
+  position: absolute;
+  inset: 0;
+  background: var(--color-text);
+}
+
+.tab svg,
+.tab-label {
+  position: relative;
 }
 
 .tab:active {
   opacity: 0.6;
+}
+
+.tab-add-slot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
 }
 
 .tab-add {
