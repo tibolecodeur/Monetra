@@ -16,8 +16,10 @@ interface Props {
 }
 
 /**
- * Barre d'onglets classique : fixe, collée au bas de l'écran, bouton d'ajout au centre.
- * Changer d'onglet est l'action la plus fréquente de l'app : aucun mouvement, seule la teinte change.
+ * Barre d'onglets flottante en capsule, bouton d'ajout au centre.
+ * L'onglet actif devient une pastille claire avec son libellé ; les autres n'affichent que leur icône
+ * (le libellé reste lu par les lecteurs d'écran). Changer d'onglet est l'action la plus fréquente de
+ * l'app : aucun mouvement, la pastille change de place à l'instant.
  */
 export function BottomNav({ current, onChange, onAdd }: Props) {
   const tab = ({ id, label, icon: Icon }: (typeof ITEMS)[number]) => {
@@ -30,7 +32,7 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
         aria-current={active ? 'page' : undefined}
         onClick={() => onChange(id)}
       >
-        <Icon size={24} strokeWidth={active ? 2.3 : 2} aria-hidden="true" />
+        <Icon size={22} strokeWidth={active ? 2.3 : 2} aria-hidden="true" />
         <span className="tab-label">{label}</span>
       </button>
     )
@@ -38,11 +40,13 @@ export function BottomNav({ current, onChange, onAdd }: Props) {
 
   return (
     <nav className="tab-bar" aria-label="Navigation principale">
-      {ITEMS.slice(0, 2).map(tab)}
-      <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">
-        <Plus size={26} strokeWidth={2.4} aria-hidden="true" />
-      </button>
-      {ITEMS.slice(2).map(tab)}
+      <div className="tab-pill">
+        {ITEMS.slice(0, 2).map(tab)}
+        <button type="button" className="tab-add" onClick={onAdd} aria-label="Ajouter une transaction">
+          <Plus size={24} strokeWidth={2.4} aria-hidden="true" />
+        </button>
+        {ITEMS.slice(2).map(tab)}
+      </div>
     </nav>
   )
 }

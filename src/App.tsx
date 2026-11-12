@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AccountForm } from './components/AccountForm'
-import { AppBackground } from './components/AppBackground'
 import { BottomNav, type Screen } from './components/BottomNav'
 import { RecurringForm } from './components/RecurringForm'
 import { Sheet } from './components/Sheet'
 import { TransactionForm } from './components/TransactionForm'
 import { currentMonth, type MonthKey } from './lib/dates'
 import { generateRecurring } from './lib/recurring'
-import type { Account, Recurring, Transaction } from './lib/types'
+import type { Account, Recurring, Transaction, TransactionType } from './lib/types'
 import { Dashboard } from './screens/Dashboard'
 import { RecurringScreen } from './screens/RecurringScreen'
 import { Settings } from './screens/Settings'
@@ -16,7 +15,7 @@ import { Transactions } from './screens/Transactions'
 const SCREENS: Screen[] = ['accueil', 'operations', 'recurrents', 'reglages']
 
 type Modal =
-  | { kind: 'transaction'; transaction?: Transaction }
+  | { kind: 'transaction'; transaction?: Transaction; type?: TransactionType }
   | { kind: 'account'; account?: Account }
   | { kind: 'recurring'; recurring?: Recurring }
   | null
@@ -75,7 +74,6 @@ export default function App() {
 
   return (
     <>
-      <AppBackground />
       <div className="app">
         <a
           href="#contenu"
@@ -95,6 +93,7 @@ export default function App() {
               onSelect={editTransaction}
               onSeeAll={() => navigate('operations')}
               onAddAccount={addAccount}
+              onAdd={(type) => setModal({ kind: 'transaction', type })}
             />
           )}
           {screen === 'operations' && <Transactions month={month} onMonthChange={setMonth} onSelect={editTransaction} />}
@@ -113,7 +112,7 @@ export default function App() {
 
         {modal?.kind === 'transaction' && (
           <Sheet key="transaction" title={modal.transaction ? 'Modifier la transaction' : 'Nouvelle transaction'} onClose={close}>
-            {(dismiss) => <TransactionForm transaction={modal.transaction} onDone={dismiss} onNeedAccount={addAccount} />}
+            {(dismiss) => <TransactionForm transaction={modal.transaction} initialType={modal.type} onDone={dismiss} onNeedAccount={addAccount} />}
           </Sheet>
         )}
         {modal?.kind === 'account' && (

@@ -1,6 +1,6 @@
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
 import { useEffect } from 'react'
-import { formatMoney, round2 } from '../lib/format'
+import { formatMoney, round2, splitMoney } from '../lib/format'
 import { SPRINGS } from '../lib/motion'
 
 /**
@@ -10,7 +10,8 @@ import { SPRINGS } from '../lib/motion'
 export function AnimatedAmount({ value, className }: { value: number; className?: string }) {
   const reduced = useReducedMotion()
   const mv = useMotionValue(value)
-  const text = useTransform(mv, (v) => formatMoney(round2(v)))
+  const units = useTransform(mv, (v) => splitMoney(formatMoney(round2(v)))[0])
+  const cents = useTransform(mv, (v) => splitMoney(formatMoney(round2(v)))[1])
 
   useEffect(() => {
     if (reduced) {
@@ -23,8 +24,23 @@ export function AnimatedAmount({ value, className }: { value: number; className?
 
   return (
     <p className={className} data-value={value}>
-      <motion.span aria-hidden="true">{text}</motion.span>
+      <span aria-hidden="true">
+        <motion.span>{units}</motion.span>
+        <motion.span className="cents">{cents}</motion.span>
+      </span>
       <span className="sr-only">{formatMoney(value)}</span>
     </p>
+  )
+}
+
+/** Montant statique avec les centimes estompés. */
+export function Money({ value, sign = '' }: { value: number; sign?: string }) {
+  const [units, cents] = splitMoney(formatMoney(value))
+  return (
+    <>
+      {sign}
+      {units}
+      <span className="cents">{cents}</span>
+    </>
   )
 }

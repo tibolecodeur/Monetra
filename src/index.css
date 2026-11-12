@@ -1,75 +1,58 @@
 /*
  * Monetra : tokens et composants.
- * Référence : design-system/monetra/MASTER.md.
- * - Le fond plasma (AppBackground) donne la palette : bleu nuit, accent pervenche.
- * - Barres (onglets, titre compact, toast) : un seul matériau translucide et flouté.
- * - Contenu (cartes, contrôles de la page) : voile translucide sans flou ; feuilles opaques.
+ * Référence : design-system/monetra/MASTER.md (direction « Noir & Violet »).
+ * - Fond noir uni, une seule couleur d'accent : le violet. Le vert reste réservé aux revenus, le rouge aux erreurs.
+ * - Les « îlots » graphiques (reste à vivre, bulles de dépenses) restent sombres et violets dans les deux thèmes.
+ * - Barres (capsule d'onglets, titre compact, toast) : un seul matériau translucide et flouté.
+ * - Contenu : surfaces pleines (cartes, registre d'opérations) ; feuilles opaques.
  * Sombre par défaut ; le thème clair s'active avec [data-theme='light'] (Réglages).
  */
 
 :root {
-  /* Fond (sous le plasma) */
-  --color-bg: #05060c;
+  --color-bg: #070609;
 
-  /* Libellés (vibrancy : opacité sur blanc, comme les labels iOS) */
+  /* Surfaces : cartes et registre (1), pastilles et contrôles posés dessus ou sur le fond (2). */
+  --surface-1: #111017;
+  --surface-2: #1c1a24;
+  --surface-edge: rgb(255 255 255 / 6%);
+
+  /* Libellés */
   --color-text: #ffffff;
-  --color-text-secondary: rgb(235 235 245 / 66%);
-  --color-text-tertiary: rgb(235 235 245 / 34%);
-  /* Texte secondaire posé directement sur le plasma : plus opaque pour rester lisible. */
-  --color-text-on-bg: rgb(255 255 255 / 86%);
+  --color-text-secondary: rgb(240 236 250 / 62%);
+  --color-text-tertiary: rgb(240 236 250 / 34%);
 
-  /* Accent tiré du plasma (pervenche) ; vert réservé aux revenus, rouge aux erreurs. */
-  --color-accent: #5468e0;
+  /* Violet : remplissage (boutons, ajout), texte (liens, sélection), voile (halo de focus, sélection). */
+  --color-accent: #7c4dff;
   --color-on-accent: #ffffff;
-  --color-accent-text: #a8b6ff;
-  --color-accent-soft: rgb(124 143 255 / 22%);
-  --color-income: #30d158;
-  --color-income-soft: rgb(48 209 88 / 18%);
-  --color-danger: #ff6961;
+  --color-accent-text: #b8a1ff;
+  --color-accent-soft: rgb(124 77 255 / 20%);
+  --color-accent-glow: rgb(124 77 255 / 38%);
+  --color-income: #5ee39a;
+  --color-income-soft: rgb(94 227 154 / 14%);
+  --color-danger: #ff7a85;
   --color-danger-fill: #ff453a;
-  --color-danger-soft: rgb(255 69 58 / 18%);
+  --color-danger-soft: rgb(255 69 58 / 16%);
 
-  /* Matériaux */
-  --material-content: rgb(17 20 36 / 66%);
-  --material-content-edge: rgb(255 255 255 / 9%);
-  --material-content-highlight: rgb(255 255 255 / 7%);
-  /* Barres (onglets, titre compact, toast) : translucides et floutées, presque opaques pour rester lisibles. */
-  --material-bar: rgb(13 15 27 / 80%);
-  --material-bar-solid: #0d0f1b;
+  /* Barres : translucides et floutées, presque opaques pour rester lisibles. */
+  --material-bar: rgb(22 20 30 / 78%);
+  --material-bar-solid: #16141e;
+  --material-bar-edge: rgb(255 255 255 / 8%);
   --blur-bar: blur(20px) saturate(180%);
-  /* Surfaces opaques au-dessus de tout : feuilles, lien d'évitement. */
-  --color-sheet: #171a2b;
+  --color-sheet: #121018;
 
-  /* Remplissages, séparateurs, états */
-  --color-fill: rgb(120 132 180 / 20%);
-  --color-separator: rgb(255 255 255 / 10%);
-  --color-border-input: rgb(255 255 255 / 38%);
-  --color-pressed: rgb(255 255 255 / 9%);
-  --color-scrim: rgb(2 3 12 / 48%);
-  --color-track: rgb(255 255 255 / 12%);
-  --color-segment: rgb(120 132 180 / 42%);
-  --material-rail: var(--material-content);
-  --color-meter: #ffffff;
-  --shadow-float: 0 10px 32px rgb(0 0 12 / 45%);
-  --shadow-card: 0 8px 28px rgb(0 0 12 / 28%);
+  --color-fill: rgb(255 255 255 / 7%);
+  --color-separator: rgb(255 255 255 / 8%);
+  --color-border-input: rgb(255 255 255 / 30%);
+  --color-pressed: rgb(255 255 255 / 6%);
+  --color-scrim: rgb(0 0 0 / 60%);
+  --color-segment: #2e2a3a;
+  --shadow-float: 0 12px 36px rgb(0 0 0 / 55%);
+  --shadow-card: none;
 
-  /* Couleurs de catégories (pastilles d'icônes, barres) : palette système iOS sombre. */
-  --cat-logement: #ff9f0a;
-  --cat-courses: #40c8e0;
-  --cat-resto: #ff453a;
-  --cat-abonnements: #bf5af2;
-  --cat-loisirs: #ff375f;
-  --cat-epargne: #5e5ce6;
-  --cat-divers: #8e8e93;
-  --cat-revenu: #30d158;
-  --cat-charges: #64d2ff;
-  --cat-variables: #ff9f0a;
-  --cat-compte: #5468e0;
-
-  /* Inter partout, SF Pro sous Safari (voir @supports plus bas). */
+  /* Inter partout, SF Pro sous Safari (voir @supports plus bas) ; serif éditoriale pour les grands titres. */
   --font-sans: 'Inter Variable', system-ui, sans-serif;
-  --font-rounded: 'Inter Variable', system-ui, sans-serif;
-  /* Typographie : taille (rem), tracking et interlignage par taille (skill apple-design §15). */
+  --font-serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', serif;
+  --fs-11: 0.6875rem;
   --fs-12: 0.75rem;
   --ls-12: 0.0005em;
   --lh-12: 1.33;
@@ -88,39 +71,33 @@
   --fs-22: 1.375rem;
   --ls-22: -0.0183em;
   --lh-22: 1.27;
-  --fs-34: 2.125rem;
-  --ls-34: -0.0215em;
-  --lh-34: 1.21;
-  --fs-52: 3.25rem;
-  --ls-52: -0.0223em;
-  --lh-52: 1.08;
+  /* Montants d'affichage : chasse serrée, comme sur les références. */
+  --ls-display: -0.045em;
 
-  /* Espacements (grille de 4) */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 32px;
 
-  /* Rayons (formes continues façon iOS) */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
-  --radius-xl: 28px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-full: 999px;
   --z-sticky: 5;
   --z-nav: 10;
   --z-toast: 30;
   --z-sheet: 40;
 
-  /* Gabarit : tab bar flottante en capsule, posée au-dessus de l'indicateur d'accueil. */
+  /* Gabarit : capsule d'onglets flottante (64 px) posée 10 px au-dessus de l'indicateur d'accueil,
+     sous un fondu de 14 px qui efface le contenu qui passe dessous. */
   --touch: 44px;
-  --tab-bar-height: 56px;
-  --tab-bar-total: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px));
+  --tab-pill-height: 64px;
+  --tab-bar-total: calc(14px + var(--tab-pill-height) + 10px + env(safe-area-inset-bottom, 0px));
   --nav-height: 44px;
-  --content-bottom: calc(var(--tab-bar-total) + var(--space-lg));
+  --content-bottom: calc(var(--tab-bar-total) + var(--space-md));
 
-  /* Mouvement (skill emil-design-eng) : ease-out marqué pour tout ce qui répond à un toucher. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press-duration: 140ms;
 
@@ -136,75 +113,89 @@
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   text-size-adjust: 100%;
-  /* App, pas document : ni pull-to-refresh ni rebond de la page entière. */
   overscroll-behavior: none;
-  /* Le focus clavier ne doit jamais finir sous la barre d'onglets ni sous la barre de titre. */
   scroll-padding-top: calc(env(safe-area-inset-top) + var(--nav-height) + var(--space-sm));
   scroll-padding-bottom: var(--content-bottom);
 }
 
-/* Safari (iOS, macOS) : SF Pro (et SF Pro Rounded pour les montants clés), avec sa propre table de tracking. */
+/* Couleurs de catégories, version sombre : posées aussi sur les îlots, qui restent sombres en thème clair. */
+:root,
+.island {
+  --cat-logement: #ffb547;
+  --cat-courses: #3fd6c6;
+  --cat-resto: #ff7a6b;
+  --cat-abonnements: #c18cff;
+  --cat-loisirs: #ff6fae;
+  --cat-epargne: #8f9bff;
+  --cat-divers: #a9a6b4;
+  --cat-revenu: #5ee39a;
+  --cat-compte: #b8a1ff;
+}
+
 @supports (font: -apple-system-body) {
   :root {
     --font-sans: -apple-system, 'Inter Variable', system-ui, sans-serif;
-    --font-rounded: ui-rounded, -apple-system, 'Inter Variable', system-ui, sans-serif;
     --ls-12: normal;
     --ls-13: normal;
     --ls-15: normal;
     --ls-17: normal;
     --ls-20: normal;
     --ls-22: normal;
-    --ls-34: normal;
-    --ls-52: normal;
+    --ls-display: -0.03em;
   }
 }
 
 :root[data-theme='light'] {
-  --color-bg: #eef0f8;
-  --color-text: #000000;
-  --color-text-secondary: rgb(60 60 67 / 82%);
-  --color-text-tertiary: rgb(60 60 67 / 42%);
-  --color-text-on-bg: rgb(28 30 44 / 86%);
-  --color-accent: #4a5ee0;
+  --color-bg: #f4f2f8;
+  --surface-1: #ffffff;
+  --surface-2: #ebe8f2;
+  --surface-edge: rgb(20 10 50 / 6%);
+  --color-text: #0b0a10;
+  --color-text-secondary: rgb(30 24 48 / 68%);
+  --color-text-tertiary: rgb(30 24 48 / 40%);
+  --color-accent: #6d3cf0;
   --color-on-accent: #ffffff;
-  --color-accent-text: #3a4fd0;
-  --color-accent-soft: rgb(74 94 224 / 14%);
-  --color-income: #196b2e;
-  --color-income-soft: rgb(52 199 89 / 12%);
-  --color-danger: #d70015;
+  --color-accent-text: #5a2bd8;
+  --color-accent-soft: rgb(109 60 240 / 12%);
+  --color-accent-glow: rgb(109 60 240 / 28%);
+  --color-income: #157a3c;
+  --color-income-soft: rgb(21 122 60 / 10%);
+  --color-danger: #c8102e;
   --color-danger-fill: #ff3b30;
   --color-danger-soft: rgb(255 59 48 / 12%);
-  --material-content: rgb(255 255 255 / 76%);
-  --material-content-edge: rgb(255 255 255 / 80%);
-  --material-content-highlight: rgb(255 255 255 / 70%);
-  --material-bar: rgb(246 247 252 / 82%);
-  --material-bar-solid: #f6f7fc;
-  --color-sheet: #f7f8fd;
-  --color-fill: rgb(116 116 140 / 13%);
-  --color-separator: rgb(60 60 67 / 14%);
-  --color-border-input: rgb(60 60 67 / 52%);
-  --color-pressed: rgb(0 0 20 / 6%);
-  --color-scrim: rgb(20 24 50 / 22%);
-  --color-track: rgb(60 60 67 / 14%);
+  --material-bar: rgb(255 255 255 / 82%);
+  --material-bar-solid: #ffffff;
+  --material-bar-edge: rgb(20 10 50 / 8%);
+  --color-sheet: #ffffff;
+  --color-fill: rgb(30 20 70 / 6%);
+  --color-separator: rgb(30 20 70 / 9%);
+  --color-border-input: rgb(30 24 48 / 42%);
+  --color-pressed: rgb(30 20 70 / 5%);
+  --color-scrim: rgb(14 8 30 / 34%);
   --color-segment: #ffffff;
-  /* Rail gris-bleu, pour que le curseur blanc s'en détache (comme le segmented d'iOS). */
-  --material-rail: rgb(222 226 240 / 84%);
-  --color-meter: #1c1c1e;
-  --shadow-float: 0 10px 30px rgb(40 50 110 / 16%);
-  --shadow-card: 0 6px 24px rgb(40 50 110 / 10%);
-  --cat-logement: #ff9500;
-  --cat-courses: #32ade6;
-  --cat-resto: #ff3b30;
-  --cat-abonnements: #af52de;
-  --cat-loisirs: #ff2d55;
-  --cat-epargne: #5856d6;
-  --cat-divers: #8e8e93;
-  --cat-revenu: #34c759;
-  --cat-charges: #30b0c7;
-  --cat-variables: #ff9500;
-  --cat-compte: #4a5ee0;
+  --shadow-float: 0 12px 32px rgb(40 20 100 / 16%);
+  --shadow-card: 0 1px 2px rgb(40 20 100 / 4%), 0 8px 24px rgb(40 20 100 / 6%);
+  --cat-logement: #b45f00;
+  --cat-courses: #0b8277;
+  --cat-resto: #cc3524;
+  --cat-abonnements: #8236d1;
+  --cat-loisirs: #c4206a;
+  --cat-epargne: #4450d4;
+  --cat-divers: #67646f;
+  --cat-revenu: #157a3c;
+  --cat-compte: #6d3cf0;
 
   color-scheme: light;
+}
+
+/* Îlots graphiques : toujours sombres, quel que soit le thème. */
+.island {
+  --color-text: #ffffff;
+  --color-text-secondary: rgb(240 236 250 / 66%);
+  --color-income: #5ee39a;
+
+  color: var(--color-text);
+  color-scheme: dark;
 }
 
 /* Base */
@@ -226,7 +217,6 @@ body {
   overscroll-behavior: none;
 }
 
-/* Sous une feuille, la page ne défile plus. */
 body.no-scroll {
   overflow: hidden;
 }
@@ -246,7 +236,6 @@ a {
   touch-action: manipulation;
 }
 
-/* Un contrôle n'est pas du contenu : un appui long ne sélectionne pas son libellé. */
 button,
 [role='radio'] {
   user-select: none;
@@ -260,6 +249,7 @@ button:disabled {
 
 h1,
 h2,
+h3,
 p,
 dl,
 dd,
@@ -312,56 +302,26 @@ fieldset {
   top: calc(env(safe-area-inset-top) + var(--space-sm));
 }
 
-/* Recettes de matériaux */
-
-/* Contenu : voile translucide sur le fond, sans flou (le fond est déjà diffus, et flouter chaque
-   carte pendant le défilement coûterait cher pour rien). */
-.card,
-.totals > div,
-.hero {
-  background: var(--material-content);
-  border: 1px solid var(--material-content-edge);
-  box-shadow:
-    inset 0 1px 0 var(--material-content-highlight),
-    var(--shadow-card);
-}
-
-/* Barres : même matériau en haut (titre compact) et en bas (onglets), et pour le toast. */
+/* Barres : même matériau en haut (titre compact), en bas (capsule d'onglets) et pour le toast. */
 .nav-bar,
-.tab-bar,
-.toast,
-.sticky-action {
+.tab-pill,
+.toast {
   background: var(--material-bar);
   backdrop-filter: var(--blur-bar);
 }
 
 @supports not (backdrop-filter: blur(1px)) {
   .nav-bar,
-  .tab-bar,
-  .toast,
-  .sticky-action {
+  .tab-pill,
+  .toast {
     background: var(--material-bar-solid);
   }
-}
-
-/* Fond plasma (components/AppBackground.tsx) : fixe, derrière tout le contenu. */
-.app-background {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.app-background canvas {
-  position: absolute;
-  inset: 0;
 }
 
 /* Gabarit */
 
 .app {
   position: relative;
-  z-index: 1;
   max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;
@@ -381,21 +341,52 @@ fieldset {
     var(--content-bottom) max(var(--space-md), env(safe-area-inset-left));
 }
 
-/* Grand titre (NavHeader) */
+/* En-tête d'écran (NavHeader) */
 
 .screen-header {
   display: flex;
-  align-items: flex-end;
-  min-height: calc(var(--nav-height) + 8px);
-  padding: 0 var(--space-xs);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) 12px;
+  min-height: 56px;
+  padding-top: var(--space-xs);
 }
 
+.screen-header-action {
+  margin-left: auto;
+}
+
+/* Grand titre éditorial, en serif (réf. « Bank Smarter. »). */
 .large-title {
-  font-size: var(--fs-34);
-  letter-spacing: var(--ls-34);
-  line-height: var(--lh-34);
-  font-weight: 700;
-  transform-origin: left center;
+  font-family: var(--font-serif);
+  font-size: 2.75rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+/* Accueil : logo rond + nom, comme l'avatar et le nom des références. */
+.brand-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #b8a1ff, #7c4dff 45%, #3b1a8a);
+  color: #ffffff;
+  font-family: var(--font-serif);
+  font-size: 1.625rem;
+  line-height: 1;
+  box-shadow: 0 6px 20px var(--color-accent-glow);
+}
+
+.brand-title {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1;
 }
 
 /* Barre compacte qui apparaît au défilement, titre centré. */
@@ -423,21 +414,28 @@ fieldset {
 .stack {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+/* Titre de section posé sur le fond, en serif, avec un éventuel bouton rond à droite (réf. flèche cerclée). */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-sm);
+  min-height: var(--touch);
+  padding: var(--space-sm) var(--space-xs) 0;
 }
 
-/* Titre de section posé sur le fond (au-dessus des cartes) */
 .section-title {
-  padding: var(--space-md) var(--space-xs) 0;
-  font-size: var(--fs-22);
-  letter-spacing: var(--ls-22);
-  line-height: var(--lh-22);
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.1;
 }
 
-/* Titre à l'intérieur d'une carte */
 .card-title {
-  margin-bottom: 10px;
   font-size: var(--fs-17);
   letter-spacing: var(--ls-17);
   line-height: var(--lh-17);
@@ -459,18 +457,34 @@ fieldset {
 }
 
 .footnote {
-  padding: var(--space-sm) var(--space-md) 0;
-  color: var(--color-text-on-bg);
+  padding: var(--space-xs) var(--space-md) 0;
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
   line-height: var(--lh-13);
   text-align: center;
 }
 
+.footnote strong {
+  color: var(--color-text);
+}
+
 .amount {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* Centimes estompés : l'œil lit les euros d'abord (réf. « $12,680.42 »). */
+.cents {
+  opacity: 0.5;
+}
+
+:root[data-theme='light'] .cents {
+  opacity: 0.62;
+}
+
+:root[data-theme='light'] .island .cents {
+  opacity: 0.5;
 }
 
 .amount.revenu {
@@ -481,43 +495,26 @@ fieldset {
   color: var(--color-danger);
 }
 
-/* Cartes */
+/* Cartes : surfaces pleines, sans voile ni flou. */
 
 .card {
   border-radius: var(--radius-lg);
   padding: var(--space-md);
+  background: var(--surface-1);
+  border: 1px solid var(--surface-edge);
+  box-shadow: var(--shadow-card);
 }
 
 .card-flush {
-  padding: 14px 0 var(--space-xs);
-}
-
-.card-flush > .card-title,
-.card-flush > .card-title-row,
-.card-flush > .empty-text {
-  padding: 0 var(--space-md);
+  padding: var(--space-xs) 0;
 }
 
 ul.card-flush {
-  padding: 2px 0;
-  /* Le fond rouge du swipe reste dans les coins arrondis (clip ne crée pas de conteneur de défilement). */
   overflow: clip;
 }
 
-.card-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  margin-bottom: 2px;
-}
-
-.card-title-row .card-title {
-  margin-bottom: 0;
-}
-
 .empty-text {
-  padding-bottom: var(--space-md) !important;
+  padding: var(--space-md) !important;
 }
 
 .onboarding,
@@ -544,236 +541,454 @@ ul.card-flush {
 
 .privacy svg {
   flex: none;
-  color: var(--color-income);
+  color: var(--color-accent-text);
 }
 
-/* Reste à vivre : la carte la plus épaisse, avec un reflet en haut. */
+/* Reste à vivre : panneau noir qui s'embrase en violet vers le bas, et le plateau glissé dessous
+   (réf. « Spent €3,480.00 » + « Add Card »). */
+
+.hero-stack {
+  display: flex;
+  flex-direction: column;
+}
 
 .hero {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 20px 20px 18px;
+  align-items: center;
+  padding: 26px 20px 22px;
   border-radius: var(--radius-xl);
+  border: 1px solid rgb(255 255 255 / 7%);
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 9%), transparent 42%),
-    var(--material-content);
+    radial-gradient(130% 70% at 50% 125%, #9b7bff 0%, #6a3cf0 18%, #4a1fb0 40%, #1d0d45 64%, transparent 86%),
+    #0d0b12;
+  box-shadow: 0 18px 40px rgb(10 0 40 / 45%);
+  text-align: center;
 }
 
 .hero.negative {
   background:
-    linear-gradient(180deg, rgb(255 69 58 / 16%), transparent 55%),
-    var(--material-content);
-}
-
-.hero-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-sm);
+    radial-gradient(130% 70% at 50% 125%, #f0506e 0%, #c41d4c 18%, #8a1640 40%, #2e0b22 64%, transparent 86%),
+    #0d0b12;
 }
 
 .hero-label {
   font-size: var(--fs-15);
   letter-spacing: var(--ls-15);
-  line-height: var(--lh-15);
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-weight: 500;
+  color: rgb(255 255 255 / 72%);
 }
 
-.hero-status {
+.hero-value {
+  margin: 6px 0 14px;
+  font-size: clamp(2.5rem, 13.5vw, 3.75rem);
+  font-weight: 600;
+  letter-spacing: var(--ls-display);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.hero-status,
+.hero-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  min-height: 28px;
+  padding: 0 12px;
   border-radius: var(--radius-full);
-  background: var(--color-income-soft);
-  color: var(--color-income);
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
   font-weight: 600;
 }
 
+.hero-status {
+  background: rgb(94 227 154 / 14%);
+  color: #5ee39a;
+}
+
 .hero.negative .hero-status {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
+  background: rgb(255 122 133 / 16%);
+  color: #ff9aa4;
 }
 
-.hero-value {
-  margin: 6px 0 2px;
-  font-family: var(--font-rounded);
-  font-size: var(--fs-52);
-  letter-spacing: var(--ls-52);
-  line-height: var(--lh-52);
-  font-weight: 700;
+.hero-chip {
+  background: rgb(255 255 255 / 8%);
+  color: rgb(255 255 255 / 78%);
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
-.hero-sub {
-  font-size: var(--fs-15);
-  letter-spacing: var(--ls-15);
-  line-height: var(--lh-15);
-  color: var(--color-text-secondary);
-}
-
-.hero-sub strong {
-  color: var(--color-text);
+.hero-chip strong {
+  color: #ffffff;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.hero-actions .btn {
+  min-height: 46px;
+  padding: 0 20px;
+  font-size: var(--fs-15);
+}
+
+.hero-meter {
+  align-self: stretch;
+  margin-top: 24px;
 }
 
 .meter {
-  height: 8px;
-  margin-top: 14px;
+  height: 6px;
   border-radius: var(--radius-full);
-  background: var(--color-track);
+  background: rgb(255 255 255 / 18%);
   overflow: hidden;
 }
 
-.meter span,
-.bar-track span {
+.meter span {
   display: block;
   height: 100%;
   border-radius: inherit;
+  background: #ffffff;
   transform-origin: left center;
   transition: transform 250ms var(--ease-out);
 }
 
-.meter span {
-  background: var(--color-meter);
+.hero-sub {
+  margin-top: var(--space-sm);
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Décomposition du mois */
+/* Plateau : plus étroit que le panneau, il dépasse dessous comme une carte rangée derrière. */
+.hero-tray {
+  position: relative;
+  margin: -32px 10px 0;
+  padding: 46px var(--space-md) var(--space-md);
+  border-radius: 0 0 28px 28px;
+  background: linear-gradient(180deg, #230c57 0%, #4a20b5 55%, #6532e0 100%);
+  color: #ffffff;
+}
 
-.breakdown {
+.tray-title {
+  margin-bottom: 10px;
+  font-size: var(--fs-12);
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 92%);
+}
+
+.tray-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.tray-stats > div {
   display: flex;
   flex-direction: column;
-}
-
-.breakdown > div {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  min-height: 54px;
-  padding: 6px 0;
-}
-
-/* Séparateur décalé après l'icône, comme les listes iOS */
-.breakdown > div + div::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 44px;
-  right: 0;
-  border-top: 1px solid var(--color-separator);
-}
-
-.breakdown > .breakdown-total::before {
-  left: 0;
-}
-
-.breakdown dt {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 2px;
   min-width: 0;
 }
 
-.breakdown dt small {
+.tray-stats dt {
+  font-size: var(--fs-12);
+  letter-spacing: var(--ls-12);
+  color: rgb(255 255 255 / 92%);
+}
+
+.tray-stats .amount {
+  font-size: var(--fs-15);
+  letter-spacing: -0.02em;
+}
+
+.tray-note {
+  font-size: var(--fs-11);
+  line-height: 1.3;
+  color: rgb(255 255 255 / 92%);
+}
+
+/* Sur le plateau violet, les centimes restent lisibles (AA). */
+.hero-tray .cents {
+  opacity: 0.8;
+}
+
+/* Dépenses : bulles par catégorie (réf. « Clothes and Shoes 16,1 % ») et tuiles chiffrées. */
+
+.spending {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px var(--space-md) var(--space-md);
+  border-color: rgb(255 255 255 / 7%);
+  background:
+    radial-gradient(90% 60% at 0% 0%, rgb(124 77 255 / 30%), transparent 70%),
+    radial-gradient(80% 60% at 100% 100%, rgb(124 77 255 / 22%), transparent 70%),
+    #0f0d16;
+}
+
+.spending-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.spending-head .card-title {
+  font-family: var(--font-serif);
+  font-size: 1.625rem;
+  font-weight: 400;
+}
+
+.spending-total {
+  font-size: var(--fs-22);
+  letter-spacing: -0.03em;
+}
+
+.bubbles {
   display: block;
+  width: 100%;
+  height: auto;
+  margin: 4px 0;
+  overflow: visible;
+}
+
+.bubble-disc {
+  fill: color-mix(in srgb, var(--tint) 9%, rgb(255 255 255 / 3%));
+  stroke: rgb(255 255 255 / 10%);
+  stroke-width: 1;
+}
+
+.bubble-arc {
+  fill: none;
+  stroke: var(--tint);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.bubble-icon {
+  color: var(--tint);
+}
+
+.bubble-label {
+  fill: rgb(255 255 255 / 78%);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.bubble-value {
+  fill: #ffffff;
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.cat-tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.cat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 6%);
+}
+
+.cat-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.cat-tile-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: var(--fs-13);
   letter-spacing: var(--ls-13);
+  color: var(--color-text-secondary);
+}
+
+.cat-tile .amount {
+  font-size: var(--fs-20);
+  letter-spacing: -0.03em;
+}
+
+.cat-tile-share {
+  font-size: var(--fs-12);
   color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
-.breakdown-total {
-  font-weight: 700;
-  font-size: var(--fs-20);
-  letter-spacing: var(--ls-20);
-}
-
-/* Barres par catégorie (couleur de la catégorie) */
-
-.bars {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.bars li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 7px var(--space-sm);
-}
-
-.bar-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.bar-icon {
+.dot-icon {
   flex: none;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  color: #ffffff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tint) 18%, transparent);
+  color: var(--tint);
 }
 
-.bar-track {
-  grid-column: 1 / -1;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-track);
-  overflow: hidden;
-}
+/* Teinte de catégorie : une variable, utilisée par les pastilles, les arcs et les tuiles. */
+.tint-logement { --tint: var(--cat-logement); }
+.tint-courses { --tint: var(--cat-courses); }
+.tint-resto { --tint: var(--cat-resto); }
+.tint-abonnements { --tint: var(--cat-abonnements); }
+.tint-loisirs { --tint: var(--cat-loisirs); }
+.tint-epargne { --tint: var(--cat-epargne); }
+.tint-divers { --tint: var(--cat-divers); }
+.tint-revenu { --tint: var(--cat-revenu); }
+.tint-compte { --tint: var(--cat-compte); }
 
-/* :where() laisse la couleur de catégorie (.cat-*) l'emporter. */
-:where(.bar-track) span {
-  background: var(--color-accent-text);
-}
+/* Résumé en haut des écrans Opérations, Récurrents, Réglages (réf. « $4,923.82 » + pastilles). */
 
-/* Totaux */
-
-.totals {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.totals > div {
+.summary {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 14px var(--space-md);
-  border-radius: var(--radius-lg);
+  padding: var(--space-xs) var(--space-xs) var(--space-sm);
 }
 
-.totals-label {
-  font-size: var(--fs-13);
-  letter-spacing: var(--ls-13);
+.summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.summary-label {
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
   color: var(--color-text-secondary);
 }
 
-.totals .amount {
-  font-family: var(--font-rounded);
+.summary-value {
+  font-size: 2.75rem;
+  letter-spacing: var(--ls-display);
+  line-height: 1.1;
+}
+
+.summary-pills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+  margin-top: 14px;
+}
+
+/* Tuile de total : icône et libellé au-dessus, montant dessous. */
+.pill {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 6px;
+  min-width: 0;
+  padding: 10px 14px 12px;
+  border-radius: 20px;
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+}
+
+.pill .amount {
+  grid-column: 1 / -1;
+  font-size: var(--fs-20);
+  letter-spacing: -0.03em;
+}
+
+.pill-icon {
+  color: var(--color-text-secondary);
+}
+
+.pill-icon.revenu {
+  color: var(--color-income);
+}
+
+.pill-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+/* Registre : grande surface qui porte les listes (réf. feuille blanche « Transactions »). */
+.ledger {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-xl);
+  background: var(--surface-1);
+  border: 1px solid var(--surface-edge);
+  box-shadow: var(--shadow-card);
+  /* Le rouge du swipe reste dans les coins arrondis (clip ne crée pas de conteneur de défilement). */
+  overflow: clip;
+  padding-bottom: var(--space-xs);
+}
+
+.ledger-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px var(--space-md) var(--space-xs);
+}
+
+.ledger-title {
   font-size: var(--fs-22);
   letter-spacing: var(--ls-22);
   font-weight: 700;
 }
 
-/* Listes groupées (inset grouped) */
+.ledger-empty {
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.day-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* En-tête de jour (réf. « YESTERDAY », « 27 JULY ») */
+.day-title {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 18px var(--space-md) 6px;
+  font-size: var(--fs-12);
+  letter-spacing: 0.06em;
+  line-height: var(--lh-12);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Listes */
 
 .list {
   list-style: none;
@@ -785,13 +1000,12 @@ ul.card-flush {
   position: relative;
 }
 
-/* Séparateur décalé : commence après l'icône, comme dans les listes iOS. */
 .list > li + li::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 64px;
-  right: 0;
+  left: 70px;
+  right: var(--space-md);
   z-index: 1;
   border-top: 1px solid var(--color-separator);
 }
@@ -799,19 +1013,20 @@ ul.card-flush {
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
-  min-height: 60px;
-  padding: 9px var(--space-md);
+  min-height: 64px;
+  padding: 10px var(--space-md);
   background: none;
   border: 0;
   text-align: left;
 }
 
-/* Surlignage immédiat à l'appui, sans transition, comme une cellule iOS. */
+/* Surlignage immédiat à l'appui, sans transition. */
 button.row:active,
 .month-label:active:not([aria-disabled='true']),
-.icon-button:active {
+.icon-button:active,
+.round-button:active {
   background: var(--color-pressed);
 }
 
@@ -821,7 +1036,6 @@ button.row:active,
   }
 }
 
-/* Pendant un glissement (ligne, mois), ce qu'on a touché ne reste pas surligné ni enfoncé. */
 [data-dragging] button.row:active,
 [data-dragging] .month-label:active,
 [data-dragging] .icon-button:active {
@@ -832,16 +1046,16 @@ button.row:active,
   transform: none;
 }
 
-/* Pastille d'icône colorée, façon Réglages iOS */
+/* Pastille ronde teintée (réf. logos ronds des marchands). */
 .row-icon {
   flex: none;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--color-fill);
-  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tint, var(--color-text-secondary)) 16%, transparent);
+  color: var(--tint, var(--color-text));
 }
 
 .row-icon svg {
@@ -849,29 +1063,19 @@ button.row:active,
   height: 20px;
 }
 
-.cat-logement { background: var(--cat-logement); }
-.cat-courses { background: var(--cat-courses); }
-.cat-resto { background: var(--cat-resto); }
-.cat-abonnements { background: var(--cat-abonnements); }
-.cat-loisirs { background: var(--cat-loisirs); }
-.cat-epargne { background: var(--cat-epargne); }
-.cat-divers { background: var(--cat-divers); }
-.cat-revenu { background: var(--cat-revenu); }
-.cat-charges { background: var(--cat-charges); }
-.cat-variables { background: var(--cat-variables); }
-.cat-compte { background: var(--cat-compte); }
-
 .row-main {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 1px;
 }
 
 .row-title {
   font-size: var(--fs-17);
   letter-spacing: var(--ls-17);
   line-height: var(--lh-17);
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
@@ -880,13 +1084,12 @@ button.row:active,
   align-items: center;
   flex-wrap: wrap;
   gap: 2px var(--space-sm);
-  font-size: var(--fs-15);
-  letter-spacing: var(--ls-15);
-  line-height: var(--lh-15);
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
   color: var(--color-text-secondary);
 }
 
-/* Une seule ligne, tronquée (comptes) : la ligne garde sa hauteur iOS de 60 px. */
 .row-meta--single {
   display: block;
   overflow: hidden;
@@ -900,7 +1103,8 @@ button.row:active,
   gap: 3px;
   padding: 0 7px;
   border-radius: var(--radius-full);
-  background: var(--color-fill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
   font-size: var(--fs-12);
   letter-spacing: var(--ls-12);
   font-weight: 600;
@@ -908,32 +1112,24 @@ button.row:active,
 
 .row .amount {
   font-size: var(--fs-17);
-  letter-spacing: var(--ls-17);
+  letter-spacing: -0.02em;
 }
 
-.total-row {
-  min-height: 54px;
-}
-
-.total-row .row-title {
-  font-weight: 600;
-}
-
+/* Jour du mois d'un récurrent : pastille ronde. */
 .day-badge {
   flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  background: var(--color-fill);
-  font-family: var(--font-rounded);
-  font-size: var(--fs-17);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  font-size: var(--fs-15);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  line-height: 1.05;
+  line-height: 1;
 }
 
 .day-badge.revenu {
@@ -942,34 +1138,13 @@ button.row:active,
 }
 
 .day-badge small {
-  font-family: var(--font-sans);
-  font-size: var(--fs-12);
+  font-size: 0.625rem;
   font-weight: 500;
   color: var(--color-text-secondary);
 }
 
 .day-badge.revenu small {
   color: inherit;
-}
-
-.day-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-/* En-tête de jour posé sur le fond */
-.day-title {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md) 0;
-  font-size: var(--fs-13);
-  letter-spacing: 0.04em;
-  line-height: var(--lh-13);
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--color-text-on-bg);
 }
 
 /* Boutons : capsules */
@@ -979,7 +1154,7 @@ button.row:active,
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  min-height: 50px;
+  min-height: 52px;
   padding: 12px 22px;
   border-radius: var(--radius-full);
   border: 1px solid transparent;
@@ -994,7 +1169,8 @@ button.row:active,
 .chip,
 .choice,
 .tab-add,
-.toast-action {
+.toast-action,
+.round-button {
   transition: transform var(--press-duration) var(--ease-out);
 }
 
@@ -1002,13 +1178,15 @@ button.row:active,
 .chip:active,
 .choice:active,
 .tab-add:active,
-.toast-action:active {
+.toast-action:active,
+.round-button:active {
   transform: scale(0.97);
 }
 
 .btn-primary {
   background: var(--color-accent);
   color: var(--color-on-accent);
+  box-shadow: 0 8px 24px var(--color-accent-glow);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -1017,18 +1195,30 @@ button.row:active,
 
 .btn-secondary {
   width: 100%;
-  border-color: var(--material-content-edge);
-  background: var(--material-content);
+  border-color: var(--surface-edge);
+  background: var(--surface-2);
   color: var(--color-text);
 }
 
 .btn-secondary:active:not(:disabled) {
-  background: color-mix(in srgb, var(--material-content) 80%, var(--color-text));
+  background: color-mix(in srgb, var(--surface-2) 85%, var(--color-text));
+}
+
+/* Sur les îlots sombres : bouton plein blanc et bouton de verre (réf. « Learn More », « Top Up »). */
+.btn-light {
+  background: #ffffff;
+  color: #0b0a10;
+}
+
+.btn-glass {
+  border-color: rgb(255 255 255 / 14%);
+  background: rgb(255 255 255 / 10%);
+  color: #ffffff;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .btn-primary:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-accent) 92%, #fff);
+    background: color-mix(in srgb, var(--color-accent) 90%, #fff);
   }
 }
 
@@ -1047,21 +1237,6 @@ button.row:active,
   font-weight: 500;
 }
 
-.btn-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  min-height: var(--touch);
-  padding: 0 var(--space-sm);
-  margin-right: calc(var(--space-sm) * -1);
-  border: 0;
-  background: none;
-  color: var(--color-accent-text);
-  font-size: var(--fs-15);
-  letter-spacing: var(--ls-15);
-  font-weight: 500;
-}
-
 .btn-block {
   width: 100%;
 }
@@ -1070,15 +1245,19 @@ button.row:active,
   flex: 1;
 }
 
-/* Bouton d'action qui reste visible juste au-dessus de la barre d'onglets. */
+/* Bouton d'action qui reste visible juste au-dessus de la capsule d'onglets. */
 .sticky-action {
+  align-self: center;
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: var(--fs-15);
   position: sticky;
-  bottom: calc(var(--tab-bar-total) + 12px);
+  bottom: calc(var(--tab-bar-total) + 4px);
   z-index: var(--z-sticky);
-  box-shadow: var(--shadow-float);
 }
 
-.icon-button {
+.icon-button,
+.round-button {
   flex: none;
   display: grid;
   place-items: center;
@@ -1090,63 +1269,67 @@ button.row:active,
   color: var(--color-text);
 }
 
-/* Sélecteur de mois : capsule, même matériau que les cartes. */
+/* Bouton rond cerclé (réf. flèche « Recent Transactions »). */
+.round-button {
+  border: 1.5px solid var(--color-accent-text);
+  color: var(--color-accent-text);
+}
+
+/* Sélecteur de mois : capsule compacte. */
 .month-switcher {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 50px;
-  padding: 3px;
+  height: var(--touch);
   border-radius: var(--radius-full);
-  border: 1px solid var(--material-content-edge);
-  background: var(--material-content);
+  background: var(--surface-2);
 }
 
 .month-label {
-  flex: 1;
+  min-width: 104px;
   min-height: var(--touch);
-  padding: 0 var(--space-xs);
+  padding: 0 2px;
   border: 0;
   border-radius: var(--radius-full);
   background: none;
-  font-size: var(--fs-17);
-  letter-spacing: var(--ls-17);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: center;
+  white-space: nowrap;
 }
 
 .month-label[aria-disabled='true'] {
   cursor: default;
 }
 
-/* Contrôle segmenté façon iOS : rail en remplissage, curseur qui glisse. */
+.month-switcher .icon-button {
+  color: var(--color-text-secondary);
+}
+
+/* Contrôle segmenté : rail plein, curseur qui glisse. */
 .segmented {
   position: relative;
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   height: 40px;
-  padding: 2px;
-  border-radius: var(--radius-md);
-  /* Posé sur le fond : un matériau presque opaque, pour que les libellés restent lisibles. */
-  border: 1px solid var(--material-content-edge);
-  background: var(--material-rail);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
 }
 
-/* Dans une feuille (fond opaque), un simple remplissage, comme les champs. */
+.ledger .segmented,
 .sheet .segmented {
-  border-color: transparent;
   background: var(--color-fill);
 }
 
 .segment-thumb {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
-  left: 2px;
-  /* Largeur (1/n du rail) et position : posées par Segmented. */
-  border-radius: calc(var(--radius-md) - 2px);
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  border-radius: var(--radius-full);
   background: var(--color-segment);
   box-shadow: 0 1px 3px rgb(0 0 10 / 18%);
   transition: transform 200ms var(--ease-out);
@@ -1156,7 +1339,7 @@ button.row:active,
   position: relative;
   min-width: 0;
   border: 0;
-  border-radius: calc(var(--radius-md) - 2px);
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-text-secondary);
   font-size: var(--fs-15);
@@ -1164,7 +1347,6 @@ button.row:active,
   font-weight: 600;
 }
 
-/* Cible tactile de 44 px malgré un rail de 40 px. */
 .segmented button::before {
   content: '';
   position: absolute;
@@ -1175,7 +1357,8 @@ button.row:active,
   color: var(--color-text);
 }
 
-/* Barre d'onglets : fixe, collée au bas de l'écran, bouton d'ajout au centre. */
+/* Capsule d'onglets flottante (réf. barres en pilule). Le conteneur fixe occupe toute la largeur,
+   efface le contenu qui passe dessous, et laisse passer les touchers en dehors de la capsule. */
 
 .tab-bar {
   position: fixed;
@@ -1183,41 +1366,59 @@ button.row:active,
   right: 0;
   bottom: 0;
   z-index: var(--z-nav);
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  align-items: center;
+  display: flex;
+  justify-content: center;
   height: var(--tab-bar-total);
-  /* Sur grand écran, les onglets restent groupés sur la largeur du contenu. */
-  padding: 0 max(4px, env(safe-area-inset-right), (100% - 480px) / 2) env(safe-area-inset-bottom, 0px)
-    max(4px, env(safe-area-inset-left), (100% - 480px) / 2);
-  border-top: 0.5px solid var(--color-separator);
+  padding: 14px max(var(--space-md), env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom, 0px))
+    max(var(--space-md), env(safe-area-inset-left));
+  background: linear-gradient(to top, var(--color-bg) 45%, transparent);
+  pointer-events: none;
+}
+
+.tab-pill {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: var(--tab-pill-height);
+  padding: 6px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--material-bar-edge);
+  box-shadow: var(--shadow-float);
+  pointer-events: auto;
 }
 
 .tab {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  height: var(--tab-bar-height);
-  min-width: 0;
-  padding: 0;
+  gap: 7px;
+  height: 52px;
+  min-width: 48px;
+  padding: 0 12px;
   border: 0;
+  border-radius: var(--radius-full);
   background: none;
   color: var(--color-text-secondary);
-  font-size: 0.6875rem;
-  letter-spacing: 0;
-  font-weight: 500;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  font-weight: 600;
   white-space: nowrap;
 }
 
-/* Changer d'onglet est l'action la plus fréquente : aucune animation, la teinte change à l'instant. */
-.tab.active {
-  color: var(--color-accent-text);
+/* Inactif : icône seule ; le libellé reste lu par les lecteurs d'écran. */
+.tab:not(.active) .tab-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
-.tab.active .tab-label {
-  font-weight: 600;
+/* Changer d'onglet est l'action la plus fréquente : aucune animation, la pastille change à l'instant. */
+.tab.active {
+  padding: 0 16px 0 14px;
+  background: var(--color-text);
+  color: var(--color-bg);
 }
 
 .tab:active {
@@ -1225,16 +1426,17 @@ button.row:active,
 }
 
 .tab-add {
-  justify-self: center;
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  margin: 0 4px;
   border: 0;
   border-radius: 50%;
   background: var(--color-accent);
   color: var(--color-on-accent);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  box-shadow: 0 6px 18px var(--color-accent-glow);
 }
 
 .tab-add:active {
@@ -1247,7 +1449,7 @@ button.row:active,
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tab-bar-total) + 12px);
+  bottom: calc(var(--tab-bar-total) + 4px);
   z-index: var(--z-toast);
   display: flex;
   justify-content: center;
@@ -1264,7 +1466,7 @@ button.row:active,
   min-height: 52px;
   padding: var(--space-xs) var(--space-xs) var(--space-xs) 18px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--material-content-edge);
+  border: 1px solid var(--material-bar-edge);
   box-shadow: var(--shadow-float);
   pointer-events: auto;
 }
@@ -1292,7 +1494,7 @@ button.row:active,
   font-weight: 700;
 }
 
-/* Bottom sheet (animée et glissable via motion, voir components/Sheet.tsx) : verre épais. */
+/* Bottom sheet (animée et glissable via motion, voir components/Sheet.tsx). */
 
 .sheet-layer {
   position: fixed;
@@ -1309,7 +1511,6 @@ button.row:active,
   background: var(--color-scrim);
 }
 
-/* En cours de fermeture : seuls les touchers sur la feuille elle-même (pour la rattraper) restent captés. */
 .sheet-layer[data-closing] {
   pointer-events: none;
 }
@@ -1318,7 +1519,7 @@ button.row:active,
   pointer-events: auto;
 }
 
-/* Feuille collée au bas de l'écran, opaque (un grand flou coûte cher, surtout sur Safari). */
+/* Feuille opaque, collée au bas de l'écran (un grand flou coûte cher, surtout sur Safari). */
 .sheet {
   position: relative;
   display: flex;
@@ -1327,10 +1528,11 @@ button.row:active,
   max-width: 560px;
   max-height: 92dvh;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border-top: 1px solid var(--surface-edge);
   background: var(--color-sheet);
   /* La seconde ombre prolonge la feuille vers le bas : tirée vers le haut (rubber-band), elle ne se décolle pas du bord. */
   box-shadow:
-    0 -8px 40px rgb(0 0 12 / 30%),
+    0 -8px 40px rgb(0 0 0 / 35%),
     0 160px 0 var(--color-sheet);
   overflow: clip;
   will-change: transform;
@@ -1340,10 +1542,9 @@ button.row:active,
   outline: none;
 }
 
-/* Zone de préhension : le navigateur ne gère aucun geste ici, on suit le doigt 1:1. */
 .sheet-grabber {
   flex: none;
-  padding: 7px var(--space-md) 0;
+  padding: 8px 20px 0;
   touch-action: none;
   cursor: grab;
 }
@@ -1357,13 +1558,13 @@ button.row:active,
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
+  padding: 0 20px calc(20px + env(safe-area-inset-bottom));
 }
 
 .sheet-handle {
   width: 36px;
   height: 5px;
-  margin: 0 auto 10px;
+  margin: 0 auto 12px;
   border-radius: var(--radius-full);
   background: var(--color-text-tertiary);
 }
@@ -1373,16 +1574,18 @@ button.row:active,
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .sheet-header h2 {
-  font-size: var(--fs-20);
-  letter-spacing: var(--ls-20);
-  line-height: var(--lh-20);
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 1.875rem;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.1;
 }
 
+/* Bouton fermer rond (réf. croix cerclée de la fiche Netflix). */
 .sheet-header .icon-button {
   width: 36px;
   height: 36px;
@@ -1398,12 +1601,10 @@ button.row:active,
 
 .swipe-row {
   position: relative;
-  /* clip et non hidden : hidden crée un conteneur de défilement qui capterait le geste horizontal. */
   overflow: clip;
   touch-action: pan-y;
 }
 
-/* Le fond rouge n'occupe que la zone découverte par le glissement (clip-path piloté par SwipeRow). */
 .swipe-action {
   position: absolute;
   inset: 0;
@@ -1426,14 +1627,14 @@ button.row:active,
   transition: transform 150ms var(--ease-out);
 }
 
-/* Seuil franchi : la corbeille grossit, la suppression est armée. */
 .swipe-action.armed .swipe-action-icon {
   transform: scale(1.15);
 }
 
+/* Le contenu glissé garde le fond de sa surface, pour masquer le rouge dessous. */
 .swipe-content {
   position: relative;
-  /* Vertical : défilement natif ; horizontal : suivi 1:1 par le geste. */
+  background: var(--surface-1);
   touch-action: pan-y;
   will-change: transform;
 }
@@ -1488,8 +1689,8 @@ button.row:active,
 .field input,
 .field select {
   width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
+  min-height: 50px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-input);
   background: var(--color-fill);
@@ -1523,6 +1724,7 @@ button.row:active,
   font-weight: 600;
 }
 
+/* Montant saisi : grand, centré, centimes compris (réf. « -$15.99 »). */
 .amount-field {
   text-align: center;
   padding: var(--space-sm) 0 0;
@@ -1555,11 +1757,10 @@ button.row:active,
   background: none;
   outline: none;
   text-align: right;
-  font-family: var(--font-rounded);
-  font-size: var(--fs-52);
-  letter-spacing: var(--ls-52);
+  font-size: 3.5rem;
+  letter-spacing: var(--ls-display);
   line-height: 1.15;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   caret-color: var(--color-accent-text);
 }
@@ -1571,64 +1772,88 @@ button.row:active,
 .currency {
   flex: 1;
   text-align: left;
-  font-family: var(--font-rounded);
   font-size: 2rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-weight: 500;
+  color: var(--color-text-tertiary);
 }
 
 .amount-field .field-error {
   margin-top: var(--space-sm);
 }
 
+/* Catégories : grille de pastilles rondes, libellé dessous. */
 .category-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm);
-}
-
-.choice,
-.chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--material-content-edge);
-  background: var(--color-fill);
-  font-size: var(--fs-15);
-  letter-spacing: var(--ls-15);
-  font-weight: 500;
-  text-align: left;
-}
-
-/* Les puces de catégorie gardent la couleur de leur catégorie sur l'icône seulement. */
-.choice[class*='cat-'] {
-  background: var(--color-fill);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-sm) 6px;
 }
 
 .choice {
-  min-height: 52px;
-  padding: var(--space-sm) 10px;
-  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 84px;
+  padding: 10px 2px 8px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background: none;
+  font-size: 0.71875rem;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
 .choice svg {
   flex: none;
-  width: 30px;
-  height: 30px;
-  padding: 6px;
-  border-radius: 8px;
-  color: #ffffff;
+  width: 48px;
+  height: 48px;
+  padding: 13px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tint) 16%, transparent);
+  color: var(--tint);
 }
 
-.choice.cat-logement svg { background: var(--cat-logement); }
-.choice.cat-courses svg { background: var(--cat-courses); }
-.choice.cat-resto svg { background: var(--cat-resto); }
-.choice.cat-abonnements svg { background: var(--cat-abonnements); }
-.choice.cat-loisirs svg { background: var(--cat-loisirs); }
-.choice.cat-epargne svg { background: var(--cat-epargne); }
-.choice.cat-divers svg { background: var(--cat-divers); }
+.choice span {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.choice span,
+.choice[aria-checked='true'] {
+  border-color: var(--color-accent-text);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.choice[aria-checked='true'] svg {
+  background: var(--tint);
+  color: var(--color-sheet);
+}
+
+.chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: var(--touch);
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--surface-edge);
+  background: var(--color-fill);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  font-weight: 500;
+}
+
 .chip span {
   white-space: nowrap;
   overflow: hidden;
@@ -1640,7 +1865,6 @@ button.row:active,
   color: var(--color-text-secondary);
 }
 
-.choice[aria-checked='true'],
 .chip[aria-checked='true'] {
   border-color: var(--color-accent-text);
   background: var(--color-accent-soft);
@@ -1652,31 +1876,17 @@ button.row:active,
   color: var(--color-accent-text);
 }
 
-.chip-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-}
-
-.chip {
-  min-height: var(--touch);
-  padding: 0 14px;
-  border-radius: var(--radius-full);
-}
-
 .form-actions {
   display: flex;
   gap: 12px;
   padding-top: var(--space-xs);
 }
 
-/* Dans une feuille, le bouton principal reste visible sous le pouce. */
 .sheet-body .form-actions {
   position: sticky;
-  bottom: calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
-  margin: 0 calc(-1 * var(--space-md)) calc(-1 * (var(--space-md) + env(safe-area-inset-bottom)));
-  padding: 20px var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
-  /* Fond opaque sous le bouton ; le contenu se fond au-dessus, sur 20 px. */
+  bottom: calc(-1 * (20px + env(safe-area-inset-bottom)));
+  margin: 0 -20px calc(-1 * (20px + env(safe-area-inset-bottom)));
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--color-sheet) calc(100% - 20px), transparent);
 }
 
@@ -1706,40 +1916,29 @@ button.row:active,
   color: var(--color-danger);
 }
 
-/* Transparence réduite : matériaux opaques, plus de flou. */
+/* Transparence réduite : barres opaques, plus de flou. */
 @media (prefers-reduced-transparency: reduce) {
-  :root {
-    --material-content: #151829;
-  }
-
-  /* Les deux thèmes : le thème clair redéfinit --material-bar avec plus de poids que :root. */
   :root,
   :root[data-theme='light'] {
     --material-bar: var(--material-bar-solid);
     --blur-bar: none;
-  }
-
-  :root[data-theme='light'] {
-    --material-content: #ffffff;
   }
 }
 
 /* Contraste renforcé : fonds pleins, bordures franches, libellés plus marqués. */
 @media (prefers-contrast: more) {
   :root {
-    --material-content: #10121f;
-    --material-content-edge: #8e8e93;
-    --color-text-secondary: rgb(235 235 245 / 86%);
-    --color-text-on-bg: #ffffff;
+    --surface-edge: rgb(255 255 255 / 40%);
+    --material-bar-edge: rgb(255 255 255 / 50%);
+    --color-text-secondary: rgb(240 236 250 / 86%);
     --color-separator: rgb(255 255 255 / 30%);
   }
 
   :root[data-theme='light'] {
-    --material-content: #ffffff;
-    --material-content-edge: #8a8a8e;
-    --color-text-secondary: rgb(40 40 46);
-    --color-text-on-bg: #000000;
-    --color-separator: rgb(60 60 67 / 40%);
+    --surface-edge: rgb(30 24 48 / 50%);
+    --material-bar-edge: rgb(30 24 48 / 50%);
+    --color-text-secondary: rgb(30 24 48 / 90%);
+    --color-separator: rgb(30 24 48 / 40%);
   }
 
   :root,
@@ -1748,24 +1947,22 @@ button.row:active,
     --blur-bar: none;
   }
 
-  /* Le curseur du segmented garde un contour net sur un rail plein. */
   .segment-thumb {
-    outline: 1px solid var(--material-content-edge);
+    outline: 1px solid var(--surface-edge);
   }
 }
 
-/* Mouvement réduit : plus de déplacement ni d'échelle ; les changements de couleur et d'opacité restent.
-   (Les springs et les gestes sont gérés dans les composants, via useReducedMotion.) */
+/* Mouvement réduit : plus de déplacement ni d'échelle ; les changements de couleur et d'opacité restent. */
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .chip,
   .choice,
   .tab-add,
   .toast-action,
+  .round-button,
   .segment-thumb,
   .swipe-action-icon,
-  .meter span,
-  .bar-track span {
+  .meter span {
     transition: none;
   }
 
@@ -1773,7 +1970,8 @@ button.row:active,
   .chip:active,
   .choice:active,
   .tab-add:active,
-  .toast-action:active {
+  .toast-action:active,
+  .round-button:active {
     transform: none;
     opacity: 0.7;
   }

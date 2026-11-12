@@ -1,10 +1,10 @@
 import { Download, Plus, ShieldCheck, Upload } from 'lucide-react'
 import { useRef, useState, type ChangeEvent } from 'react'
+import { Money } from '../components/AnimatedAmount'
 import { AccountIcon } from '../components/CategoryIcon'
 import { Segmented } from '../components/Segmented'
 import { downloadBackup, parseBackup, restoreBackup } from '../lib/backup'
 import { accountTypeLabel } from '../lib/categories'
-import { formatMoney } from '../lib/format'
 import { useAccounts } from '../lib/hooks'
 import { getTheme, setTheme, type Theme } from '../lib/prefs'
 import { generateRecurring } from '../lib/recurring'
@@ -72,6 +72,15 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
     <div className="screen">
       <NavHeader title="Réglages" />
 
+      {accounts.length > 0 && (
+        <section className="summary" aria-label="Patrimoine">
+          <p className="summary-label">Total de vos comptes</p>
+          <p className={`summary-value amount${total < 0 ? ' negative' : ''}`}>
+            <Money value={total} />
+          </p>
+        </section>
+      )}
+
       <section aria-labelledby="accounts-title" className="stack">
         <h2 id="accounts-title" className="section-title">
           Comptes
@@ -85,23 +94,19 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
             {accounts.map((a) => (
               <li key={a.id}>
                 <button type="button" className="row" onClick={() => onSelectAccount(a)}>
-                  <span className="row-icon cat-compte">
+                  <span className="row-icon tint-compte">
                     <AccountIcon type={a.type} />
                   </span>
                   <span className="row-main">
                     <span className="row-title">{a.nom}</span>
                     <span className="row-meta row-meta--single">{[accountTypeLabel(a.type), a.banque].filter(Boolean).join(' · ')}</span>
                   </span>
-                  <span className={`amount${a.solde < 0 ? ' negative' : ''}`}>{formatMoney(a.solde)}</span>
+                  <span className={`amount${a.solde < 0 ? ' negative' : ''}`}>
+                    <Money value={a.solde} />
+                  </span>
                 </button>
               </li>
             ))}
-            <li className="row static total-row">
-              <span className="row-main">
-                <span className="row-title">Total</span>
-              </span>
-              <span className="amount">{formatMoney(total)}</span>
-            </li>
           </ul>
         )}
         <button type="button" className="btn btn-secondary" onClick={onAddAccount}>

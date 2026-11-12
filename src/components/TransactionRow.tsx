@@ -1,8 +1,8 @@
 import { Repeat } from 'lucide-react'
 import { motion } from 'motion/react'
 import { getCategory } from '../lib/categories'
-import { formatMoney } from '../lib/format'
 import type { Transaction } from '../lib/types'
+import { Money } from './AnimatedAmount'
 import { CategoryIcon } from './CategoryIcon'
 import { SwipeRow } from './SwipeRow'
 
@@ -24,7 +24,7 @@ export function TransactionRow({ transaction: t, accountName, onSelect, onSwipeD
 
   const row = (
     <button type="button" className="row" onClick={() => onSelect?.(t)}>
-      <span className={`row-icon ${t.type} cat-${t.categorie}`}>
+      <span className={`row-icon tint-${t.categorie}`}>
         <CategoryIcon categorie={t.categorie} />
       </span>
       <span className="row-main">
@@ -42,8 +42,7 @@ export function TransactionRow({ transaction: t, accountName, onSelect, onSwipeD
         )}
       </span>
       <span className={`amount ${t.type}`}>
-        {sign}
-        {formatMoney(t.montant)}
+        <Money value={t.montant} sign={sign} />
       </span>
     </button>
   )

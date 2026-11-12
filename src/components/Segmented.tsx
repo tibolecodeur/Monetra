@@ -13,8 +13,8 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
       <span
         className="segment-thumb"
         aria-hidden="true"
-        // 4 px : les marges du rail. translateX en % est relatif à la largeur du curseur.
-        style={{ width: `calc((100% - 4px) / ${options.length})`, transform: `translateX(${index * 100}%)` }}
+        // 6 px : les marges du rail (3 px de chaque côté). translateX en % est relatif à la largeur du curseur.
+        style={{ width: `calc((100% - 6px) / ${options.length})`, transform: `translateX(${index * 100}%)` }}
       />
       {options.map((o) => (
         <button

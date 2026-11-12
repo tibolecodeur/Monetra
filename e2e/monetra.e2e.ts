@@ -149,35 +149,43 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(a.data.transactions.length).toBeGreaterThan(0)
   })
 
-  test('fond plasma derrière tous les écrans, sans bloquer les touchers', async ({ page }) => {
+  test('bulles de dépenses : une par catégorie, sans chevauchement, doublées d\'une liste lisible', async ({ page }) => {
     await openWithDemo(page)
-    const background = page.getByTestId('app-background')
-    for (const tab of ['Accueil', 'Opérations', 'Récurrents', 'Réglages']) {
-      await page.getByRole('button', { name: tab }).tap()
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-      await expect(background.locator('canvas')).toBeVisible()
-    }
-    const style = await background.evaluate((el) => getComputedStyle(el))
-    expect(style.position).toBe('fixed')
-    expect(style.pointerEvents).toBe('none')
-    expect(await background.getAttribute('aria-hidden')).toBe('true')
-    // Le centre de l'écran appartient au contenu, pas au fond.
-    const hit = await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest('[data-testid="app-background"]'))
-    expect(hit).toBeNull()
+    const bubbles = page.getByTestId('bubbles')
+    await expect(bubbles).toBeVisible()
+    // Décoratives pour les lecteurs d'écran : la liste des catégories porte l'information.
+    expect(await bubbles.getAttribute('aria-hidden')).toBe('true')
+    const discs = await bubbles.locator('.bubble-disc').evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect()
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2, r: r.width / 2 }
+      }),
+    )
+    await expect(page.locator('.cat-tile')).toHaveCount(discs.length)
+    expect(discs.length).toBeGreaterThan(1)
+    for (const [i, a] of discs.entries())
+      for (const b of discs.slice(i + 1)) expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThan(a.r + b.r - 1)
+    // Aucun fond WebGL : l'app n'a plus de canvas.
+    await expect(page.locator('canvas')).toHaveCount(0)
   })
 
-  test('barre d\'onglets : fixe en bas, toujours entière, sans rien masquer', async ({ page }) => {
+  test('barre d\'onglets : capsule flottante fixe en bas, toujours entière, sans rien masquer', async ({ page }) => {
     await openWithDemo(page)
     const bar = page.locator('.tab-bar')
     const box = (await bar.boundingBox())!
     expect(Math.round(box.y + box.height)).toBe(844)
     expect(Math.round(box.width)).toBe(390)
+    // La capsule flotte au-dessus du bord, dans la largeur de l'écran.
+    const pill = (await page.locator('.tab-pill').boundingBox())!
+    expect(pill.y + pill.height).toBeLessThan(844)
+    expect(pill.x).toBeGreaterThanOrEqual(0)
+    expect(pill.x + pill.width).toBeLessThanOrEqual(390)
     // Un seul matériau, flouté par un backdrop-filter standard (pas de filtre SVG, pas de WebGL).
-    const style = await bar.evaluate((el) => {
+    const style = await page.locator('.tab-pill').evaluate((el) => {
       const cs = getComputedStyle(el)
       return { position: cs.position, backdrop: cs.backdropFilter, filter: cs.filter }
     })
-    expect(style.position).toBe('fixed')
+    expect(await bar.evaluate((el) => getComputedStyle(el).position)).toBe('fixed')
     expect(style.backdrop).toContain('blur(20px)')
     expect(style.filter).toBe('none')
 
@@ -221,6 +229,8 @@ test.describe('Monetra en émulation iPhone', () => {
     const tab = page.getByRole('button', { name: 'Opérations' })
     const active = await page.getByRole('button', { name: 'Accueil' }).evaluate((el) => getComputedStyle(el).color)
     await tab.tap()
+    // Dès que l'onglet est marqué actif, sa teinte est déjà la bonne : aucune transition en cours.
+    await expect(tab).toHaveAttribute('aria-current', 'page')
     expect(await tab.evaluate((el) => getComputedStyle(el).color)).toBe(active)
     expect(await tab.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s')
 
@@ -244,7 +254,7 @@ test.describe('Monetra en émulation iPhone', () => {
     test('barres opaques, sans flou, dans les deux thèmes', async ({ page }) => {
       await openWithDemo(page)
       const read = () =>
-        page.locator('.tab-bar').evaluate((el) => {
+        page.locator('.tab-pill').evaluate((el) => {
           const cs = getComputedStyle(el)
           return { background: cs.backgroundColor, backdrop: cs.backdropFilter }
         })

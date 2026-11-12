@@ -6,6 +6,7 @@ interface Props {
   onChange: (month: MonthKey) => void
 }
 
+/** Capsule compacte : chevrons de 44 px, libellé du mois au centre (toucher le libellé ramène au mois en cours). */
 export function MonthSwitcher({ month, onChange }: Props) {
   const isCurrent = month === currentMonth()
   return (
@@ -16,7 +17,7 @@ export function MonthSwitcher({ month, onChange }: Props) {
         onClick={() => onChange(addMonths(month, -1))}
         aria-label="Mois précédent"
       >
-        <ChevronLeft size={22} aria-hidden="true" />
+        <ChevronLeft size={20} aria-hidden="true" />
       </button>
       <button
         type="button"
@@ -33,7 +34,7 @@ export function MonthSwitcher({ month, onChange }: Props) {
         onClick={() => onChange(addMonths(month, 1))}
         aria-label="Mois suivant"
       >
-        <ChevronRight size={22} aria-hidden="true" />
+        <ChevronRight size={20} aria-hidden="true" />
       </button>
     </div>
   )
