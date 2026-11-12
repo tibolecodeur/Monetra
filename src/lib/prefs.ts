@@ -61,3 +61,15 @@ export function watchSystemTheme() {
   query.addEventListener('change', onChange)
   return () => query.removeEventListener('change', onChange)
 }
+
+const PRIVATE_KEY = 'monetra:private'
+
+/** Mode discret : les montants sont floutés partout (consulter ses comptes dans le métro). */
+export function getPrivate(): boolean {
+  return read(PRIVATE_KEY) === '1'
+}
+
+export function setPrivate(on: boolean) {
+  write(PRIVATE_KEY, on ? '1' : '0')
+  document.documentElement.toggleAttribute('data-private', on)
+}

@@ -21,6 +21,8 @@
           document.documentElement.dataset.theme = 'light'
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f4f2f8')
         }
+        // Mode discret : les montants arrivent déjà floutés, jamais en clair au lancement.
+        if (localStorage.getItem('monetra:private') === '1') document.documentElement.setAttribute('data-private', '')
       } catch (e) {}
     </script>
   </head>

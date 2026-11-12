@@ -14,6 +14,7 @@
 **Revised:** 2026-11-10 : **retrait du Liquid Glass** (trop fragile selon les navigateurs) ; barre d'onglets classique, un seul matériau de barre, retour au toucher en CSS, règles des skills d'Emil Kowalski
 **Revised:** 2026-11-12 : **refonte « Noir & Violet »** : fond noir uni (plasma retiré), accent violet unique, îlots graphiques (reste à vivre embrasé, bulles de dépenses), registre d'opérations, capsule d'onglets flottante, titres en serif éditoriale. Inspirée de trois maquettes bancaires (panneau « Spent » noir → orange, bulles « Expenses » bleues, registre « Transactions » noir et blanc).
 **Revised:** 2026-11-12 : **expérience iOS** : menu contextuel à l'appui long, retours haptiques sur iPhone, onglet actif qui remonte, toast balayable, thème Automatique (voir « Réflexes iOS »).
+**Revised:** 2026-11-12 : **passage UX/UI** : Trajectoire (courbe des dépenses lisible au doigt), mode discret, dates relatives, raccourcis de date, états vides dessinés, bord de défilement en fondu.
 **Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -159,7 +160,7 @@ Calculés le 12/11/2026 sur les couleurs composées (alpha appliqué sur la surf
 
 ### Navigation
 
-- **En-tête** (`NavHeader`) : grand titre en serif, ou, sur l'accueil, logo rond violet + « Monetra » avec le sélecteur de mois à droite. Une barre compacte (titre 17px centré) apparaît en fondu au défilement.
+- **En-tête** (`NavHeader`) : grand titre en serif, ou, sur l'accueil, logo rond violet + « Monetra » avec le sélecteur de mois à droite. Une barre compacte (titre 17px centré) apparaît en fondu au défilement ; **son bord inférieur se fond dans le contenu** (masque dégradé de 12px) au lieu d'un filet.
 - **Capsule d'onglets** (`BottomNav`) : conteneur fixe pleine largeur (`.tab-bar`, transparent aux touchers, fondu vers le fond pour effacer le contenu qui passe dessous), capsule flottante de 64px (`.tab-pill`) à 10px au-dessus de l'indicateur d'accueil. Accueil, Opérations, **bouton d'ajout** (rond de 52px, violet, halo) au centre, Récurrents, Réglages. **Onglet actif : pastille pleine (blanche en sombre, noire en clair) avec icône et libellé** ; inactifs : icône seule, libellé gardé pour les lecteurs d'écran. **La pastille glisse d'un onglet à l'autre** (`layoutId`, spring critique de 0,3 s, choix du 12/11/2026) ; les onglets, dont la largeur change avec le libellé, glissent avec elle (`layout="position"`). La teinte du texte change à l'instant. Le bouton d'ajout glisse dans un conteneur (`.tab-add-slot`, au-dessus de la pastille) pour garder son retour à l'appui en CSS.
 - **Bouton « Nouveau récurrent »** : capsule violette centrée, `position: sticky` au-dessus de la capsule d'onglets.
 - Chaque écran réserve la hauteur de la barre en bas (`--content-bottom`).
@@ -171,6 +172,8 @@ Calculés le 12/11/2026 sur les couleurs composées (alpha appliqué sur la surf
 3. **Où part l'argent** (`.spending`, îlot) : total du mois, **bulles** (`CategoryBubbles`) puis **tuiles** chiffrées (2 colonnes).
    - Une bulle par catégorie, aire proportionnelle au montant (rayon 30 à 78 unités), placée par une spirale aplatie (`lib/bubbles.ts`, déterministe, testé), arc de la teinte de la catégorie pour la part du total, icône, libellé si la bulle est assez grande, pourcentage.
    - Le SVG est `aria-hidden` : les tuiles portent la même information (libellé, montant, part).
+3 bis. **Trajectoire** (`.trajectory`, îlot, `TrajectoryChart`, calcul dans `lib/trajectory.ts`, testé) : dépenses cumulées jour par jour (trait `#B8A1FF` + aire violette) jusqu'à aujourd'hui, puis estimation en pointillés (rythme moyen des dépenses variables + prélèvements prévus à leur date), face aux revenus du mois (pointillés verts). Pastille d'état : « ≈ 467 € le 31 » (euros ronds : une estimation n'a pas de centimes) ou « Dépassement le 24 » ; phrase de synthèse en dessous, avec le rythme à viser en cas de dépassement.
+   - **Lecture au doigt** comme dans Bourse : le doigt posé sur la courbe affiche un curseur et le jour touché au-dessus (hauteur réservée, la carte ne bouge pas) ; un tap haptique au passage du réel à l'estimé ; le geste ne déclenche pas le swipe de mois (`touch-action: pan-y`, propagation arrêtée). Au clavier : `role="slider"`, flèches gauche et droite.
 4. **À venir ce mois-ci** et **Dernières opérations** : titres serif sur le fond, bouton rond cerclé « Tout voir », liste dans une carte.
 5. Pied : solde total des comptes.
 
@@ -181,6 +184,19 @@ Le swipe horizontal de mois porte sur tout ce bloc (sauf l'en-tête).
 - **Résumé** (`.summary`) posé sur le fond : libellé (+ sélecteur de mois sur Opérations), total de 44px, deux tuiles (`.pill`) Entrées / Sorties ou Revenus fixes / Charges fixes.
 - **Registre** (`.ledger`) : surface de rayon 32px, `overflow: clip` (le rouge du swipe reste dans les coins). Segmented de filtre en tête, puis groupes par jour (en-tête en petites capitales, net du jour à droite), lignes pleine largeur.
 - Réglages : résumé du total des comptes, listes en cartes.
+
+### Mode discret
+
+Bouton œil en haut à droite du reste à vivre (44px). Il floute (`filter: blur(7px)`, 200 ms) tous les montants de l'app : `.amount`, reste à vivre, lecture et synthèse de la trajectoire. Mémorisé sur l'appareil et appliqué avant le premier rendu (`data-private` sur `<html>`, posé par `index.html`) : aucun montant ne s'affiche en clair au lancement. Les lecteurs d'écran lisent toujours les valeurs.
+
+### Dates
+
+- **Relatives quand c'est proche** : « Aujourd'hui », « Hier », « Demain » dans les en-têtes de jour et les lignes ; sinon « Mercredi 21 octobre » / « 21 oct. » (`formatDayHeading`, `formatShortDay`).
+- Saisie : **raccourcis** « Aujourd'hui », « Hier », « Autre date » (sélecteur du système) toujours visibles ; champ **Libellé** toujours visible (c'est lui qui donne son nom à la ligne).
+
+### États vides
+
+`EmptyState` : icône dans un rond violet (60px), titre, phrase qui dit à quoi ça sert, bouton d'action principal quand il y a un geste évident (saisir une opération). Jamais une phrase grise seule.
 
 ### Listes
 
@@ -347,6 +363,7 @@ Jamais au changement d'onglet, au segmented ni au défilement : l'haptique se r�
 - ❌ Dialogue de confirmation pour une suppression annulable : préférer l'annulation par toast
 - ❌ Fermer un menu contextuel sur `click` (le doigt qui l'a ouvert se lève dessus) ; haptique sur une action fréquente (onglets, défilement)
 - ❌ Couleur seule pour identifier une catégorie (toujours le libellé)
+- ❌ Signe sur un montant nul (« −0,00 € ») : `formatSigned` ; centimes sur une estimation : `formatMoneyRound`
 - ❌ **Emojis comme icônes** ; chiffres proportionnels pour les montants
 - ❌ Contenu masqué par la barre d'onglets ; **focus invisible** ; cibles tactiles de moins de 44px
 

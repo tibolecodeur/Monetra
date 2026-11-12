@@ -102,7 +102,14 @@ export default function App() {
               onAdd={(type) => setModal({ kind: 'transaction', type })}
             />
           )}
-          {screen === 'operations' && <Transactions month={month} onMonthChange={setMonth} onSelect={editTransaction} />}
+          {screen === 'operations' && (
+            <Transactions
+              month={month}
+              onMonthChange={setMonth}
+              onSelect={editTransaction}
+              onAdd={() => setModal({ kind: 'transaction' })}
+            />
+          )}
           {screen === 'recurrents' && (
             <RecurringScreen
               onAdd={() => setModal({ kind: 'recurring' })}

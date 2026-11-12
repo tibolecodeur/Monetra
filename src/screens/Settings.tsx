@@ -1,4 +1,5 @@
-import { Download, Plus, ShieldCheck, Upload } from 'lucide-react'
+import { ChevronRight, Download, Plus, ShieldCheck, Upload, Wallet } from 'lucide-react'
+import { EmptyState } from '../components/EmptyState'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { Money } from '../components/AnimatedAmount'
 import { AccountIcon } from '../components/CategoryIcon'
@@ -86,8 +87,12 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
           Comptes
         </h2>
         {accounts.length === 0 ? (
-          <div className="card empty-state">
-            <p>Aucun compte pour l'instant. Ajoutez votre compte courant pour commencer.</p>
+          <div className="card">
+            <EmptyState
+              icon={Wallet}
+              title="Aucun compte"
+              text="Ajoutez votre compte courant avec son solde actuel : tout le reste en découle."
+            />
           </div>
         ) : (
           <ul className="list card card-flush">
@@ -104,6 +109,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
                   <span className={`amount${a.solde < 0 ? ' negative' : ''}`}>
                     <Money value={a.solde} />
                   </span>
+                  <ChevronRight size={18} className="row-chevron" aria-hidden="true" />
                 </button>
               </li>
             ))}

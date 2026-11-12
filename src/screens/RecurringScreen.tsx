@@ -1,4 +1,5 @@
-import { ArrowDownLeft, ArrowUpRight, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, CalendarClock, Pencil, Plus, Trash2 } from 'lucide-react'
+import { EmptyState } from '../components/EmptyState'
 import { AnimatePresence, motion } from 'motion/react'
 import { Money } from '../components/AnimatedAmount'
 import { SwipeRow } from '../components/SwipeRow'
@@ -6,7 +7,7 @@ import { getCategory } from '../lib/categories'
 import { useContextMenu } from '../lib/contextMenu'
 import { useLongPress } from '../lib/useLongPress'
 import { formatShortDate, today } from '../lib/dates'
-import { formatMoney, round2 } from '../lib/format'
+import { formatSigned, round2 } from '../lib/format'
 import { accountLabels, useAccounts, useRecurring } from '../lib/hooks'
 import { deleteRecurring, restoreRecurring } from '../lib/mutations'
 import { useToast } from '../lib/toast'
@@ -76,12 +77,12 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
           <span className="pill">
             <ArrowDownLeft size={16} aria-hidden="true" className="pill-icon revenu" />
             <span className="pill-label">Revenus fixes</span>
-            <span className="amount revenu">+{formatMoney(sum('revenu'))}</span>
+            <span className="amount revenu">{formatSigned(sum('revenu'), '+')}</span>
           </span>
           <span className="pill">
             <ArrowUpRight size={16} aria-hidden="true" className="pill-icon" />
             <span className="pill-label">Charges fixes</span>
-            <span className="amount">−{formatMoney(sum('depense'))}</span>
+            <span className="amount">{formatSigned(sum('depense'), '−')}</span>
           </span>
         </div>
       </section>
@@ -91,12 +92,11 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
           <h2 className="ledger-title">Chaque mois</h2>
         </div>
         {active.length === 0 ? (
-          <div className="empty-state ledger-empty">
-            <p>
-              Loyer, forfait, salaire d'alternance… Ajoutez ce qui revient chaque mois : Monetra crée la transaction
-              automatiquement au bon jour.
-            </p>
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title="Rien ne revient encore"
+            text="Loyer, forfait, salaire d'alternance… Ajoutez ce qui revient chaque mois : Monetra crée l'opération au bon jour."
+          />
         ) : (
           renderList(active)
         )}

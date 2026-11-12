@@ -1,12 +1,13 @@
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-react'
+import { EmptyState } from '../components/EmptyState'
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { Money } from '../components/AnimatedAmount'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { Segmented } from '../components/Segmented'
 import { TransactionRow } from '../components/TransactionRow'
-import { formatDay, type MonthKey } from '../lib/dates'
-import { formatMoney, round2 } from '../lib/format'
+import { formatDayHeading, type MonthKey } from '../lib/dates'
+import { formatMoney, formatSigned, round2 } from '../lib/format'
 import { accountLabels, useAccounts, useMonthTransactions } from '../lib/hooks'
 import { deleteTransaction, restoreTransaction } from '../lib/mutations'
 import { useToast } from '../lib/toast'
@@ -17,11 +18,12 @@ interface Props {
   month: MonthKey
   onMonthChange: (m: MonthKey) => void
   onSelect: (t: Transaction) => void
+  onAdd?: () => void
 }
 
 type Filter = 'tout' | TransactionType
 
-export function Transactions({ month, onMonthChange, onSelect }: Props) {
+export function Transactions({ month, onMonthChange, onSelect, onAdd }: Props) {
   const accounts = useAccounts()
   const transactions = useMonthTransactions(month)
   const [filter, setFilter] = useState<Filter>('tout')
@@ -69,12 +71,12 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
           <span className="pill">
             <ArrowDownLeft size={16} aria-hidden="true" className="pill-icon revenu" />
             <span className="pill-label">Entrées</span>
-            <span className="amount revenu">+{formatMoney(entrees)}</span>
+            <span className="amount revenu">{formatSigned(entrees, '+')}</span>
           </span>
           <span className="pill">
             <ArrowUpRight size={16} aria-hidden="true" className="pill-icon" />
             <span className="pill-label">Sorties</span>
-            <span className="amount">−{formatMoney(sorties)}</span>
+            <span className="amount">{formatSigned(sorties, '−')}</span>
           </span>
         </div>
       </section>
@@ -95,10 +97,12 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
         </div>
 
         {groups.length === 0 ? (
-          <div className="empty-state ledger-empty">
-            <p>Aucune opération pour ce mois.</p>
-            <p className="hint">Touchez le bouton + en bas de l'écran pour en saisir une.</p>
-          </div>
+          <EmptyState
+            icon={Receipt}
+            title={filter === 'tout' ? 'Aucune opération ce mois-ci' : `Aucun${filter === 'revenu' ? ' revenu' : 'e dépense'} ce mois-ci`}
+            text="Chaque dépense saisie ici met à jour votre reste à vivre."
+            action={onAdd ? { label: 'Saisir une opération', onClick: onAdd } : undefined}
+          />
         ) : (
           <AnimatePresence initial={false}>
             {groups.map(([date, list]) => {
@@ -107,13 +111,13 @@ export function Transactions({ month, onMonthChange, onSelect }: Props) {
                 <motion.section
                   key={date}
                   className="day-group"
-                  aria-label={formatDay(date)}
+                  aria-label={formatDayHeading(date)}
                   layout="position"
                   exit={{ opacity: 0 }}
                   transition={{ opacity: { duration: 0.15 } }}
                 >
                   <h3 className="day-title">
-                    <span>{formatDay(date)}</span>
+                    <span>{formatDayHeading(date)}</span>
                     <span className="amount">
                       {dayNet > 0 ? '+' : dayNet < 0 ? '−' : ''}
                       {formatMoney(Math.abs(dayNet))}

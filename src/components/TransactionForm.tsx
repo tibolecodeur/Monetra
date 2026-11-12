@@ -1,7 +1,7 @@
-import { Plus } from 'lucide-react'
+import { CalendarDays } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORY } from '../lib/categories'
-import { today } from '../lib/dates'
+import { addDays, formatShortDate, today } from '../lib/dates'
 import { amountToInput, formatMoney, parseAmount } from '../lib/format'
 import { useAccounts } from '../lib/hooks'
 import { addTransaction, deleteTransaction, restoreTransaction, updateTransaction } from '../lib/mutations'
@@ -34,7 +34,12 @@ export function TransactionForm({ transaction, initialType, onDone, onNeedAccoun
   const [compteId, setCompteId] = useState<string | null>(transaction?.compteId ?? null)
   const [date, setDate] = useState(transaction?.date ?? today())
   const [note, setNote] = useState(transaction?.note ?? '')
-  const [showMore, setShowMore] = useState(Boolean(transaction))
+  const todayDate = today()
+  const yesterday = addDays(todayDate, -1)
+  // « Autre date » : ouverte d'emblée quand on modifie une opération d'un autre jour.
+  const [otherDate, setOtherDate] = useState(
+    Boolean(transaction && transaction.date !== todayDate && transaction.date !== yesterday),
+  )
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
 
@@ -205,23 +210,55 @@ export function TransactionForm({ transaction, initialType, onDone, onNeedAccoun
         </fieldset>
       )}
 
-      {showMore ? (
-        <div className="field-row">
-          <label className="field">
-            <span className="field-label">Date</span>
-            <input type="date" value={date} required onChange={(e) => setDate(e.target.value || today())} />
-          </label>
-          <label className="field grow">
-            <span className="field-label">Note</span>
-            <input value={note} placeholder="Optionnel" onChange={(e) => setNote(e.target.value)} />
-          </label>
+      <label className="field">
+        <span className="field-label">Libellé</span>
+        <input value={note} placeholder="Facultatif, ex. Boulangerie" onChange={(e) => setNote(e.target.value)} />
+      </label>
+
+      {/* Date : les deux cas fréquents en un toucher, le reste dans le sélecteur du système. */}
+      <fieldset className="fieldset">
+        <legend className="field-label">Date</legend>
+        <div className="chip-wrap" role="radiogroup" aria-label="Date">
+          {[
+            { value: todayDate, label: "Aujourd'hui" },
+            { value: yesterday, label: 'Hier' },
+          ].map((d) => (
+            <button
+              key={d.label}
+              type="button"
+              role="radio"
+              aria-checked={!otherDate && date === d.value}
+              className="chip"
+              onClick={() => {
+                setOtherDate(false)
+                setDate(d.value)
+              }}
+            >
+              {d.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            role="radio"
+            aria-checked={otherDate}
+            className="chip"
+            onClick={() => setOtherDate(true)}
+          >
+            <CalendarDays size={16} aria-hidden="true" />
+            {otherDate ? formatShortDate(date) : 'Autre date'}
+          </button>
         </div>
-      ) : (
-        <button type="button" className="btn btn-ghost" onClick={() => setShowMore(true)} aria-expanded={false}>
-          <Plus size={18} aria-hidden="true" />
-          Ajouter une date ou une note
-        </button>
-      )}
+        {otherDate && (
+          <input
+            className="date-input"
+            type="date"
+            aria-label="Choisir la date"
+            value={date}
+            required
+            onChange={(e) => setDate(e.target.value || todayDate)}
+          />
+        )}
+      </fieldset>
 
       {transaction?.recurringId && (
         <p className="hint">Générée par un récurrent : seule cette occurrence est modifiée.</p>
