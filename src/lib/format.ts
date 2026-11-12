@@ -18,3 +18,9 @@ export function parseAmount(input: string): number {
 export function amountToInput(value: number): string {
   return (Number.isInteger(value) ? String(value) : value.toFixed(2)).replace('.', ',')
 }
+
+/** « 1 234,56 € » → [« 1 234 », « ,56 € »] : les centimes sont estompés, les euros portent le regard. */
+export function splitMoney(text: string): [string, string] {
+  const i = text.lastIndexOf(',')
+  return i < 0 ? [text, ''] : [text.slice(0, i), text.slice(i)]
+}

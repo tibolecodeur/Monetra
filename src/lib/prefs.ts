@@ -5,7 +5,7 @@ const THEME_KEY = 'monetra:theme'
 export type Theme = 'dark' | 'light'
 
 /** Couleur de la barre d'état : le fond du haut de la page (--color-bg). */
-const THEME_COLORS: Record<Theme, string> = { dark: '#05060c', light: '#eef0f8' }
+const THEME_COLORS: Record<Theme, string> = { dark: '#070609', light: '#f4f2f8' }
 
 function read(key: string): string | null {
   try {

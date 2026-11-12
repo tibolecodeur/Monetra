@@ -1,5 +1,6 @@
-import { Plus } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Plus } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { Money } from '../components/AnimatedAmount'
 import { SwipeRow } from '../components/SwipeRow'
 import { getCategory } from '../lib/categories'
 import { formatShortDate, today } from '../lib/dates'
@@ -36,7 +37,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
   }
 
   const renderList = (list: Recurring[]) => (
-    <ul className="list card card-flush">
+    <ul className="list">
       <AnimatePresence initial={false}>
       {list.map((r) => {
         const meta = [
@@ -60,8 +61,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
                 {meta && <span className="row-meta">{meta}</span>}
               </span>
               <span className={`amount ${r.type}`}>
-                {r.type === 'revenu' ? '+' : '−'}
-                {formatMoney(r.montant)}
+                <Money value={r.montant} sign={r.type === 'revenu' ? '+' : '−'} />
               </span>
             </button>
             </SwipeRow>
@@ -72,44 +72,59 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
     </ul>
   )
 
+  const net = round2(sum('revenu') - sum('depense'))
+
   return (
     <div className="screen">
       <NavHeader title="Récurrents" />
 
-      <section className="totals" aria-label="Total mensuel des récurrents actifs">
-        <div>
-          <span className="totals-label">Revenus fixes / mois</span>
-          <span className="amount revenu">+{formatMoney(sum('revenu'))}</span>
-        </div>
-        <div>
-          <span className="totals-label">Charges fixes / mois</span>
-          <span className="amount">−{formatMoney(sum('depense'))}</span>
+      <section className="summary" aria-label="Total mensuel des récurrents actifs">
+        <p className="summary-label">Net fixe par mois</p>
+        <p className={`summary-value amount${net < 0 ? ' negative' : ''}`}>
+          <Money value={Math.abs(net)} sign={net > 0 ? '+' : net < 0 ? '−' : ''} />
+        </p>
+        <div className="summary-pills">
+          <span className="pill">
+            <ArrowDownLeft size={16} aria-hidden="true" className="pill-icon revenu" />
+            <span className="pill-label">Revenus fixes</span>
+            <span className="amount revenu">+{formatMoney(sum('revenu'))}</span>
+          </span>
+          <span className="pill">
+            <ArrowUpRight size={16} aria-hidden="true" className="pill-icon" />
+            <span className="pill-label">Charges fixes</span>
+            <span className="amount">−{formatMoney(sum('depense'))}</span>
+          </span>
         </div>
       </section>
 
-      {active.length === 0 ? (
-        <div className="card empty-state">
-          <p>
-            Loyer, forfait, salaire d'alternance… Ajoutez ce qui revient chaque mois : Monetra crée la transaction
-            automatiquement au bon jour.
-          </p>
+      <div className="ledger">
+        <div className="ledger-head">
+          <h2 className="ledger-title">Chaque mois</h2>
         </div>
-      ) : (
-        renderList(active)
-      )}
+        {active.length === 0 ? (
+          <div className="empty-state ledger-empty">
+            <p>
+              Loyer, forfait, salaire d'alternance… Ajoutez ce qui revient chaque mois : Monetra crée la transaction
+              automatiquement au bon jour.
+            </p>
+          </div>
+        ) : (
+          renderList(active)
+        )}
+
+        {ended.length > 0 && (
+          <>
+            <h3 className="day-title">Terminés</h3>
+            {renderList(ended)}
+          </>
+        )}
+      </div>
 
       {/* Reste visible juste au-dessus de la barre d'onglets pendant le défilement. */}
-      <button type="button" className="btn btn-secondary sticky-action" onClick={onAdd}>
+      <button type="button" className="btn btn-primary sticky-action" onClick={onAdd}>
         <Plus size={20} aria-hidden="true" />
         Nouveau récurrent
       </button>
-
-      {ended.length > 0 && (
-        <>
-          <h2 className="section-title">Terminés</h2>
-          {renderList(ended)}
-        </>
-      )}
     </div>
   )
 }

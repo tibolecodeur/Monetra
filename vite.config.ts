@@ -25,8 +25,8 @@ export default defineConfig({
         scope: base,
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#05060c',
-        theme_color: '#05060c',
+        background_color: '#070609',
+        theme_color: '#070609',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
@@ -35,7 +35,7 @@ export default defineConfig({
       },
       workbox: {
         // Polices : seuls les sous-ensembles latins (français) sont mis en cache hors ligne.
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}', '**/*-latin{,-ext}-wght-*.woff2'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}', '**/*-latin{,-ext}-wght-*.woff2', '**/*-latin{,-ext}-400-normal.woff2'],
         navigateFallback: `${base}index.html`,
       },
     }),

@@ -13,17 +13,19 @@ import { Segmented } from './Segmented'
 
 interface Props {
   transaction?: Transaction
+  /** Type proposé à l'ouverture (boutons « Dépense » / « Revenu » de l'accueil). */
+  initialType?: TransactionType
   onDone: () => void
   onNeedAccount: () => void
 }
 
 type Errors = Partial<Record<'amount' | 'category', string>>
 
-export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
+export function TransactionForm({ transaction, initialType, onDone, onNeedAccount }: Props) {
   const accounts = useAccounts()
   const toast = useToast()
   const ids = { amount: useId(), amountError: useId(), categoryError: useId() }
-  const [type, setType] = useState<TransactionType>(transaction?.type ?? 'depense')
+  const [type, setType] = useState<TransactionType>(transaction?.type ?? initialType ?? 'depense')
   const [amount, setAmount] = useState(transaction ? amountToInput(transaction.montant) : '')
   const [categorie, setCategorie] = useState<CategoryId | null>(
     transaction && transaction.type === 'depense' ? transaction.categorie : null,
@@ -160,7 +162,7 @@ export function TransactionForm({ transaction, onDone, onNeedAccount }: Props) {
                 type="button"
                 role="radio"
                 aria-checked={categorie === c.id}
-                className={`choice cat-${c.id}`}
+                className={`choice tint-${c.id}`}
                 onClick={() => {
                   setCategorie(c.id)
                   setErrors((x) => ({ ...x, category: undefined }))

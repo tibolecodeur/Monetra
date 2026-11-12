@@ -12,7 +12,8 @@
 **Revised:** 2026-11-09 : **Liquid Glass physique sur fond plasma** (réfraction de Snell, liseré spéculaire, palette tirée du plasma)
 **Revised:** 2026-11-10 : **nouveau Liquid Glass, scène filtrée** d'après [liquid-glass-web-react](https://github.com/PallavAg/liquid-glass-web-react) (même rendu sur Safari, Chrome et Firefox), lentilles de sélection glissables, défilement dans un conteneur
 **Revised:** 2026-11-10 : **retrait du Liquid Glass** (trop fragile selon les navigateurs) ; barre d'onglets classique, un seul matériau de barre, retour au toucher en CSS, règles des skills d'Emil Kowalski
-**Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants).
+**Revised:** 2026-11-12 : **refonte « Noir & Violet »** : fond noir uni (plasma retiré), accent violet unique, îlots graphiques (reste à vivre embrasé, bulles de dépenses), registre d'opérations, capsule d'onglets flottante, titres en serif éditoriale. Inspirée de trois maquettes bancaires (panneau « Spent » noir → orange, bulles « Expenses » bleues, registre « Transactions » noir et blanc).
+**Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
 
@@ -20,13 +21,15 @@ En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skil
 
 ## Principe
 
-Sobre, lisible, fiable : l'interface d'une app Apple professionnelle, pas une démonstration d'effets.
+Noir, violet, graphique : une app bancaire moderne, pas une démonstration d'effets.
 
-- **Le fond plasma** donne la palette et la profondeur ; il reste derrière tout.
-- **Barres** (onglets en bas, titre compact en haut, toast) : un seul matériau translucide et flouté, avec un filet de séparation. Un `backdrop-filter` standard, rien d'autre : ni filtre SVG, ni WebGL, ni détection de navigateur.
-- **Contenu** (cartes, sélecteur de mois, contrôle segmenté, boutons secondaires) : un voile translucide sans flou.
+- **Fond noir uni** (`#070609`). Plus de fond animé : la profondeur vient des îlots violets, pas d'une boucle WebGL.
+- **Une seule couleur d'accent : le violet.** Le vert est réservé aux revenus, le rouge aux erreurs et au dépassement ; les catégories n'ont qu'une teinte d'icône.
+- **Îlots graphiques** : le panneau du reste à vivre (noir qui s'embrase en violet vers le bas) et la carte des bulles de dépenses. Ils restent sombres dans les deux thèmes.
+- **Registre** : sur Opérations et Récurrents, un résumé chiffré posé sur le fond, puis une grande surface qui porte toute la liste.
+- **Barres** (capsule d'onglets, titre compact, toast) : un seul matériau translucide et flouté, `backdrop-filter` standard.
 - **Feuilles** : opaques.
-- **Le mouvement se mérite** : ce qu'on fait cent fois par jour (changer d'onglet) ne s'anime pas ; ce qui répond à un geste suit le doigt ; le reste est court (≤ 250 ms) et en ease-out.
+- **Le mouvement se mérite** : inchangé (voir Motion).
 
 ---
 
@@ -34,92 +37,105 @@ Sobre, lisible, fiable : l'interface d'une app Apple professionnelle, pas une d�
 
 ### Theme
 
-- **Sombre par défaut**. Thème clair dans Réglages, mémorisé sur l'appareil, appliqué avant le premier rendu.
-- `theme-color` : la couleur du haut de la page, `#05060C` (manifest et meta) ; `#EEF0F8` en clair, mise à jour au changement de thème.
+- **Sombre par défaut**. Thème clair dans Réglages, mémorisé sur l'appareil, appliqué avant le premier rendu. Les îlots restent sombres en clair (classe `.island`, qui repose les tokens sombres).
+- `theme-color` : `#070609` (manifest et meta) ; `#F4F2F8` en clair.
 
 ### Couleurs : sombre (défaut)
 
 | Rôle | Valeur | Variable |
 |------|--------|----------|
-| Fond (sous le plasma) | `#05060C` | `--color-bg` |
-| Libellé principal | `#FFFFFF` | `--color-text` |
-| Libellé secondaire | `rgba(235,235,245,0.66)` | `--color-text-secondary` |
-| Libellé tertiaire (décoratif) | `rgba(235,235,245,0.34)` | `--color-text-tertiary` |
-| Texte posé sur le plasma | `rgba(255,255,255,0.86)` | `--color-text-on-bg` |
-| Accent (pervenche, tiré du plasma) : remplissage | `#5468E0` | `--color-accent` |
-| Accent : texte, onglet actif, liens, sélection | `#A8B6FF` | `--color-accent-text` |
-| Revenus | `#30D158` | `--color-income` |
-| Danger | `#FF6961` (texte), `#FF453A` (fond du swipe) | `--color-danger*` |
-| Matériau du contenu (cartes, contrôles) | `rgba(17,20,36,0.66)`, sans flou | `--material-content` |
-| Matériau des barres | `rgba(13,15,27,0.80)` + flou 20px, saturation 180 % ; opaque `#0D0F1B` en repli | `--material-bar`, `--material-bar-solid` |
-| Feuille (sheet) | `#171A2B`, opaque | `--color-sheet` |
-| Curseur du segmented | `rgba(120,132,180,0.42)` | `--color-segment` |
-| Remplissage (tuiles, champs, puces) | `rgba(120,132,180,0.20)` | `--color-fill` |
-| Séparateurs | `rgba(255,255,255,0.10)` | `--color-separator` |
+| Fond | `#070609` | `--color-bg` |
+| Surface (cartes, registre) | `#111017` | `--surface-1` |
+| Surface posée (pastilles, sélecteur de mois, rail) | `#1C1A24` | `--surface-2` |
+| Arête des surfaces | `rgba(255,255,255,0.06)` | `--surface-edge` |
+| Libellé principal / secondaire / tertiaire | `#FFFFFF` / `rgba(240,236,250,0.62)` / `0.34` | `--color-text*` |
+| Accent : remplissage (boutons, ajout) | `#7C4DFF` | `--color-accent` |
+| Accent : texte, liens, sélection | `#B8A1FF` | `--color-accent-text` |
+| Accent : halo (ombres colorées des boutons) | `rgba(124,77,255,0.38)` | `--color-accent-glow` |
+| Revenus | `#5EE39A` | `--color-income` |
+| Danger | `#FF7A85` (texte), `#FF453A` (fond du swipe) | `--color-danger*` |
+| Matériau des barres | `rgba(22,20,30,0.78)` + flou 20px, saturation 180 % ; opaque `#16141E` en repli | `--material-bar`, `--material-bar-solid` |
+| Feuille | `#121018`, opaque | `--color-sheet` |
 
 ### Couleurs : clair
 
 | Rôle | Valeur | Variable |
 |------|--------|----------|
-| Fond | `#EEF0F8` | `--color-bg` |
-| Libellés principal / secondaire / tertiaire | `#000000` / `rgba(60,60,67,0.82)` / `rgba(60,60,67,0.42)` | `--color-text*` |
-| Texte posé sur le plasma | `rgba(28,30,44,0.86)` | `--color-text-on-bg` |
-| Accent : remplissage / texte | `#4A5EE0` / `#3A4FD0` | `--color-accent`, `--color-accent-text` |
-| Revenus | `#196B2E` | `--color-income` |
-| Danger | `#D70015` | `--color-danger` |
-| Matériau du contenu | `rgba(255,255,255,0.76)` | `--material-content` |
-| Matériau des barres | `rgba(246,247,252,0.82)` + flou ; opaque `#F6F7FC` en repli | `--material-bar` |
-| Feuille | `#F7F8FD` | `--color-sheet` |
+| Fond | `#F4F2F8` | `--color-bg` |
+| Surfaces | `#FFFFFF` / `#EBE8F2` | `--surface-1`, `--surface-2` |
+| Libellés | `#0B0A10` / `rgba(30,24,48,0.68)` / `0.40` | `--color-text*` |
+| Accent : remplissage / texte | `#6D3CF0` / `#5A2BD8` | `--color-accent`, `--color-accent-text` |
+| Revenus / danger | `#157A3C` / `#C8102E` | |
+| Matériau des barres | `rgba(255,255,255,0.82)` + flou ; opaque `#FFFFFF` | `--material-bar` |
 
-### Couleurs de catégories (pastilles d'icônes et barres)
+### Îlots (fixes, dans les deux thèmes)
 
-Palette système iOS, glyphe blanc sur pastille arrondie (façon Réglages iOS). L'identité ne repose jamais sur la couleur seule : chaque pastille est accompagnée de son libellé.
+| Élément | Recette |
+|---|---|
+| Reste à vivre (`.hero`) | `#0D0B12` + lueur radiale centrée sous le bas du panneau : `#9B7BFF` → `#6A3CF0` → `#4A1FB0` → `#1D0D45` → transparent. En dépassement, la même lueur en rose-rouge. |
+| Plateau « Le mois en détail » (`.hero-tray`) | dégradé vertical `#230C57` → `#4A20B5` → `#6532E0`, plus étroit que le panneau (10 px de chaque côté), glissé 32 px dessous. |
+| Bulles de dépenses (`.spending`) | `#0F0D16` + deux halos violets (haut gauche, bas droite). |
+
+La lueur la plus claire reste sous le bord du panneau : le texte posé dessus (jauge, « % des revenus engagés ») ne voit jamais plus clair que `#6A3CF0`.
+
+### Couleurs de catégories (une teinte par catégorie, `--tint`)
+
+Une seule teinte par catégorie, appliquée à l'icône sur une pastille ronde du même ton à 16 % (`.row-icon`, `.dot-icon`, `.choice`), et à l'arc des bulles. Classes `.tint-*`. L'identité ne repose jamais sur la couleur seule : toujours le libellé à côté.
 
 | Catégorie | Sombre | Clair |
 |-----------|--------|-------|
-| Logement | `#FF9F0A` | `#FF9500` |
-| Courses | `#40C8E0` | `#32ADE6` |
-| Resto | `#FF453A` | `#FF3B30` |
-| Abonnements | `#BF5AF2` | `#AF52DE` |
-| Loisirs | `#FF375F` | `#FF2D55` |
-| Épargne | `#5E5CE6` | `#5856D6` |
-| Divers | `#8E8E93` | `#8E8E93` |
-| Revenu | `#30D158` | `#34C759` |
+| Logement | `#FFB547` | `#B45F00` |
+| Courses | `#3FD6C6` | `#0B8277` |
+| Resto | `#FF7A6B` | `#CC3524` |
+| Abonnements | `#C18CFF` | `#8236D1` |
+| Loisirs | `#FF6FAE` | `#C4206A` |
+| Épargne | `#8F9BFF` | `#4450D4` |
+| Divers | `#A9A6B4` | `#67646F` |
+| Revenu | `#5EE39A` | `#157A3C` |
+| Compte | `#B8A1FF` | `#6D3CF0` |
+
+### Montants
+
+- Chiffres tabulaires partout, chasse serrée (`--ls-display: -0.045em`, `-0.03em` sous Safari) pour les montants d'affichage.
+- **Centimes estompés** (`.cents`, composant `Money` et `AnimatedAmount`) : opacité 0,5 en sombre, 0,62 en clair, 0,8 sur le plateau violet (contraste AA conservé).
 
 ### Contrastes vérifiés (WCAG AA)
 
-Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (plasma + matériaux) est photographié sur plusieurs images. Le pire cas (2e centile des pixels sous chaque texte) est calculé sur les 4 écrans, en haut de page et après défilement. Toute nouvelle couleur de texte ou de matériau se mesure de la même façon.
+Calculés le 12/11/2026 sur les couleurs composées (alpha appliqué sur la surface réelle) :
 
-- **Mesure du 10/11/2026** (barre d'onglets classique, même méthode, contraste calculé pixel par pixel avec l'alpha du texte), pire cas par style :
-  - sombre : texte secondaire des cartes 5,7 ; segmented inactif 6,5 ; onglets inactifs 6,9 ; segmented actif 8,4 ; onglet actif 9,0 ; boutons secondaires 14,4 ; bouton principal 4,7 (blanc sur accent, 17 px semi-gras) ;
-  - clair : texte secondaire des cartes 5,4 ; onglets 5,7 ; segmented inactif 5,9 ; boutons secondaires 15,4.
-- Les bordures des champs restent au-dessus de 3:1.
+- sombre : secondaire sur carte 6,7 ; secondaire sur pastille 6,4 ; centimes 5,3 ; accent-texte 8,6 ; revenus 11,7 ; danger 7,5 ; blanc sur bouton violet 4,8 ;
+- îlots : « % des revenus engagés » 6,0 (pire cas, `#6A3CF0`) ; libellés du plateau 6,0 ; centimes du plateau ≥ 4,5 ;
+- clair : secondaire 5,9 ; centimes 5,4 ; accent-texte 7,6 ; revenus 5,4 ; danger 5,9 ; blanc sur bouton violet 5,9.
+- Le tertiaire (34 %) ne sert qu'aux textes d'exemple et au symbole € décoratif de la saisie.
+- À refaire sur le rendu réel (méthode de la mesure du 10/11) avant une publication.
 
-### Typographie (apple-design §15)
+### Typographie
 
-- **SF Pro sous Safari, Inter ailleurs** (`@supports (font: -apple-system-body)`) ; **SF Pro Rounded** (`ui-rounded`) pour les montants clés sous Safari.
-- Tailles en `rem`, tracking et interlignage par taille (tokens `--fs-*`, `--ls-*`, `--lh-*`), montants en `tabular-nums`.
+- **SF Pro sous Safari, Inter ailleurs** pour l'interface et les montants.
+- **Instrument Serif** (auto-hébergée, `@fontsource/instrument-serif`, 400) pour les titres éditoriaux uniquement : grand titre d'écran, nom de l'app, titres de section, titre des feuilles, titre « Où part l'argent ».
 
-| Rôle | Taille | Graisse |
-|------|--------|---------|
-| Grand titre d'écran (repliable) | 34px | 700 |
-| Titre de la barre compacte | 17px | 600 |
-| Titre de section (sur le fond) | 22px | 700 |
-| Titre de carte | 17px | 600 |
-| Ligne de liste (corps iOS) | 17px | 400 ; méta 15px |
-| Reste à vivre | 52px arrondi | 700 |
-| En-tête de jour | 13px majuscules, +0.04em | 600 |
-| Onglets | 11px | 500 (600 actif) |
+| Rôle | Police | Taille | Graisse |
+|------|--------|--------|---------|
+| Grand titre d'écran | Serif | 44px | 400 |
+| Nom de l'app (accueil) | Serif | 28px | 400 |
+| Titre de section (sur le fond) | Serif | 28px | 400 |
+| Titre de feuille | Serif | 30px | 400 |
+| Reste à vivre | Sans | `clamp(40px, 13.5vw, 60px)` | 600 |
+| Total d'un résumé | Sans | 44px | 600 |
+| Ligne de liste | Sans | 17px | 500 ; méta 13px |
+| En-tête de jour | Sans | 12px majuscules, +0.06em | 600 |
+| Onglet actif | Sans | 15px | 600 |
 
 ### Rayons
 
 | Token | Valeur | Usage |
 |-------|--------|-------|
-| `--radius-sm` | 10px | Pastilles d'icône |
-| `--radius-md` | 14px | Champs, puces de catégorie, contrôle segmenté |
-| `--radius-lg` | 22px | Cartes |
-| `--radius-xl` | 28px | Reste à vivre, haut des sheets |
-| `--radius-full` | 999px | Capsules : boutons, sélecteur de mois, toast |
+| `--radius-sm` | 12px | |
+| `--radius-md` | 16px | Champs |
+| `--radius-lg` | 24px | Cartes |
+| `--radius-xl` | 32px | Reste à vivre, registre, haut des feuilles |
+| `--radius-full` | 999px | Capsules : boutons, onglets, sélecteur de mois, segmented, toast |
+| (rond) | 50 % | Pastilles d'icônes, logo, bouton d'ajout, jour des récurrents |
 
 ---
 
@@ -127,12 +143,13 @@ Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (pl
 
 | Matériau | Où | Recette |
 |---|---|---|
-| Barre | barre d'onglets, titre compact, toast, bouton « Nouveau récurrent » | `--material-bar` + `backdrop-filter: blur(20px) saturate(180%)`, filet `0.5px` `--color-separator` |
-| Contenu | cartes, sélecteur de mois, segmented, boutons secondaires | `--material-content` + bordure `--material-content-edge`, **sans flou** |
+| Barre | capsule d'onglets, titre compact, toast | `--material-bar` + `backdrop-filter: blur(20px) saturate(180%)`, arête `--material-bar-edge` |
+| Surface | cartes, registre, tuiles | `--surface-1` / `--surface-2`, pleines, **sans flou** |
+| Îlot | reste à vivre, plateau, bulles | dégradés fixes (voir plus haut), **sans flou** |
 | Feuille | sheets, lien d'évitement | `--color-sheet`, opaque |
 
-- **Repli** : sans `backdrop-filter` (`@supports not`), en transparence réduite ou en contraste renforcé, les barres passent à `--material-bar-solid`, opaques.
-- **Flou ≤ 20 px**, et seulement sur de petites surfaces fixes. Pas de flou sur les cartes (elles défilent) ni sur les feuilles (grandes, déplacées au doigt) : c'est cher, surtout sur Safari.
+- **Repli** : sans `backdrop-filter` (`@supports not`), en transparence réduite ou en contraste renforcé, les barres passent à `--material-bar-solid`.
+- **Flou ≤ 20 px**, seulement sur de petites surfaces fixes.
 - **Aucune détection de navigateur** : `@supports` et media queries uniquement.
 
 ---
@@ -141,33 +158,52 @@ Mesurés **sur le rendu réel** : le texte est rendu invisible, puis le fond (pl
 
 ### Navigation
 
-- **Grand titre repliable** (`NavHeader`) : 34px qui défile avec la page ; une barre compacte (matériau de barre, titre 17px centré, filet en bas) apparaît en fondu, liée au défilement, dès qu'il passe sous le haut de l'écran.
-- **Barre d'onglets** (`BottomNav`) : fixe, collée au bas de l'écran, pleine largeur, 56px + zone de l'indicateur d'accueil. Cinq colonnes : Accueil, Opérations, **bouton d'ajout** (rond de 48px, accent) au centre, Récurrents, Réglages. Onglet actif en `--color-accent-text`, inactifs en `--color-text-secondary`, libellés de 11px. **Aucune animation au changement d'onglet.** Sur grand écran, les onglets restent groupés sur 480px.
-- **Bouton « Nouveau récurrent »** : `position: sticky` juste au-dessus de la barre d'onglets, matériau de barre.
+- **En-tête** (`NavHeader`) : grand titre en serif, ou, sur l'accueil, logo rond violet + « Monetra » avec le sélecteur de mois à droite. Une barre compacte (titre 17px centré) apparaît en fondu au défilement.
+- **Capsule d'onglets** (`BottomNav`) : conteneur fixe pleine largeur (`.tab-bar`, transparent aux touchers, fondu vers le fond pour effacer le contenu qui passe dessous), capsule flottante de 64px (`.tab-pill`) à 10px au-dessus de l'indicateur d'accueil. Accueil, Opérations, **bouton d'ajout** (rond de 52px, violet, halo) au centre, Récurrents, Réglages. **Onglet actif : pastille pleine (blanche en sombre, noire en clair) avec icône et libellé** ; inactifs : icône seule, libellé gardé pour les lecteurs d'écran. **La pastille glisse d'un onglet à l'autre** (`layoutId`, spring critique de 0,3 s, choix du 12/11/2026) ; les onglets, dont la largeur change avec le libellé, glissent avec elle (`layout="position"`). La teinte du texte change à l'instant. Le bouton d'ajout glisse dans un conteneur (`.tab-add-slot`, au-dessus de la pastille) pour garder son retour à l'appui en CSS.
+- **Bouton « Nouveau récurrent »** : capsule violette centrée, `position: sticky` au-dessus de la capsule d'onglets.
 - Chaque écran réserve la hauteur de la barre en bas (`--content-bottom`).
 
-### Cartes et listes
+### Accueil
 
-- Cartes en matériau de contenu, rayon 22px, arête claire en haut ; la carte du reste à vivre (rayon 28px) a un reflet supérieur, rouge si dépassement ; méta des comptes sur une ligne, tronquée.
-- Listes « inset grouped » : séparateurs décalés après la pastille d'icône, lignes de 60px, surlignage immédiat à l'appui (`:active`).
-- Swipe pour supprimer : le rouge n'occupe que la zone découverte (`clip-path`, pas `width`) ; la corbeille grossit quand le seuil est franchi.
+1. **Reste à vivre** (`.hero`, îlot) : libellé, montant géant centré, pastilles d'état (« Dans le vert » / « Budget dépassé ») et de reste par jour, deux actions rapides (« Dépense » blanc plein, « Revenu » en verre) qui ouvrent la saisie sur le bon type, jauge blanche et « % des revenus engagés ».
+2. **Plateau** (`.hero-tray`) : « Le mois en détail », trois colonnes Revenus / Charges fixes / Variables, avec « dont … à venir ».
+3. **Où part l'argent** (`.spending`, îlot) : total du mois, **bulles** (`CategoryBubbles`) puis **tuiles** chiffrées (2 colonnes).
+   - Une bulle par catégorie, aire proportionnelle au montant (rayon 30 à 78 unités), placée par une spirale aplatie (`lib/bubbles.ts`, déterministe, testé), arc de la teinte de la catégorie pour la part du total, icône, libellé si la bulle est assez grande, pourcentage.
+   - Le SVG est `aria-hidden` : les tuiles portent la même information (libellé, montant, part).
+4. **À venir ce mois-ci** et **Dernières opérations** : titres serif sur le fond, bouton rond cerclé « Tout voir », liste dans une carte.
+5. Pied : solde total des comptes.
+
+Le swipe horizontal de mois porte sur tout ce bloc (sauf l'en-tête).
+
+### Opérations, Récurrents, Réglages
+
+- **Résumé** (`.summary`) posé sur le fond : libellé (+ sélecteur de mois sur Opérations), total de 44px, deux tuiles (`.pill`) Entrées / Sorties ou Revenus fixes / Charges fixes.
+- **Registre** (`.ledger`) : surface de rayon 32px, `overflow: clip` (le rouge du swipe reste dans les coins). Segmented de filtre en tête, puis groupes par jour (en-tête en petites capitales, net du jour à droite), lignes pleine largeur.
+- Réglages : résumé du total des comptes, listes en cartes.
+
+### Listes
+
+- Lignes de 64px, **pastille d'icône ronde de 40px teintée**, titre 17px, méta 13px, montant à droite, séparateurs décalés après la pastille.
+- Récurrents : pastille ronde du jour du mois (« le 12 »), verte pour un revenu.
+- Surlignage immédiat à l'appui (`:active`) ; swipe pour supprimer inchangé.
 
 ### Boutons et contrôles
 
-- Capsules (`--radius-full`), 50px. Principal : accent plein, sans dégradé ni reflet. Secondaire (`.btn-secondary`) : matériau de contenu. Danger : rouge à 18 %.
-- Sélecteur de mois : capsule en matériau de contenu.
-- Contrôle segmenté façon iOS : rail de 40px (cibles de 44px), curseur qui glisse en 200 ms ; rail en matériau de contenu sur la page, en simple remplissage dans une feuille.
-- Champs : remplissage `--color-fill`, bordure ≥ 3:1, halo d'accent au focus, texte de 17px (jamais moins de 16px : iOS zoomerait la page).
+- Capsules. Principal : violet plein, halo violet. Secondaire : `--surface-2`. Sur îlot : blanc plein (`.btn-light`) ou verre (`.btn-glass`). Danger : rouge à 16 %.
+- Bouton rond cerclé (`.round-button`) : 44px, liseré et icône en accent-texte.
+- Sélecteur de mois : capsule compacte `--surface-2`, chevrons de 44px.
+- Segmented : rail capsule ; le curseur est rendu dans l'option choisie et partage un `layoutId` (unique par instance, `useId`) : Motion l'anime d'une option à l'autre, sans calcul de largeur ni de position.
+- Champs : remplissage, bordure ≥ 3:1, halo d'accent au focus, 17px.
+
+### Saisie
+
+- Montant géant centré, € décoratif.
+- **Catégories en grille de 4** : pastille ronde teintée de 48px, libellé dessous ; sélection = cadre et voile violets, pastille pleine de la teinte.
+- Comptes en puces capsules.
 
 ### Sheets
 
-Collées au bas de l'écran, opaques, rayon 28px en haut, poignée, bouton fermer rond, bouton principal collé en bas sur un fond opaque qui se fond vers le haut. Voile qui s'éclaircit avec le glissement. Tirée vers le haut (rubber-band), la feuille ne se décolle pas du bord (ombre pleine sous elle).
-
----
-
-## Fond plasma (`@componentry/closing-plasma`)
-
-Fond WebGL fixe derrière tous les écrans (`AppBackground`), non interactif, `aria-hidden`. Palette d'origine (bleu nuit / gris bleuté pâle), opacité `0.9` en sombre et `1` en clair, `speed 0.5`, 30 images/s, rendu à 0,5×. Suit le thème ; figé en mouvement réduit et sous une sheet. Adaptations commentées « Monetra » : `themeMode` appliqué, `paused`, `maxDpr`, `maxFps`, `premultipliedAlpha: false`. C'est la seule animation en boucle de l'app, et la seule décoration : elle reste lente, hors du contenu, et s'arrête dès qu'on ne la regarde pas (onglet caché, feuille ouverte, mouvement réduit).
+Collées au bas de l'écran, opaques, rayon 32px en haut, poignée, titre serif, bouton fermer rond, bouton principal collé en bas. Mécanique inchangée.
 
 ---
 
@@ -177,17 +213,17 @@ Fond WebGL fixe derrière tous les écrans (`AppBackground`), non interactif, `a
 
 | Fréquence | Décision | Dans Monetra |
 |---|---|---|
-| Cent fois par jour, ou au clavier | Aucune animation | changement d'onglet, navigation, Échap |
+| Cent fois par jour, ou au clavier | Aucune animation, sauf exception assumée | navigation entre écrans, Échap. **Exception** : la pastille d'onglet glisse (0,3 s, critique, interruptible), à la demande du produit |
 | Dizaines de fois par jour | Réduite, à peine perceptible | retour à l'appui (140 ms), curseur du segmented (200 ms), chevrons de mois (fondu de 270 ms) |
 | Occasionnelle | Animation normale | sheet, toast, suppression d'une ligne |
-| Donnée lue ou manipulée | Seulement un vrai changement de valeur | reste à vivre qui glisse vers sa nouvelle valeur, jauges (250 ms) ; jamais rejoué au chargement |
+| Donnée lue ou manipulée | Seulement un vrai changement de valeur | reste à vivre qui glisse vers sa nouvelle valeur, jauges (250 ms), bulles qui glissent et grossissent, tuiles de catégories qui se réordonnent ; jamais rejoué au chargement ni au changement de mois (composants recréés par mois : le contenu glisse déjà avec le geste) |
 
 Chaque animation a une raison : retour au toucher, cohérence spatiale, indication d'état, ou éviter un changement brutal. « C'est joli » n'en est pas une.
 
 ### Deux outils
 
-- **CSS** pour ce qui est prédéterminé : retour à l'appui (`:active`, `transform: scale(0.97)`, `--press-duration` 140 ms), curseur du segmented, jauges. Courbe `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`. Jamais `transition: all`, jamais `ease-in`, jamais plus de 300 ms, uniquement `transform`, `opacity` ou `clip-path`.
-- **Springs `motion`** pour ce qui suit un geste et doit pouvoir être rattrapé : sheet, swipe d'une ligne, swipe de mois. Pas de `@keyframes` sur ces éléments.
+- **CSS** pour ce qui est prédéterminé : retour à l'appui (`:active`, `transform: scale(0.97)`, `--press-duration` 140 ms), jauges. Courbe `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`. Jamais `transition: all`, jamais `ease-in`, jamais plus de 300 ms, uniquement `transform`, `opacity` ou `clip-path`.
+- **Springs `motion`** pour ce qui suit un geste et doit pouvoir être rattrapé (sheet, swipe d'une ligne, swipe de mois), et pour ce que CSS ne sait pas animer : élément qui change de place (`layoutId` du curseur du segmented), liste qui se réordonne (`layout` des tuiles), attributs SVG (`r`, position et arc des bulles). Pas de `@keyframes` sur ces éléments.
 
 ### Springs (damping ratio + response, convertis pour Motion : k = (2π/response)², c = 4π·ζ/response)
 
@@ -197,6 +233,9 @@ Chaque animation a une raison : retour au toucher, cohérence spatiale, indicati
 | Repositionnement | 1.0 | 0.4 s | fermeture de sheet, sortie d'une ligne supprimée, changement de mois au doigt |
 | Sheet après un geste avec élan | 0.8 | 0.3 s | retour de la sheet après un flick |
 | Flick | 0.8 | 0.35 s | retour élastique d'une ligne ou d'un mois après un geste rapide |
+| Pastille d'onglet | 1.0 | 0.3 s | `layoutId` + `layout="position"` |
+| Curseur du segmented | 1.0 | 0.25 s | `layoutId` |
+| Données qui se réorganisent | 1.0 | 0.45 s | bulles, tuiles de catégories |
 | Chiffres | 1.0 | 0.5 s | reste à vivre |
 
 Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'applique aucune force, donc aucun rebond.
@@ -254,19 +293,22 @@ Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'appliqu
 
 ## Style Guidelines
 
-**Style:** Apple professionnel, sobre, sur fond plasma bleu nuit
+**Style:** banque moderne, noir et violet, graphique
 
-**Keywords:** barres translucides, filets fins, capsules, grand titre repliable, pastilles colorées, calme, retenue
+**Keywords:** noir profond, lueur violette, centimes estompés, serif éditoriale, bulles, capsules, pastilles rondes teintées
 
-**Icons:** Lucide (SVG, trait de 2px) ; blancs sur pastilles de catégorie colorées dans les listes, accent pour l'onglet actif.
+**Icons:** Lucide (SVG, trait de 2px) ; dans la teinte de la catégorie sur une pastille ronde du même ton ; noir sur la pastille blanche de l'onglet actif.
 
 ---
 
 ## Anti-Patterns (Do NOT Use)
 
+- ❌ Fond animé en boucle (plasma WebGL) : retiré, la profondeur vient des îlots
+- ❌ Une seconde couleur d'accent : le violet est seul ; vert = revenus, rouge = erreurs
+- ❌ Lueur claire sous du texte : le pic de la lueur reste hors du panneau
 - ❌ Effets de verre réfractant (filtre SVG, WebGL, cartes de déplacement) : retirés, trop fragiles d'un navigateur à l'autre
 - ❌ Détection de navigateur par user agent ; préférer `@supports` et les media queries
-- ❌ Animation au changement d'onglet ou sur une action au clavier
+- ❌ Animation sur une action au clavier ; au changement d'onglet, seule la pastille (et les onglets qu'elle décale) glisse, rien d'autre (ni l'écran, ni les icônes)
 - ❌ `transition: all`, `ease-in`, durée > 300 ms, animation de `width` / `height` / `top` / `margin`
 - ❌ JavaScript pour un retour à l'appui que `:active` sait faire
 - ❌ Flou de plus de 20 px, ou flou sur une grande surface qui bouge (cartes, feuilles)

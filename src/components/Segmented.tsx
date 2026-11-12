@@ -1,3 +1,7 @@
+import { motion } from 'motion/react'
+import { useId } from 'react'
+import { SPRINGS } from '../lib/motion'
+
 interface Props<T extends string> {
   value: T
   options: { value: T; label: string }[]
@@ -5,29 +9,39 @@ interface Props<T extends string> {
   label: string
 }
 
-/** Contrôle segmenté façon iOS : le curseur glisse vers l'option choisie (transition CSS, interruptible). */
+/**
+ * Contrôle segmenté : le curseur est rendu dans l'option choisie et partage un `layoutId`,
+ * Motion l'anime d'une option à l'autre (spring critique, interruptible). Aucun calcul de largeur
+ * ni de position : le curseur prend toujours la boîte exacte de l'option.
+ */
 export function Segmented<T extends string>({ value, options, onChange, label }: Props<T>) {
-  const index = Math.max(0, options.findIndex((o) => o.value === value))
+  // Unique par instance : deux segmented à l'écran ne se partagent pas le curseur.
+  const thumbId = useId()
   return (
     <div className="segmented" role="radiogroup" aria-label={label}>
-      <span
-        className="segment-thumb"
-        aria-hidden="true"
-        // 4 px : les marges du rail. translateX en % est relatif à la largeur du curseur.
-        style={{ width: `calc((100% - 4px) / ${options.length})`, transform: `translateX(${index * 100}%)` }}
-      />
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          role="radio"
-          aria-checked={value === o.value}
-          className={value === o.value ? 'active' : undefined}
-          onClick={() => onChange(o.value)}
-        >
-          {o.label}
-        </button>
-      ))}
+      {options.map((o) => {
+        const active = value === o.value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            className={active ? 'active' : undefined}
+            onClick={() => onChange(o.value)}
+          >
+            {active && (
+              <motion.span
+                className="segment-thumb"
+                layoutId={thumbId}
+                transition={SPRINGS.segment()}
+                aria-hidden="true"
+              />
+            )}
+            <span className="segment-label">{o.label}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
