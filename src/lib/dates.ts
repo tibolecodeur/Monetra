@@ -59,3 +59,28 @@ export function formatShortDate(date: string): string {
   const [y, m, d] = date.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }
+
+/** « Aujourd'hui », « Hier », « Demain », ou null : comme les listes d'iOS, le proche se dit en mots. */
+export function relativeDay(date: string, now = today()): string | null {
+  const offset = (delta: number) => addDays(now, delta)
+  if (date === now) return "Aujourd'hui"
+  if (date === offset(-1)) return 'Hier'
+  if (date === offset(1)) return 'Demain'
+  return null
+}
+
+/** En-tête de jour : relatif si proche, sinon « Mercredi 28 octobre ». */
+export function formatDayHeading(date: string, now = today()): string {
+  return relativeDay(date, now) ?? formatDay(date)
+}
+
+/** Date courte : relative si proche, sinon « 28 oct. ». */
+export function formatShortDay(date: string, now = today()): string {
+  return relativeDay(date, now) ?? formatShortDate(date)
+}
+
+/** Décale une date YYYY-MM-DD d'un nombre de jours. */
+export function addDays(date: string, delta: number): string {
+  const [y, m, d] = date.split('-').map(Number)
+  return toISODate(new Date(y, m - 1, d + delta))
+}

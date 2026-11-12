@@ -16,7 +16,7 @@ test.describe('Monetra en émulation iPhone', () => {
     expect(before).toBe(482.52)
 
     await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
-    await page.getByLabel('Montant').fill('12,90')
+    await page.getByLabel('Montant', { exact: true }).fill('12,90')
     await page.getByRole('radio', { name: 'Courses' }).tap()
     await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
 
@@ -127,7 +127,7 @@ test.describe('Monetra en émulation iPhone', () => {
 
     // On modifie la base, puis on réimporte la première sauvegarde.
     await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
-    await page.getByLabel('Montant').fill('50')
+    await page.getByLabel('Montant', { exact: true }).fill('50')
     await page.getByRole('radio', { name: 'Loisirs' }).tap()
     await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
     await expect(page.getByTestId('sheet')).toHaveCount(0)
@@ -311,7 +311,7 @@ test.describe('Monetra en émulation iPhone', () => {
 
     // Le toast se balaie vers le bas pour le fermer.
     await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
-    await page.getByLabel('Montant').fill('5')
+    await page.getByLabel('Montant', { exact: true }).fill('5')
     await page.getByRole('radio', { name: 'Divers' }).tap()
     await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
     const toast = page.locator('.toast')
@@ -319,6 +319,50 @@ test.describe('Monetra en émulation iPhone', () => {
     const t = await center(page, '.toast')
     await touchDrag(page, t, { x: t.x, y: t.y + 90 }, { duration: 120, steps: 8 })
     await expect(toast).toHaveCount(0)
+  })
+
+  test('trajectoire : lecture au doigt, sans changer de mois', async ({ page }) => {
+    await openWithDemo(page)
+    const chart = page.getByTestId('trajectory')
+    await chart.scrollIntoViewIfNeeded()
+    await expect(page.locator('.trajectory-insight')).toContainText('Au rythme actuel')
+    const box = (await chart.boundingBox())!
+    const y = box.y + box.height / 2
+    // Glissement horizontal sur la courbe : le curseur suit, le mois ne change pas.
+    const finger = await touchDrag(page, { x: box.x + box.width * 0.2, y }, { x: box.x + box.width * 0.7, y }, { duration: 300, release: false })
+    await expect(page.locator('.trajectory-cursor')).toHaveCount(1)
+    await expect(page.locator('.trajectory-readout')).toContainText(/estimés|dépensés/)
+    await expect(page.locator('.month-label')).toHaveText('Octobre 2026')
+    expect(Math.abs(await translateX(page, '[data-testid="month-pager"]'))).toBeLessThan(1)
+    // Doigt levé : le curseur disparaît.
+    await finger.release()
+    await expect(page.locator('.trajectory-cursor')).toHaveCount(0)
+    // Au clavier : flèches gauche et droite, depuis aujourd'hui (le 29).
+    await chart.focus()
+    await page.keyboard.press('ArrowLeft')
+    await expect(chart).toHaveAttribute('aria-valuetext', /28 octobre/)
+  })
+
+  test('mode discret et raccourcis de date', async ({ page }) => {
+    await openWithDemo(page)
+    // Le mode discret floute les montants, et tient après rechargement.
+    await page.getByRole('button', { name: 'Masquer les montants' }).tap()
+    await expect(page.locator('html')).toHaveAttribute('data-private', '')
+    expect(await page.locator('.hero-value').evaluate((el) => getComputedStyle(el).filter)).toContain('blur')
+    await page.reload()
+    await expect(page.locator('html')).toHaveAttribute('data-private', '')
+    await page.getByRole('button', { name: 'Afficher les montants' }).tap()
+    await expect(page.locator('html')).not.toHaveAttribute('data-private')
+
+    // « Hier » en un toucher : l'opération apparaît sous l'en-tête « Hier ».
+    await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
+    await page.getByLabel('Montant', { exact: true }).fill('3,10')
+    await page.getByRole('radio', { name: 'Divers' }).tap()
+    await page.getByLabel('Libellé').fill('Café')
+    await page.getByRole('radio', { name: 'Hier' }).tap()
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
+    await page.getByRole('button', { name: 'Opérations' }).tap()
+    await expect(page.getByRole('region', { name: 'Hier' })).toContainText('Café')
   })
 
   test.describe('avec l’apparence claire du système', () => {
@@ -374,7 +418,7 @@ test.describe('Monetra en émulation iPhone', () => {
       await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
       await page.waitForTimeout(30)
       expect(Math.abs(await sheetY(page))).toBeLessThan(1)
-      await page.getByLabel('Montant').fill('12,90')
+      await page.getByLabel('Montant', { exact: true }).fill('12,90')
       await page.getByRole('radio', { name: 'Courses' }).tap()
       await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
 

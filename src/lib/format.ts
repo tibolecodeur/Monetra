@@ -24,3 +24,15 @@ export function splitMoney(text: string): [string, string] {
   const i = text.lastIndexOf(',')
   return i < 0 ? [text, ''] : [text.slice(0, i), text.slice(i)]
 }
+
+const euroRound = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+
+/** Montant arrondi à l'euro, pour une estimation (« ≈ 467 € ») : des centimes y seraient une fausse précision. */
+export function formatMoneyRound(value: number): string {
+  return euroRound.format(value)
+}
+
+/** Montant signé, sans signe pour zéro (« 0,00 € », jamais « −0,00 € »). */
+export function formatSigned(value: number, sign: '+' | '−'): string {
+  return value === 0 ? formatMoney(0) : `${sign}${formatMoney(value)}`
+}

@@ -1,20 +1,24 @@
-import { ArrowDownLeft, ArrowRight, Plus, TrendingUp, TriangleAlert } from 'lucide-react'
+import { ArrowDownLeft, ArrowRight, Eye, EyeOff, Plus, Receipt, TrendingUp, TriangleAlert } from 'lucide-react'
+import { EmptyState } from '../components/EmptyState'
 import { motion } from 'motion/react'
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { AnimatedAmount, Money } from '../components/AnimatedAmount'
 import { CategoryBubbles } from '../components/CategoryBubbles'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { NavHeader } from '../components/NavHeader'
+import { TrajectoryChart } from '../components/TrajectoryChart'
 import { TransactionRow } from '../components/TransactionRow'
 import { getCategory } from '../lib/categories'
 import { SPRINGS } from '../lib/motion'
-import { addMonths, currentMonth, daysInMonth, formatShortDate, today, type MonthKey } from '../lib/dates'
-import { formatMoney } from '../lib/format'
+import { addMonths, currentMonth, daysInMonth, formatMonth, formatShortDate, formatShortDay, relativeDay, today, type MonthKey } from '../lib/dates'
+import { formatMoney, formatMoneyRound } from '../lib/format'
 import { accountLabels, useAccounts, useMonthTransactions, useRecurring } from '../lib/hooks'
+import { getPrivate, setPrivate } from '../lib/prefs'
 import { upcomingOccurrences } from '../lib/recurring'
 import { summarize } from '../lib/summary'
 import type { Transaction, TransactionType } from '../lib/types'
+import { computeTrajectory } from '../lib/trajectory'
 import { useMonthPager } from '../lib/useMonthPager'
 
 interface Props {
@@ -34,9 +38,14 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
   const recurring = useRecurring()
 
   const upcoming = useMemo(() => upcomingOccurrences(recurring ?? [], month), [recurring, month])
+  const trajectory = useMemo(
+    () => computeTrajectory(month, transactions ?? [], upcoming, today()),
+    [month, transactions, upcoming],
+  )
   const summary = useMemo(() => summarize(transactions ?? [], upcoming), [transactions, upcoming])
   const accountNames = useMemo(() => accountLabels(accounts, transactions), [accounts, transactions])
   const pagerArea = useRef<HTMLDivElement>(null)
+  const [hidden, setHidden] = useState(getPrivate)
   const pager = useMonthPager(month, onMonthChange, pagerArea)
 
   if (!accounts || !transactions || !recurring) return <div className="screen" aria-busy="true" />
@@ -50,6 +59,16 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
   const percent = Math.round(ratio * 100)
   const totalDepenses = summary.parCategorie.reduce((s, c) => s + c.total, 0)
   const totalSolde = accounts.reduce((s, a) => s + a.solde, 0)
+  const lastDay = `${trajectory.days} ${formatMonth(month).split(' ')[0].toLowerCase()}`
+  // Une phrase, en clair : ce que la courbe dit.
+  const insight =
+    trajectory.lastActualDay === 0
+      ? `Mois à venir : ${formatMoney(trajectory.projectedSpent)} de prélèvements déjà prévus.`
+      : trajectory.lastActualDay === trajectory.days
+        ? `Mois terminé : ${formatMoney(trajectory.projectedSpent)} dépensés sur ${formatMoney(trajectory.ceiling)} de revenus.`
+        : trajectory.overflowDay
+          ? `Au rythme actuel (${formatMoney(trajectory.dailyPace)} par jour), vos revenus seront dépassés le ${trajectory.overflowDay}. Pour tenir, visez ${formatMoney(trajectory.safePace)} par jour.`
+          : `Au rythme actuel (${formatMoney(trajectory.dailyPace)} par jour), il vous restera environ ${formatMoneyRound(trajectory.projectedLeft)} le ${lastDay}.`
 
   return (
     <div className="screen">
@@ -87,6 +106,18 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
 
         <div className="hero-stack island">
           <section className={`hero${negative ? ' negative' : ''}`} aria-labelledby="hero-label">
+            <button
+              type="button"
+              className="hero-privacy"
+              aria-pressed={hidden}
+              aria-label={hidden ? 'Afficher les montants' : 'Masquer les montants'}
+              onClick={() => {
+                setPrivate(!hidden)
+                setHidden(!hidden)
+              }}
+            >
+              {hidden ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+            </button>
             <p id="hero-label" className="hero-label">
               Reste à vivre
             </p>
@@ -145,7 +176,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
                 <dd className="amount">
                   <Money value={summary.revenus} sign="+" />
                 </dd>
-                {summary.revenusAVenir > 0 && <dd className="tray-note">dont {formatMoney(summary.revenusAVenir)} à venir</dd>}
+                {summary.revenusAVenir > 0 && <dd className="tray-note">{formatMoney(summary.revenusAVenir)} à venir</dd>}
               </div>
               <div>
                 <dt>Charges fixes</dt>
@@ -153,7 +184,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
                   <Money value={summary.chargesFixes} sign="−" />
                 </dd>
                 {summary.chargesFixesAVenir > 0 && (
-                  <dd className="tray-note">dont {formatMoney(summary.chargesFixesAVenir)} à venir</dd>
+                  <dd className="tray-note">{formatMoney(summary.chargesFixesAVenir)} à venir</dd>
                 )}
               </div>
               <div>
@@ -165,6 +196,23 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
             </dl>
           </section>
         </div>
+
+        <section className="card trajectory island" aria-labelledby="trajectory-title">
+          <div className="trajectory-head">
+            <h2 id="trajectory-title" className="card-title">
+              Trajectoire
+            </h2>
+            {isCurrent && trajectory.ceiling > 0 && (
+              <span className={`trajectory-status${trajectory.overflowDay ? ' over' : ''}`}>
+                {trajectory.overflowDay
+                  ? `Dépassement le ${trajectory.overflowDay}`
+                  : `≈ ${formatMoneyRound(trajectory.projectedLeft)} le ${trajectory.days}`}
+              </span>
+            )}
+          </div>
+          <TrajectoryChart key={`trajectory-${month}`} month={month} trajectory={trajectory} />
+          <p className="trajectory-insight">{insight}</p>
+        </section>
 
         {summary.parCategorie.length > 0 && (
           <section className="card spending island" aria-labelledby="cat-title">
@@ -217,7 +265,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
                   </span>
                   <span className="row-main">
                     <span className="row-title">{r.libelle}</span>
-                    <span className="row-meta">Prévu le {formatShortDate(date)}</span>
+                    <span className="row-meta">Prévu {relativeDay(date)?.toLowerCase() ?? `le ${formatShortDate(date)}`}</span>
                   </span>
                   <span className={`amount ${r.type}`}>
                     <Money value={r.montant} sign={r.type === 'revenu' ? '+' : '−'} />
@@ -240,7 +288,14 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
             )}
           </div>
           {transactions.length === 0 ? (
-            <p className="card empty-text">Aucune opération ce mois-ci. Touchez le bouton + en bas pour en ajouter une.</p>
+            <div className="card">
+              <EmptyState
+                icon={Receipt}
+                title="Aucune opération ce mois-ci"
+                text="Saisissez votre première dépense : trois touchers suffisent."
+                action={{ label: 'Saisir une dépense', onClick: () => onAdd('depense') }}
+              />
+            </div>
           ) : (
             <ul className="list card card-flush">
               {transactions.slice(0, 5).map((t) => (
@@ -248,7 +303,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
                   key={t.id}
                   transaction={t}
                   accountName={accountNames.get(t.compteId)}
-                  dateLabel={formatShortDate(t.date)}
+                  dateLabel={formatShortDay(t.date)}
                   onSelect={onSelect}
                 />
               ))}

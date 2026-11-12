@@ -13,7 +13,9 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 - **Catégories** : logement, courses, resto/fast-food, abonnements, loisirs, épargne, divers.
 - **Récurrents** : loyer, forfait, salaire… générés automatiquement chaque mois au jour indiqué, avec date de fin optionnelle.
 - **Tableau de bord du mois** : revenus, charges fixes, dépenses variables et reste à vivre (occurrences à venir incluses).
-- **Opérations du mois** : liste par jour, édition et suppression.
+- **Trajectoire** : la courbe des dépenses du mois et l'estimation jusqu'au dernier jour, face aux revenus ; on la lit au doigt. Elle répond à « est-ce que je tiens jusqu'au 31 ? ».
+- **Mode discret** : un bouton œil floute tous les montants.
+- **Opérations du mois** : liste par jour (« Aujourd'hui », « Hier »…), édition et suppression.
 - **Comptes** : courant, livret, PEL, PER, assurance-vie, parts sociales ; le solde suit les transactions.
 - **Export / import JSON** de toute la base.
 - **Réflexes iOS** : appui long sur une opération pour Modifier / Dupliquer / Supprimer, retours haptiques (iPhone compris), toucher l'onglet actif pour remonter, toast qu'on balaie, thème Automatique.
