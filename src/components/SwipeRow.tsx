@@ -73,7 +73,7 @@ export function SwipeRow({ label, onDelete, children }: Props) {
       const projected = x.get() + project(velocity)
       const commit = velocity < 300 && projected < -w * THRESHOLD
       if (commit) {
-        haptic([6, 30, 6])
+        haptic('success')
         to(-w, velocity, onDelete)
       } else to(0, velocity)
     },

@@ -1,8 +1,10 @@
-import { ArrowDownLeft, ArrowUpRight, Plus } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Pencil, Plus, Trash2 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Money } from '../components/AnimatedAmount'
 import { SwipeRow } from '../components/SwipeRow'
 import { getCategory } from '../lib/categories'
+import { useContextMenu } from '../lib/contextMenu'
+import { useLongPress } from '../lib/useLongPress'
 import { formatShortDate, today } from '../lib/dates'
 import { formatMoney, round2 } from '../lib/format'
 import { accountLabels, useAccounts, useRecurring } from '../lib/hooks'
@@ -50,20 +52,7 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
         return (
           <motion.li key={r.id} layout="position" exit={{ opacity: 0 }} transition={{ opacity: { duration: 0.15 } }}>
             <SwipeRow label={`Supprimer ${r.libelle}`} onDelete={() => swipeDelete(r)}>
-            <button type="button" className="row" onClick={() => onSelect(r)}>
-              <span className={`day-badge ${r.type}`}>
-                <small aria-hidden="true">le</small>
-                <span aria-hidden="true">{r.jourDuMois}</span>
-                <span className="sr-only">Le {r.jourDuMois} du mois :</span>
-              </span>
-              <span className="row-main">
-                <span className="row-title">{r.libelle}</span>
-                {meta && <span className="row-meta">{meta}</span>}
-              </span>
-              <span className={`amount ${r.type}`}>
-                <Money value={r.montant} sign={r.type === 'revenu' ? '+' : '−'} />
-              </span>
-            </button>
+            <RecurringRow recurring={r} meta={meta} onSelect={onSelect} onDelete={swipeDelete} />
             </SwipeRow>
           </motion.li>
         )
@@ -126,5 +115,43 @@ export function RecurringScreen({ onAdd, onSelect }: Props) {
         Nouveau récurrent
       </button>
     </div>
+  )
+}
+
+interface RowProps {
+  recurring: Recurring
+  meta: string
+  onSelect: (r: Recurring) => void
+  onDelete: (r: Recurring) => void
+}
+
+/** Ligne de récurrent : toucher pour modifier, appui long pour le menu contextuel. */
+function RecurringRow({ recurring: r, meta, onSelect, onDelete }: RowProps) {
+  const openMenu = useContextMenu()
+  const longPress = useLongPress<HTMLButtonElement>((anchor) =>
+    openMenu({
+      anchor,
+      label: r.libelle,
+      items: [
+        { label: 'Modifier', icon: Pencil, onSelect: () => onSelect(r) },
+        { label: 'Supprimer', icon: Trash2, onSelect: () => onDelete(r), destructive: true },
+      ],
+    }),
+  )
+  return (
+    <button type="button" className="row" onClick={() => onSelect(r)} {...longPress}>
+      <span className={`day-badge ${r.type}`}>
+        <small aria-hidden="true">le</small>
+        <span aria-hidden="true">{r.jourDuMois}</span>
+        <span className="sr-only">Le {r.jourDuMois} du mois :</span>
+      </span>
+      <span className="row-main">
+        <span className="row-title">{r.libelle}</span>
+        {meta && <span className="row-meta">{meta}</span>}
+      </span>
+      <span className={`amount ${r.type}`}>
+        <Money value={r.montant} sign={r.type === 'revenu' ? '+' : '−'} />
+      </span>
+    </button>
   )
 }

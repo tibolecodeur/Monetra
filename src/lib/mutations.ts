@@ -26,6 +26,12 @@ export async function addTransaction(input: Omit<Transaction, 'id'>): Promise<st
   return t.id
 }
 
+/** Copie d'une opération, datée du jour ; jamais rattachée à un récurrent. */
+export async function duplicateTransaction(t: Transaction, date: string): Promise<string> {
+  const { id: _id, recurringId: _rec, ...rest } = t
+  return addTransaction({ ...rest, date })
+}
+
 /** Réinsère une transaction supprimée (annulation), avec son identifiant d'origine. */
 export async function restoreTransaction(t: Transaction) {
   await db.transaction('rw', db.transactions, db.accounts, async () => {

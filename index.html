@@ -13,9 +13,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <title>Monetra</title>
     <script>
-      // Thème choisi dans Réglages, appliqué avant le premier rendu (sombre par défaut).
+      // Thème choisi dans Réglages (sombre, clair ou automatique), appliqué avant le premier rendu (sombre par défaut).
       try {
-        if (localStorage.getItem('monetra:theme') === 'light') {
+        var theme = localStorage.getItem('monetra:theme')
+        var light = theme === 'light' || (theme === 'auto' && matchMedia('(prefers-color-scheme: light)').matches)
+        if (light) {
           document.documentElement.dataset.theme = 'light'
           document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f4f2f8')
         }

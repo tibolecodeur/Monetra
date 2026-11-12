@@ -6,6 +6,7 @@ import { amountToInput, formatMoney, parseAmount } from '../lib/format'
 import { useAccounts } from '../lib/hooks'
 import { addTransaction, deleteTransaction, restoreTransaction, updateTransaction } from '../lib/mutations'
 import { getLastAccount, setLastAccount } from '../lib/prefs'
+import { haptic } from '../lib/motion'
 import { useToast } from '../lib/toast'
 import type { CategoryId, Transaction, TransactionType } from '../lib/types'
 import { AccountIcon, CategoryIcon } from './CategoryIcon'
@@ -62,6 +63,7 @@ export function TransactionForm({ transaction, initialType, onDone, onNeedAccoun
     if (!(montant > 0)) next.amount = 'Saisissez un montant supérieur à 0, par exemple 12,50.'
     if (!cat) next.category = 'Choisissez une catégorie pour cette dépense.'
     setErrors(next)
+    if (next.amount || next.category) haptic('error')
     if (next.amount) return document.getElementById(ids.amount)?.focus()
     if (next.category || !cat) return
 
@@ -79,6 +81,7 @@ export function TransactionForm({ transaction, initialType, onDone, onNeedAccoun
       if (transaction) await updateTransaction(transaction.id, data)
       else await addTransaction(data)
       setLastAccount(selectedAccount)
+      haptic('success')
       toast({
         message: transaction
           ? 'Transaction modifiée'

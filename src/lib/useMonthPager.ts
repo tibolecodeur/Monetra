@@ -1,7 +1,7 @@
 import { animate, useMotionValue, useReducedMotion, type AnimationPlaybackControls } from 'motion/react'
 import { useRef, type RefObject } from 'react'
 import { addMonths, type MonthKey } from './dates'
-import { project, REDUCED_FADE, SPRINGS } from './motion'
+import { project, REDUCED_FADE, SPRINGS, haptic } from './motion'
 import { useHorizontalDrag } from './useHorizontalDrag'
 
 /**
@@ -53,8 +53,14 @@ export function useMonthPager(month: MonthKey, onChange: (m: MonthKey) => void, 
     onRelease: (velocity) => {
       const w = width()
       const projected = x.get() + project(velocity)
-      if (projected < -w / 2) go(1, velocity)
-      else if (projected > w / 2) go(-1, velocity)
+      // Le geste a changé de mois : un tap, comme le cran d'un sélecteur iOS.
+      if (projected < -w / 2) {
+        haptic()
+        go(1, velocity)
+      } else if (projected > w / 2) {
+        haptic()
+        go(-1, velocity)
+      }
       else animation.current = animate(x, 0, Math.abs(velocity) > 100 ? SPRINGS.flick(velocity) : SPRINGS.default())
     },
   })

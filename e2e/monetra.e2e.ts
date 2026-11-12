@@ -259,6 +259,86 @@ test.describe('Monetra en émulation iPhone', () => {
       .toBe(true)
   })
 
+  test('appui long : menu contextuel façon iOS, sans ouvrir la fiche', async ({ page }) => {
+    await openWithDemo(page)
+    await page.getByRole('button', { name: 'Opérations' }).tap()
+    const row = page.locator('.swipe-content', { hasText: 'Kebab' })
+    await row.scrollIntoViewIfNeeded()
+    const c = await center(page, '.swipe-content:has-text("Kebab")')
+
+    // Doigt immobile 600 ms : le menu s'ouvre, la ligne est soulevée, la fiche ne s'ouvre pas.
+    await touchDrag(page, c, c, { duration: 0, steps: 1, hold: 600 })
+    const menu = page.getByRole('menu', { name: 'Kebab' })
+    await expect(menu).toBeVisible()
+    await expect(menu.getByRole('menuitem')).toHaveText(['Modifier', 'Dupliquer aujourd’hui', 'Supprimer'])
+    await expect(page.getByTestId('sheet')).toHaveCount(0)
+    await expect(page.locator('[data-lifted]')).toHaveCount(1)
+
+    // Dupliquer : une seconde ligne, annulable depuis le toast.
+    await menu.getByRole('menuitem', { name: 'Dupliquer aujourd’hui' }).tap()
+    await expect(menu).toHaveCount(0)
+    await expect(page.locator('.swipe-content', { hasText: 'Kebab' })).toHaveCount(2)
+    await page.getByRole('button', { name: 'Annuler' }).tap()
+    await expect(page.locator('.swipe-content', { hasText: 'Kebab' })).toHaveCount(1)
+    await expect(page.locator('[data-lifted]')).toHaveCount(0)
+
+    // Un doigt qui bouge (défilement) n'ouvre rien.
+    await touchDrag(page, c, { x: c.x, y: c.y - 60 }, { duration: 600, steps: 12 })
+    await expect(page.getByRole('menu')).toHaveCount(0)
+
+    // Toucher le fond ferme le menu ; clic droit à la souris l'ouvre aussi, Échap le ferme.
+    // (Le glissement a fait défiler la page : la ligne a bougé.)
+    await row.scrollIntoViewIfNeeded()
+    const c2 = await center(page, '.swipe-content:has-text("Kebab")')
+    await touchDrag(page, c2, c2, { duration: 0, steps: 1, hold: 600 })
+    await expect(menu).toBeVisible()
+    await page.mouse.click(20, 20)
+    await expect(menu).toHaveCount(0)
+    await row.click({ button: 'right' })
+    await expect(menu).toBeVisible()
+    await expect(menu.getByRole('menuitem').first()).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(menu).toHaveCount(0)
+  })
+
+  test('réflexes iOS : onglet actif qui remonte, toast balayé', async ({ page }) => {
+    await openWithDemo(page)
+    // Toucher l'onglet déjà ouvert remonte en haut de l'écran.
+    await scrollTo(page, 700)
+    await page.getByRole('button', { name: 'Accueil' }).tap()
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0)
+    await expect(page.getByRole('button', { name: 'Accueil' })).toHaveAttribute('aria-current', 'page')
+
+    // Le toast se balaie vers le bas pour le fermer.
+    await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
+    await page.getByLabel('Montant').fill('5')
+    await page.getByRole('radio', { name: 'Divers' }).tap()
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
+    const toast = page.locator('.toast')
+    await expect(toast).toBeVisible()
+    const t = await center(page, '.toast')
+    await touchDrag(page, t, { x: t.x, y: t.y + 90 }, { duration: 120, steps: 8 })
+    await expect(toast).toHaveCount(0)
+  })
+
+  test.describe('avec l’apparence claire du système', () => {
+    test.use({ colorScheme: 'light' })
+
+    test('le thème Auto suit le système', async ({ page }) => {
+      await openWithDemo(page)
+      await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light')
+      await page.getByRole('button', { name: 'Réglages' }).tap()
+      await page.getByRole('radio', { name: 'Auto' }).tap()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      await page.emulateMedia({ colorScheme: 'dark' })
+      await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light')
+      // Gardé après rechargement, appliqué avant le premier rendu.
+      await page.emulateMedia({ colorScheme: 'light' })
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+  })
+
   test.describe('avec un contraste renforcé', () => {
     test.use({ contrast: 'more' })
 

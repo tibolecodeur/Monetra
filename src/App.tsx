@@ -65,6 +65,12 @@ export default function App() {
   }, [])
 
   const navigate = (s: Screen) => {
+    // Comme sur iOS : toucher l'onglet déjà ouvert remonte en haut de l'écran, en défilant.
+    if (s === screen) {
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+      window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })
+      return
+    }
     location.hash = `#/${s}`
     window.scrollTo(0, 0)
   }
