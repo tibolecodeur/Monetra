@@ -8,11 +8,14 @@ import { ContextMenuProvider } from './components/ContextMenu'
 import { ToastProvider } from './components/Toast'
 import './index.css'
 import { watchSystemTheme } from './lib/prefs'
+import { requestPersistence } from './lib/safety'
 
 // iOS n'applique :active au toucher que si un écouteur touchstart existe : tout le retour
 // au toucher de l'app est en CSS (:active), sans JavaScript.
 document.addEventListener('touchstart', () => {}, { passive: true })
 watchSystemTheme()
+// Données 100 % locales : on demande au navigateur de ne jamais les effacer de lui-même.
+void requestPersistence()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

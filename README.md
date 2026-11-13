@@ -17,6 +17,8 @@ Monetra est une PWA de gestion de finances personnelles pensée pour un étudian
 - **Mode discret** : un bouton œil floute tous les montants.
 - **Opérations du mois** : liste par jour (« Aujourd'hui », « Hier »…), édition et suppression.
 - **Comptes** : courant, livret, PEL, PER, assurance-vie, parts sociales ; le solde suit les transactions.
+- **Sauvegarde du jour** : à l'heure choisie, un rappel propose d'enregistrer la sauvegarde dans l'app Fichiers en un toucher.
+- **Copies de sécurité** : une par jour et une avant chaque import, les 7 dernières, restaurables depuis Réglages.
 - **Export / import JSON** de toute la base.
 - **Réflexes iOS** : appui long sur une opération pour Modifier / Dupliquer / Supprimer, retours haptiques (iPhone compris), toucher l'onglet actif pour remonter, toast qu'on balaie, thème Automatique.
 
@@ -93,5 +95,6 @@ L'app est publiée sur GitHub Pages à chaque push sur `main` : **https://tibole
 - Une seule fois : **Settings → Pages → Source : GitHub Actions**.
 - Le build de production est servi dans le sous-dossier `/Monetra/`, via la variable `BASE_PATH` ; en local, tout reste à la racine.
 - Pour l'installer sur iPhone : ouvrez l'URL dans Safari, puis **Partager → Sur l'écran d'accueil**.
+- ⚠️ **Supprimer l'app de l'écran d'accueil efface toutes ses données** : sauvegardez dans Fichiers avant (Réglages → Sauvegarder maintenant).
 
 Pour tester l'installation sur mobile, servez le build (`npm run preview -- --host`) et ouvrez l'URL depuis le téléphone sur le même réseau. L'installation de la PWA demande HTTPS, sauf sur `localhost`.

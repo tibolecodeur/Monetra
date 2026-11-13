@@ -6,6 +6,7 @@ import { Sheet } from './components/Sheet'
 import { TransactionForm } from './components/TransactionForm'
 import { currentMonth, type MonthKey } from './lib/dates'
 import { generateRecurring } from './lib/recurring'
+import { takeDailySnapshot } from './lib/safety'
 import type { Account, Recurring, Transaction, TransactionType } from './lib/types'
 import { Dashboard } from './screens/Dashboard'
 import { RecurringScreen } from './screens/RecurringScreen'
@@ -58,8 +59,10 @@ export default function App() {
 
   // Génère les récurrents au lancement et quand l'app revient au premier plan.
   useEffect(() => {
-    generateRecurring()
-    const onVisible = () => document.visibilityState === 'visible' && generateRecurring()
+    // Puis la copie de sécurité du jour, une fois les récurrents à jour.
+    const refresh = () => void generateRecurring().then(() => takeDailySnapshot())
+    refresh()
+    const onVisible = () => document.visibilityState === 'visible' && refresh()
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])

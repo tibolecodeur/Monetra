@@ -1,16 +1,8 @@
 import { db } from './db'
 import { today } from './dates'
-import type { Account, Budget, Goal, Recurring, Transaction } from './types'
+import type { BackupData } from './types'
 
 const BACKUP_VERSION = 1
-
-interface BackupData {
-  accounts: Account[]
-  transactions: Transaction[]
-  recurring: Recurring[]
-  budgets: Budget[]
-  goals: Goal[]
-}
 
 export interface Backup {
   app: 'monetra'
@@ -19,7 +11,8 @@ export interface Backup {
   data: BackupData
 }
 
-async function createBackup(): Promise<Backup> {
+/** Toutes les données de l'app (sans les copies de sécurité). */
+export async function collectData(): Promise<BackupData> {
   const [accounts, transactions, recurring, budgets, goals] = await Promise.all([
     db.accounts.toArray(),
     db.transactions.toArray(),
@@ -27,12 +20,51 @@ async function createBackup(): Promise<Backup> {
     db.budgets.toArray(),
     db.goals.toArray(),
   ])
-  return {
-    app: 'monetra',
-    version: BACKUP_VERSION,
-    exportedAt: new Date().toISOString(),
-    data: { accounts, transactions, recurring, budgets, goals },
+  return { accounts, transactions, recurring, budgets, goals }
+}
+
+export function toBackup(data: BackupData, exportedAt = new Date()): Backup {
+  return { app: 'monetra', version: BACKUP_VERSION, exportedAt: exportedAt.toISOString(), data }
+}
+
+async function createBackup(): Promise<Backup> {
+  return toBackup(await collectData())
+}
+
+/** Fichier de sauvegarde prêt à partager : « monetra-2026-11-13.json ». */
+export function backupFile(backup: Backup): File {
+  return new File([JSON.stringify(backup, null, 2)], `monetra-${backup.exportedAt.slice(0, 10)}.json`, {
+    type: 'application/json',
+  })
+}
+
+export type SaveOutcome = 'shared' | 'downloaded' | 'cancelled'
+
+/**
+ * Enregistre un fichier de sauvegarde : feuille de partage du système quand elle sait partager un fichier
+ * (iPhone : « Enregistrer dans Fichiers », dernier dossier retenu), téléchargement sinon.
+ * Appelée directement dans le gestionnaire du toucher, avec un fichier déjà prêt : Safari n'ouvre la
+ * feuille de partage que si l'appel suit immédiatement le geste.
+ */
+export async function saveBackupFile(file: File): Promise<SaveOutcome> {
+  if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'Sauvegarde Monetra' })
+      return 'shared'
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return 'cancelled'
+      throw err
+    }
   }
+  const url = URL.createObjectURL(file)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = file.name
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  return 'downloaded'
 }
 
 export async function downloadBackup() {
