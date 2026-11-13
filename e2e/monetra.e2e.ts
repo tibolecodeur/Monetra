@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
-import { center, DEMO, openWithDemo, settle, touchDrag, translateX, translateY } from './helpers.ts'
+import { center, DEMO, openWithDemo, settle, skipSplash, touchDrag, translateX, translateY } from './helpers.ts'
 
 const heroValue = async (page: Page) => Number(await page.locator('.hero-value').getAttribute('data-value'))
 // Intl insère des espaces insécables (fines) : on les normalise pour comparer.
@@ -10,6 +10,8 @@ const sheetY = (page: Page) => translateY(page, '[data-testid="sheet"]')
 const scrollTo = (page: Page, y: number) => page.evaluate((top) => window.scrollTo(0, top), y)
 
 test.describe('Monetra en émulation iPhone', () => {
+  test.beforeEach(({ page }) => skipSplash(page))
+
   test('ajout d’une transaction et mise à jour du reste à vivre', async ({ page }) => {
     await openWithDemo(page)
     const before = await heroValue(page)
@@ -483,6 +485,104 @@ test.describe('Monetra en émulation iPhone', () => {
     await expect(page.getByTestId('safety-copies')).toContainText('Copie du jour')
   })
 
+  test.describe('écran d’ouverture', () => {
+    // Densité ×1 : allège le rendu logiciel des tests pour le chronométrage ; ce qu'on vérifie n'en dépend pas.
+    test.use({ deviceScaleFactor: 1 })
+
+    test('écran d’ouverture : le logo rejoint l’en-tête, une fois par session, un toucher le passe', async ({ page, context }) => {
+      await openWithDemo(page)
+      // Nouvel onglet = nouvelle session (sessionStorage vide), même données.
+      const fresh = await context.newPage()
+      // Chronométré dans la page, image par image (indépendant de la latence du pilote de test) :
+      // de l'apparition de l'écran d'ouverture au fond transparent et au logo posé dans l'en-tête.
+      await fresh.addInitScript(() => {
+        const w = window as unknown as { splashTiming: { start?: number; clear?: number; landed?: number } }
+        w.splashTiming = {}
+        const tick = () => {
+          const t = w.splashTiming
+          const now = performance.now()
+          const el = document.querySelector('.splash')
+          if (el && t.start === undefined) t.start = now
+          if (t.start !== undefined && t.clear === undefined && (!el || Number(getComputedStyle(el).opacity) < 0.05)) t.clear = now
+          const logo = document.querySelector('img.brand-mark')?.getBoundingClientRect()
+          if (t.start !== undefined && t.landed === undefined && logo && Math.abs(logo.width - 44) < 1) t.landed = now
+          if (t.clear === undefined || t.landed === undefined) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+      })
+      await fresh.goto('/#/accueil')
+      const splash = fresh.getByTestId('splash')
+      await expect(splash).toBeVisible()
+      const timing = await fresh.waitForFunction(() => {
+        const t = (window as unknown as { splashTiming: { start?: number; clear?: number; landed?: number } }).splashTiming
+        return t.clear !== undefined && t.landed !== undefined ? t : null
+      })
+      const { start, landed } = (await timing.jsonValue()) as { start: number; clear: number; landed: number }
+      // La transition du logo vers l'en-tête tient en 1,2 s. Le fondu du fond (240 ms prévus) n'est pas chronométré :
+      // le rendu logiciel des tests l'étire quand la cascade et les compteurs démarrent en même temps.
+      expect(landed - start).toBeLessThanOrEqual(1200)
+      expect((await fresh.locator('img.brand-mark').boundingBox())!.y).toBeLessThan(80)
+      // Puis il quitte la page et ne bloque aucun toucher.
+      await expect(splash).toHaveCount(0)
+      await fresh.getByRole('button', { name: 'Opérations' }).tap()
+      await expect(fresh.getByRole('heading', { name: 'Opérations', level: 1 })).toBeVisible()
+      await fresh.getByRole('button', { name: 'Accueil' }).tap()
+      // Une fois par session : un rechargement ne le rejoue pas.
+      await fresh.reload()
+      await expect(fresh.getByText('Le mois en détail')).toBeVisible()
+      await expect(splash).toHaveCount(0)
+
+      // Une autre session : un toucher le passe tout de suite.
+      const other = await context.newPage()
+      await other.goto('/#/accueil')
+      await expect(other.getByTestId('splash')).toBeVisible()
+      await other.getByTestId('splash').tap()
+      await expect(other.getByTestId('splash')).toHaveCount(0)
+      await expect(other.getByText('Le mois en détail')).toBeVisible()
+    })
+  })
+
+  test('compteurs : montants clés exacts au format fr-FR, rejoués au changement', async ({ page }) => {
+    await openWithDemo(page)
+    const text = (selector: string) =>
+      page.locator(`${selector} > span[aria-hidden]`).innerText().then((t) => t.replace(/[\u00a0\u202f]/g, ' '))
+    await expect.poll(() => text('.hero-value')).toBe('482,52 €')
+    await expect.poll(() => text('.spending-total')).toBe('803,98 €')
+    // Le solde total est en bas de page : il compte quand il arrive à l'écran.
+    await page.locator('.footnote').scrollIntoViewIfNeeded()
+    await expect.poll(() => text('.footnote .amount')).toBe('4 735,87 €')
+    await scrollTo(page, 0)
+    // Centimes estompés, valeur finale pour les lecteurs d'écran.
+    await expect(page.locator('.hero-value .cents')).toHaveText(/^,52\s€$/)
+    await expect(page.locator('.hero-value .sr-only')).toHaveText(/^482,52\s€$/)
+    // Changement de mois : le compteur repart de la valeur affichée vers la nouvelle.
+    await page.getByRole('button', { name: 'Mois suivant' }).tap()
+    await expect.poll(() => page.locator('.hero-value').getAttribute('data-value')).not.toBe('482.52')
+    const target = Number(await page.locator('.hero-value').getAttribute('data-value'))
+    const expected = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(target).replace(/[\u00a0\u202f]/g, ' ')
+    await expect.poll(() => text('.hero-value')).toBe(expected)
+    // Opérations : « Sorties » compte aussi.
+    await page.getByRole('button', { name: 'Mois précédent' }).tap()
+    await expect(page.locator('.month-label')).toHaveText('Octobre 2026')
+    await page.getByRole('button', { name: 'Opérations' }).tap()
+    await expect.poll(() => text('.pill .amount:not(.revenu)')).toBe('−803,98 €')
+  })
+
+  test('cascade et transitions : jouées une fois, sans bloquer les touchers', async ({ page }) => {
+    await openWithDemo(page)
+    // Première arrivée de la session sur l'accueil : cascade ; elle ne revient pas aux arrivées suivantes.
+    await expect(page.locator('.month-pager.cascade')).toHaveCount(1)
+    await page.getByRole('button', { name: 'Opérations' }).tap()
+    // Pendant la transition d'entrée, l'écran répond déjà : on touche immédiatement le filtre.
+    await page.getByRole('radio', { name: 'Revenus' }).tap()
+    await expect(page.getByRole('radio', { name: 'Revenus' })).toHaveAttribute('aria-checked', 'true')
+    await page.getByRole('button', { name: 'Accueil' }).tap()
+    await expect(page.getByText('Le mois en détail')).toBeVisible()
+    await expect(page.locator('.month-pager.cascade')).toHaveCount(0)
+    // La transition d'entrée se pose bien (pas de transformation résiduelle).
+    await expect.poll(() => page.locator('.screen-enter').evaluate((el) => getComputedStyle(el).opacity)).toBe('1')
+  })
+
   test.describe('avec l’apparence claire du système', () => {
     test.use({ colorScheme: 'light' })
 
@@ -557,6 +657,14 @@ test.describe('Monetra en émulation iPhone', () => {
       await touchDrag(page, c, { x: c.x - 220, y: c.y }, { duration: 140, steps: 8 })
       await expect(page.locator('.month-label')).toHaveText('Novembre 2026')
       expect(Math.abs(await translateX(page, '[data-testid="month-pager"]'))).toBeLessThan(1)
+
+      // Mouvement réduit : ni écran d'ouverture (même dans une nouvelle session) ni cascade.
+      const fresh = await page.context().newPage()
+      await fresh.goto('/#/accueil')
+      await expect(fresh.getByText('Le mois en détail')).toBeVisible()
+      await expect(fresh.getByTestId('splash')).toHaveCount(0)
+      expect(await fresh.locator('.month-pager > *').first().evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
+      await fresh.close()
 
       await page.getByRole('button', { name: 'Accueil' }).tap()
       await info.attach('accueil-mouvement-reduit', { body: await page.screenshot(), contentType: 'image/png' })

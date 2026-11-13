@@ -16,6 +16,7 @@ import { addMonths, currentMonth, daysInMonth, formatMonth, formatShortDate, for
 import { formatMoney, formatMoneyRound } from '../lib/format'
 import { accountLabels, useAccounts, useMonthTransactions, useRecurring } from '../lib/hooks'
 import { getPrivate, setPrivate } from '../lib/prefs'
+import { claimCascade, useSplashActive } from '../lib/splash'
 import { upcomingOccurrences } from '../lib/recurring'
 import { summarize } from '../lib/summary'
 import type { Transaction, TransactionType } from '../lib/types'
@@ -47,6 +48,9 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
   const accountNames = useMemo(() => accountLabels(accounts, transactions), [accounts, transactions])
   const pagerArea = useRef<HTMLDivElement>(null)
   const [hidden, setHidden] = useState(getPrivate)
+  // Cascade des cartes à la première arrivée de la session, une fois l'écran d'ouverture parti.
+  const [cascade] = useState(claimCascade)
+  const splash = useSplashActive()
   const pager = useMonthPager(month, onMonthChange, pagerArea)
 
   if (!accounts || !transactions || !recurring) return <div className="screen" aria-busy="true" />
@@ -90,7 +94,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
 
       <motion.div
         ref={pagerArea}
-        className="month-pager"
+        className={`month-pager${cascade ? (splash ? ' cascade-pending' : ' cascade') : ''}`}
         style={{ x: pager.x, opacity: pager.opacity }}
         data-testid="month-pager"
         {...pager.drag}
@@ -223,9 +227,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
               <h2 id="cat-title" className="card-title">
                 Où part l'argent
               </h2>
-              <p className="spending-total amount">
-                <Money value={totalDepenses} />
-              </p>
+              <AnimatedAmount className="spending-total amount" value={totalDepenses} />
             </div>
             {/* Clé = mois : au changement de mois, rien ne glisse (le contenu entier glisse déjà avec le geste). */}
             <CategoryBubbles key={`bubbles-${month}`} items={summary.parCategorie} />
@@ -317,7 +319,7 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
 
       {accounts.length > 0 && (
         <p className="footnote">
-          Solde total de vos comptes : <strong className="amount">{formatMoney(totalSolde)}</strong>
+          Solde total de vos comptes : <AnimatedAmount as="strong" className="amount" value={totalSolde} />
         </p>
       )}
     </div>

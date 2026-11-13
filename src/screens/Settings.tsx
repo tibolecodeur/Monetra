@@ -1,7 +1,7 @@
 import { ChevronRight, CircleCheck, Download, Plus, ShieldCheck, TriangleAlert, Upload, Wallet } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { useRef, useState, type ChangeEvent } from 'react'
-import { Money } from '../components/AnimatedAmount'
+import { AnimatedAmount, Money } from '../components/AnimatedAmount'
 import { AccountIcon } from '../components/CategoryIcon'
 import { Segmented } from '../components/Segmented'
 import { parseBackup, restoreBackup } from '../lib/backup'
@@ -70,9 +70,7 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
       {accounts.length > 0 && (
         <section className="summary" aria-label="Patrimoine">
           <p className="summary-label">Total de vos comptes</p>
-          <p className={`summary-value amount${total < 0 ? ' negative' : ''}`}>
-            <Money value={total} />
-          </p>
+          <AnimatedAmount className={`summary-value amount${total < 0 ? ' negative' : ''}`} value={total} />
         </section>
       )}
 
