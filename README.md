@@ -1,6 +1,6 @@
 # Monetra
 
-Monetra est une PWA de gestion de finances personnelles pensée pour un étudiant en alternance : suivre ses revenus, ses charges fixes et ses dépenses du mois, et voir d'un coup d'œil son **reste à vivre**.
+Monetra est une PWA de gestion de finances personnelles : suivre ses revenus, ses charges fixes et ses dépenses du mois, et voir d'un coup d'œil son **reste à vivre**.
 
 - **100 % locale** : toutes les données restent dans le navigateur (IndexedDB). Rien n'est envoyé à un serveur.
 - **Installable sur mobile** : PWA avec manifest, service worker et fonctionnement hors ligne.
