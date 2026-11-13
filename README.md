@@ -56,6 +56,10 @@ Les règles viennent des skills d'[Emil Kowalski](https://github.com/emilkowalsk
 
 Vidéos des gestes : [`docs/videos/`](docs/videos).
 
+Écran d'ouverture (une fois par session, ≈ 1 s) : le logo rejoint l'en-tête pendant que l'accueil se dévoile et que les montants comptent.
+
+<img src="docs/screenshots/07-ouverture.png" alt="Écran d'ouverture, image par image">
+
 ## Stack
 
 - [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
