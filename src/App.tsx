@@ -1,8 +1,10 @@
+import { motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AccountForm } from './components/AccountForm'
 import { BottomNav, type Screen } from './components/BottomNav'
 import { RecurringForm } from './components/RecurringForm'
 import { Sheet } from './components/Sheet'
+import { Splash } from './components/Splash'
 import { TransactionForm } from './components/TransactionForm'
 import { currentMonth, type MonthKey } from './lib/dates'
 import { generateRecurring } from './lib/recurring'
@@ -32,9 +34,14 @@ export default function App() {
   const [modal, setModal] = useState<Modal>(null)
   const main = useRef<HTMLElement>(null)
   const firstRender = useRef(true)
+  // Premier écran affiché : pas de transition d'entrée ; seulement après une vraie navigation.
+  const [navigated, setNavigated] = useState(false)
 
   useEffect(() => {
-    const onHash = () => setScreen(screenFromHash())
+    const onHash = () => {
+      setNavigated(true)
+      setScreen(screenFromHash())
+    }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
@@ -95,6 +102,16 @@ export default function App() {
           Aller au contenu
         </a>
         <main id="contenu" ref={main}>
+          {/* Changement d'écran : le nouvel écran apparaît en 180 ms (fondu, 8 px), l'ancien part tout de suite.
+              Pas au premier affichage (l'écran d'ouverture et la cascade s'en chargent). En mouvement réduit,
+              MotionConfig ne garde que le fondu. */}
+          <motion.div
+            key={screen}
+            className="screen-enter"
+            initial={navigated ? { opacity: 0, y: 8 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+          >
           {screen === 'accueil' && (
             <Dashboard
               month={month}
@@ -122,7 +139,10 @@ export default function App() {
           {screen === 'reglages' && (
             <Settings onAddAccount={addAccount} onSelectAccount={(account) => setModal({ kind: 'account', account })} />
           )}
+          </motion.div>
         </main>
+
+        <Splash flyToHeader={screen === 'accueil'} />
 
         <BottomNav current={screen} onChange={navigate} onAdd={() => setModal({ kind: 'transaction' })} />
 

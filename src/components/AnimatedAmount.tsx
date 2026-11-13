@@ -1,35 +1,50 @@
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
-import { useEffect } from 'react'
+import { useReducedMotion } from 'motion/react'
+import { useCallback, type ElementType } from 'react'
 import { formatMoney, round2, splitMoney } from '../lib/format'
-import { SPRINGS } from '../lib/motion'
+import CountUp from './CountUp'
+
+/** Durée du compteur : assez pour se lire, assez courte pour ne pas faire attendre. */
+const COUNT_DURATION = 0.8
+
+interface Props {
+  value: number
+  className?: string
+  /** Signe affiché devant (« + », « − »), la valeur restant positive. */
+  sign?: string
+  /** Élément conteneur : un paragraphe par défaut, un span dans une ligne de texte. */
+  as?: ElementType
+}
 
 /**
- * Montant qui glisse vers sa nouvelle valeur en spring quand il change.
- * Les lecteurs d'écran ne lisent que la valeur finale ; les chiffres tabulaires évitent les sauts.
+ * Montant clé qui compte jusqu'à sa valeur (CountUp de React Bits) : à l'arrivée à l'écran, depuis 0,
+ * puis depuis la valeur affichée à chaque changement. Format fr-FR, centimes estompés.
+ * En mouvement réduit, la valeur s'affiche directement. Les lecteurs d'écran ne lisent que la valeur finale.
  */
-export function AnimatedAmount({ value, className }: { value: number; className?: string }) {
+export function AnimatedAmount({ value, className, sign = '', as: Tag = 'p' }: Props) {
   const reduced = useReducedMotion()
-  const mv = useMotionValue(value)
-  const units = useTransform(mv, (v) => splitMoney(formatMoney(round2(v)))[0])
-  const cents = useTransform(mv, (v) => splitMoney(formatMoney(round2(v)))[1])
-
-  useEffect(() => {
-    if (reduced) {
-      mv.set(value)
-      return
-    }
-    const controls = animate(mv, value, SPRINGS.number())
-    return () => controls.stop()
-  }, [value, reduced, mv])
-
+  const formatter = useCallback(
+    (v: number): [string, string] => {
+      const [units, cents] = splitMoney(formatMoney(round2(v)))
+      return [sign + units, cents]
+    },
+    [sign],
+  )
   return (
-    <p className={className} data-value={value}>
+    <Tag className={className} data-value={value}>
       <span aria-hidden="true">
-        <motion.span>{units}</motion.span>
-        <motion.span className="cents">{cents}</motion.span>
+        <CountUp
+          to={value}
+          from={reduced ? value : 0}
+          duration={COUNT_DURATION}
+          formatter={formatter}
+          tailClassName="cents"
+        />
       </span>
-      <span className="sr-only">{formatMoney(value)}</span>
-    </p>
+      <span className="sr-only">
+        {sign}
+        {formatMoney(value)}
+      </span>
+    </Tag>
   )
 }
 

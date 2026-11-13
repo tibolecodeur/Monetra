@@ -955,6 +955,65 @@ ul.card-flush {
   color: var(--color-text-tertiary);
 }
 
+/* Cascade de l'accueil (première arrivée de la session) : les cartes montent l'une après l'autre,
+   12 px en 220 ms, 35 ms d'écart (≈ 360 ms en tout). Retenues tant que l'écran d'ouverture est là. */
+.month-pager.cascade-pending > * {
+  opacity: 0;
+}
+
+.month-pager.cascade > * {
+  animation: card-rise 220ms var(--ease-out) both;
+}
+
+.month-pager.cascade > :nth-child(2) { animation-delay: 35ms; }
+.month-pager.cascade > :nth-child(3) { animation-delay: 70ms; }
+.month-pager.cascade > :nth-child(4) { animation-delay: 105ms; }
+.month-pager.cascade > :nth-child(n + 5) { animation-delay: 140ms; }
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* Écran d'ouverture (Splash) : fond de l'app, logo au centre ; au-dessus de tout, le temps d'une seconde. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-menu) + 10);
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+  cursor: pointer;
+}
+
+.brand-mark--flying {
+  position: relative;
+  z-index: calc(var(--z-menu) + 20);
+}
+
+.brand-mark--placeholder {
+  box-shadow: none;
+}
+
+/* Le logo au-dessus du fond, centré ; les touchers traversent jusqu'au fond (qui passe l'écran). */
+.splash-logo-layer {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-menu) + 11);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.splash-logo {
+  display: block;
+  width: 112px;
+  height: 112px;
+  box-shadow: 0 18px 48px var(--color-accent-glow);
+}
+
 /* Sauvegarde du jour (BackupBanner) : bandeau violet sur l'accueil, ambre au-delà de 3 jours sans sauvegarde. */
 .backup-banner {
   position: relative;
@@ -1485,6 +1544,15 @@ ul.card-flush {
   text-align: left;
 }
 
+/* Lignes touchables : légère réduction à l'appui (140 ms), en plus du surlignage iOS. */
+button.row {
+  transition: transform var(--press-duration) var(--ease-out);
+}
+
+button.row:active {
+  transform: scale(0.98);
+}
+
 /* Surlignage immédiat à l'appui, sans transition. */
 button.row:active,
 .month-label:active:not([aria-disabled='true']),
@@ -1505,7 +1573,7 @@ button.row:active,
   background: transparent;
 }
 
-[data-dragging] :is(.btn, .chip, .choice):active {
+[data-dragging] :is(.btn, .chip, .choice, button.row):active {
   transform: none;
 }
 
@@ -2524,6 +2592,16 @@ button.row:active,
 
 /* Mouvement réduit : plus de déplacement ni d'échelle ; les changements de couleur et d'opacité restent. */
 @media (prefers-reduced-motion: reduce) {
+  .month-pager.cascade > *,
+  .month-pager.cascade-pending > * {
+    animation: none;
+    opacity: 1;
+  }
+
+  button.row:active {
+    transform: none;
+  }
+
   .switch,
   .switch::after,
   .hero-privacy,
@@ -2533,6 +2611,7 @@ button.row:active,
   .tab-add,
   .toast-action,
   .round-button,
+  button.row,
   .swipe-action-icon,
   .meter span {
     transition: none;

@@ -2,7 +2,7 @@ import { ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
-import { Money } from '../components/AnimatedAmount'
+import { AnimatedAmount, Money } from '../components/AnimatedAmount'
 import { MonthSwitcher } from '../components/MonthSwitcher'
 import { Segmented } from '../components/Segmented'
 import { TransactionRow } from '../components/TransactionRow'
@@ -76,7 +76,7 @@ export function Transactions({ month, onMonthChange, onSelect, onAdd }: Props) {
           <span className="pill">
             <ArrowUpRight size={16} aria-hidden="true" className="pill-icon" />
             <span className="pill-label">Sorties</span>
-            <span className="amount">{formatSigned(sorties, '−')}</span>
+            <AnimatedAmount as="span" className="amount" value={sorties} sign={sorties ? '−' : ''} />
           </span>
         </div>
       </section>

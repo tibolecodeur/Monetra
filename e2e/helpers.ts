@@ -7,7 +7,13 @@ export const DEMO = path.join(import.meta.dirname, 'fixtures', 'demo.json')
 export const TODAY = new Date('2026-10-29T10:00:00')
 
 /** Ouvre l'app avec les données de démo, importées par l'écran Réglages comme le ferait un utilisateur. */
+/** Écran d'ouverture déjà vu dans cette session : les tests commencent directement sur l'app. */
+export async function skipSplash(page: Page) {
+  await page.addInitScript(() => sessionStorage.setItem('monetra:splash-seen', '1'))
+}
+
 export async function openWithDemo(page: Page) {
+  await skipSplash(page)
   await page.clock.setFixedTime(TODAY)
   page.on('dialog', (d) => d.accept())
   await page.goto('/#/reglages')

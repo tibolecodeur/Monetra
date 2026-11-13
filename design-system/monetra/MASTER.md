@@ -17,6 +17,7 @@
 **Revised:** 2026-11-12 : **passage UX/UI** : Trajectoire (courbe des dépenses lisible au doigt), mode discret, dates relatives, raccourcis de date, états vides dessinés, bord de défilement en fondu.
 **Revised:** 2026-11-13 : **nouveau logo** (« M. » en serif sur noir à lueur violette) ; la Trajectoire ne compte plus l'épargne dans le rythme.
 **Revised:** 2026-11-13 : **sauvegarde et sécurité des données** : copies de sécurité locales, rappel quotidien vers l'app Fichiers, stockage persistant, avertissement sur la suppression de l'app.
+**Revised:** 2026-11-13 : **animations et finitions** (consigne validée) : écran d'ouverture, compteurs CountUp, cascade de l'accueil, transition d'entrée des écrans, réduction au toucher des lignes.
 **Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -242,10 +243,10 @@ Collées au bas de l'écran, opaques, rayon 32px en haut, poignée, titre serif,
 
 | Fréquence | Décision | Dans Monetra |
 |---|---|---|
-| Cent fois par jour, ou au clavier | Aucune animation, sauf exception assumée | navigation entre écrans, Échap. **Exception** : la pastille d'onglet glisse (0,3 s, critique, interruptible), à la demande du produit |
+| Cent fois par jour, ou au clavier | Animation minimale, jamais bloquante | Échap : aucune. **Exceptions assumées** (demandes produit) : la pastille d'onglet glisse (0,3 s, critique, interruptible) ; le nouvel écran entre en 180 ms (fondu + 8 px, l'ancien part sans animation, rien n'attend) |
 | Dizaines de fois par jour | Réduite, à peine perceptible | retour à l'appui (140 ms), curseur du segmented (200 ms), chevrons de mois (fondu de 270 ms) |
-| Occasionnelle | Animation normale | sheet, toast, suppression d'une ligne |
-| Donnée lue ou manipulée | Seulement un vrai changement de valeur | reste à vivre qui glisse vers sa nouvelle valeur, jauges (250 ms), bulles qui glissent et grossissent, tuiles de catégories qui se réordonnent ; jamais rejoué au chargement ni au changement de mois (composants recréés par mois : le contenu glisse déjà avec le geste) |
+| Occasionnelle | Animation normale | sheet, toast, suppression d'une ligne, écran d'ouverture (une fois par session), cascade de l'accueil (première arrivée de la session) |
+| Donnée lue ou manipulée | À l'arrivée à l'écran et aux vrais changements de valeur | montants clés qui comptent (CountUp, 0,8 s, sans rebond) : reste à vivre, solde total, dépenses du mois, sorties ; jauges (250 ms), bulles qui glissent et grossissent, tuiles de catégories qui se réordonnent ; jamais rejoué au chargement ni au changement de mois (composants recréés par mois : le contenu glisse déjà avec le geste) |
 
 Chaque animation a une raison : retour au toucher, cohérence spatiale, indication d'état, ou éviter un changement brutal. « C'est joli » n'en est pas une.
 
@@ -292,6 +293,19 @@ Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'appliqu
 | Sheet vers le bas | fermeture si projection > 40 % de la hauteur, ou flick vers le bas | bouton Fermer, Échap, voile |
 | Ligne vers la gauche (opérations, récurrents) | suppression si projection > 45 % de la largeur ; retour haptique au franchissement ; **annulation par toast**, pas de dialogue | bouton Supprimer dans la feuille d'édition |
 | Dashboard horizontal | mois suivant ou précédent si projection > 50 % de la largeur | chevrons du sélecteur de mois (fondu, sans glissement) |
+
+---
+
+## Ouverture, compteurs et micro-interactions
+
+- **Écran d'ouverture** (`Splash`, `lib/splash.ts`) : le logo « M. » (112px) apparaît au centre sur le fond de l'app, 400 ms, puis vole jusqu'à sa place dans l'en-tête de l'accueil (`layoutId` partagé : un seul porteur à la fois, l'en-tête garde la place vide pendant l'ouverture) pendant que le fond s'efface (240 ms). ≈ 0,9 s ; une fois par session (`sessionStorage`) ; un toucher le passe ; absent en mouvement réduit ; hors de l'accueil, le logo s'efface simplement. Le fond seul passe par `AnimatePresence` (retrait garanti, aucun fond fantôme qui bloquerait les touchers).
+- **Compteurs** (`AnimatedAmount` sur `components/CountUp.tsx`, React Bits `CountUp-TS-CSS`, adapté « Monetra » : format fr-FR, centimes dans un span estompé) : de 0 à la valeur quand le montant arrive à l'écran, puis depuis la valeur affichée à chaque changement ; 0,8 s, ease-out sans rebond ; valeur finale pour les lecteurs d'écran ; directe en mouvement réduit. Sur le reste à vivre, le solde total (accueil, Réglages), les dépenses du mois et les sorties (Opérations).
+- **Cascade de l'accueil** : à la première arrivée de la session (après l'écran d'ouverture), les cartes montent l'une après l'autre (12px, 220 ms, 35 ms d'écart, ≈ 360 ms en tout). Pas aux retours suivants sur l'onglet.
+- **Entrée des écrans** : 180 ms (fondu + 8px), jamais au premier affichage ; l'ancien écran part sans animation.
+- **Au toucher** : les lignes touchables se réduisent à 0,98 (140 ms) en plus du surlignage iOS ; boutons, puces et bouton rond à 0,97. Les tuiles de catégories ne sont pas touchables : pas de réduction (un retour au toucher sur un élément inerte mentirait).
+- **Mouvement réduit** : ni écran d'ouverture, ni cascade, ni réduction au toucher ; compteurs directs ; l'entrée des écrans n'est plus qu'un fondu.
+
+`motion` reste en 14.x : l'installation du composant via shadcn demande `motion@^12` et rétrograde la dépendance ; on la remet en 14 après tout `shadcn add` de React Bits.
 
 ---
 
@@ -389,13 +403,15 @@ Jamais au changement d'onglet, au segmented ni au défilement : l'haptique se r�
 - ❌ Lueur claire sous du texte : le pic de la lueur reste hors du panneau
 - ❌ Effets de verre réfractant (filtre SVG, WebGL, cartes de déplacement) : retirés, trop fragiles d'un navigateur à l'autre
 - ❌ Détection de navigateur par user agent ; préférer `@supports` et les media queries
-- ❌ Animation sur une action au clavier ; au changement d'onglet, seule la pastille (et les onglets qu'elle décale) glisse, rien d'autre (ni l'écran, ni les icônes)
+- ❌ Animation sur une action au clavier ; au changement d'onglet, rien d'autre que la pastille (et les onglets qu'elle décale) et l'entrée de 180 ms du nouvel écran : jamais d'animation de sortie qui ferait attendre
 - ❌ `transition: all`, `ease-in`, durée > 300 ms, animation de `width` / `height` / `top` / `margin`
 - ❌ JavaScript pour un retour à l'appui que `:active` sait faire
 - ❌ Flou de plus de 20 px, ou flou sur une grande surface qui bouge (cartes, feuilles)
 - ❌ `:hover` hors de `@media (hover: hover) and (pointer: fine)`
 - ❌ `-webkit-backdrop-filter` écrit à la main à côté de la propriété standard (le minifieur ne garde que la version préfixée)
-- ❌ `@keyframes` sur un élément manipulé au doigt : utiliser un spring `motion`
+- ❌ `@keyframes` sur un élément manipulé au doigt : utiliser un spring `motion` (la cascade `card-rise` anime les cartes une fois, à l'arrivée ; le glissement de mois porte sur leur conteneur)
+- ❌ Un écran d'ouverture qui bloque : il se passe d'un toucher, ne dure pas plus de 1,2 s, ne revient pas dans la session et n'existe pas en mouvement réduit
+- ❌ Deux éléments avec le même `layoutId` en même temps (le logo de l'ouverture et celui de l'en-tête se passent le relais : `lib/splash.ts`)
 - ❌ Dialogue de confirmation pour une suppression annulable : préférer l'annulation par toast
 - ❌ Fermer un menu contextuel sur `click` (le doigt qui l'a ouvert se lève dessus) ; haptique sur une action fréquente (onglets, défilement)
 - ❌ Couleur seule pour identifier une catégorie (toujours le libellé)
