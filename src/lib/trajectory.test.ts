@@ -50,6 +50,19 @@ describe('computeTrajectory', () => {
     expect(t.safePace).toBe(43.5)
   })
 
+  it('ne compte pas l’épargne dans le rythme, mais la garde dans le réel', () => {
+    const transactions = [
+      tx('2026-11-01', 1000, { type: 'revenu', categorie: 'revenu' }),
+      tx('2026-11-02', 50),
+      tx('2026-11-05', 300, { categorie: 'epargne' }),
+    ]
+    const t = computeTrajectory('2026-11', transactions, [], '2026-11-10')
+    // 50 € en 10 jours : 5 €/jour ; les 300 € épargnés sont sortis du compte mais ne se répètent pas.
+    expect(t.dailyPace).toBe(5)
+    expect(t.points[9].spent).toBe(350)
+    expect(t.projectedSpent).toBe(450)
+  })
+
   it('signale le jour du dépassement', () => {
     const transactions = [tx('2026-11-01', 300, { type: 'revenu', categorie: 'revenu' }), tx('2026-11-02', 40)]
     const t = computeTrajectory('2026-11', transactions, [], '2026-11-02')

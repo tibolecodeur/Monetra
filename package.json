@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test --project=iphone",
-    "record:videos": "playwright test --project=videos"
+    "record:videos": "playwright test --project=videos",
+    "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

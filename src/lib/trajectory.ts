@@ -21,7 +21,7 @@ export interface Trajectory {
   projectedSpent: number
   /** Ce qui restera, estimé, au dernier jour (négatif : dépassement). */
   projectedLeft: number
-  /** Dépenses variables par jour, au rythme constaté depuis le début du mois. */
+  /** Dépenses variables par jour, au rythme constaté depuis le début du mois (hors épargne). */
   dailyPace: number
   /** Dépenses variables possibles par jour d'ici la fin du mois sans dépasser les revenus (0 si plus rien). */
   safePace: number
@@ -54,7 +54,9 @@ export function computeTrajectory(
     }
     const day = Number(t.date.slice(8))
     if (day >= 1 && day <= days) spentOn[day] += t.montant
-    if (!t.recurringId) variable += t.montant
+    // Le rythme ne retient que la consommation : l'épargne est un choix ponctuel (virement vers un livret,
+    // versement d'assurance-vie), pas une dépense qui se répète chaque jour.
+    if (!t.recurringId && t.categorie !== 'epargne') variable += t.montant
   }
 
   const scheduledOn = new Array<number>(days + 1).fill(0)

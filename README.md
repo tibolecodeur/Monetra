@@ -83,6 +83,7 @@ npm run lint      # lint avec oxlint
 npm test          # tests unitaires (Vitest)
 npm run test:e2e  # tests e2e Playwright en émulation iPhone (build + preview automatiques)
 npm run record:videos  # enregistre les vidéos des gestes (test-results/)
+npm run icons     # régénère les icônes PNG depuis public/logo-full.svg
 ```
 
 ## Déploiement

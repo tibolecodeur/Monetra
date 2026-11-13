@@ -15,6 +15,7 @@
 **Revised:** 2026-11-12 : **refonte « Noir & Violet »** : fond noir uni (plasma retiré), accent violet unique, îlots graphiques (reste à vivre embrasé, bulles de dépenses), registre d'opérations, capsule d'onglets flottante, titres en serif éditoriale. Inspirée de trois maquettes bancaires (panneau « Spent » noir → orange, bulles « Expenses » bleues, registre « Transactions » noir et blanc).
 **Revised:** 2026-11-12 : **expérience iOS** : menu contextuel à l'appui long, retours haptiques sur iPhone, onglet actif qui remonte, toast balayable, thème Automatique (voir « Réflexes iOS »).
 **Revised:** 2026-11-12 : **passage UX/UI** : Trajectoire (courbe des dépenses lisible au doigt), mode discret, dates relatives, raccourcis de date, états vides dessinés, bord de défilement en fondu.
+**Revised:** 2026-11-13 : **nouveau logo** (« M. » en serif sur noir à lueur violette) ; la Trajectoire ne compte plus l'épargne dans le rythme.
 **Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -141,6 +142,16 @@ Calculés le 12/11/2026 sur les couleurs composées (alpha appliqué sur la surf
 
 ---
 
+## Logo
+
+« **M.** » : la lettre M en Instrument Serif (contour vectorisé, pas de police à charger), blanc légèrement violacé, suivie d'un point `#B8A1FF`, sur le noir `#0D0B12` avec la lueur violette qui monte du bas, comme le panneau du reste à vivre.
+
+- **Source unique** : `public/logo-full.svg` (carré plein bord : iOS et Android arrondissent eux-mêmes) ; `public/favicon.svg` est le même dessin aux coins arrondis (rayon 112/512).
+- **PNG** (`apple-touch-icon`, `pwa-192`, `pwa-512`, `maskable-512`) générés par `npm run icons` (`scripts/icons.mjs`, Playwright) : ne jamais les retoucher à la main. Le « M. » tient dans la zone sûre des icônes masquables.
+- Dans l'app, l'en-tête de l'accueil affiche la même icône (44px, rayon 11px), à côté de « Monetra » en serif.
+
+---
+
 ## Matériaux
 
 | Matériau | Où | Recette |
@@ -172,7 +183,7 @@ Calculés le 12/11/2026 sur les couleurs composées (alpha appliqué sur la surf
 3. **Où part l'argent** (`.spending`, îlot) : total du mois, **bulles** (`CategoryBubbles`) puis **tuiles** chiffrées (2 colonnes).
    - Une bulle par catégorie, aire proportionnelle au montant (rayon 30 à 78 unités), placée par une spirale aplatie (`lib/bubbles.ts`, déterministe, testé), arc de la teinte de la catégorie pour la part du total, icône, libellé si la bulle est assez grande, pourcentage.
    - Le SVG est `aria-hidden` : les tuiles portent la même information (libellé, montant, part).
-3 bis. **Trajectoire** (`.trajectory`, îlot, `TrajectoryChart`, calcul dans `lib/trajectory.ts`, testé) : dépenses cumulées jour par jour (trait `#B8A1FF` + aire violette) jusqu'à aujourd'hui, puis estimation en pointillés (rythme moyen des dépenses variables + prélèvements prévus à leur date), face aux revenus du mois (pointillés verts). Pastille d'état : « ≈ 467 € le 31 » (euros ronds : une estimation n'a pas de centimes) ou « Dépassement le 24 » ; phrase de synthèse en dessous, avec le rythme à viser en cas de dépassement.
+3 bis. **Trajectoire** (`.trajectory`, îlot, `TrajectoryChart`, calcul dans `lib/trajectory.ts`, testé) : dépenses cumulées jour par jour (trait `#B8A1FF` + aire violette) jusqu'à aujourd'hui, épargne comprise, puis estimation en pointillés (rythme moyen des dépenses variables **hors épargne** — un virement vers un livret ne se répète pas chaque jour — + prélèvements prévus à leur date), face aux revenus du mois (pointillés verts). Pastille d'état : « ≈ 467 € le 31 » (euros ronds : une estimation n'a pas de centimes) ou « Dépassement le 24 » ; phrase de synthèse en dessous, avec le rythme à viser en cas de dépassement.
    - **Lecture au doigt** comme dans Bourse : le doigt posé sur la courbe affiche un curseur et le jour touché au-dessus (hauteur réservée, la carte ne bouge pas) ; un tap haptique au passage du réel à l'estimé ; le geste ne déclenche pas le swipe de mois (`touch-action: pan-y`, propagation arrêtée). Au clavier : `role="slider"`, flèches gauche et droite.
 4. **À venir ce mois-ci** et **Dernières opérations** : titres serif sur le fond, bouton rond cerclé « Tout voir », liste dans une carte.
 5. Pied : solde total des comptes.
