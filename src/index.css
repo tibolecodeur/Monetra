@@ -371,16 +371,10 @@ fieldset {
 /* Accueil : logo rond + nom, comme l'avatar et le nom des références. */
 .brand-mark {
   flex: none;
-  display: grid;
-  place-items: center;
+  display: block;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 25%, #b8a1ff, #7c4dff 45%, #3b1a8a);
-  color: #ffffff;
-  font-family: var(--font-serif);
-  font-size: 1.625rem;
-  line-height: 1;
+  border-radius: 11px;
   box-shadow: 0 6px 20px var(--color-accent-glow);
 }
 

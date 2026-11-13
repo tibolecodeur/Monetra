@@ -26,9 +26,8 @@ export function NavHeader({ title, variant = 'large', action }: Props) {
       </motion.div>
       <header className={`screen-header ${variant}`}>
         {variant === 'brand' && (
-          <span className="brand-mark" aria-hidden="true">
-            M
-          </span>
+          // La même icône que sur l'écran d'accueil du téléphone (public/favicon.svg).
+          <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={44} height={44} />
         )}
         <h1 tabIndex={-1} className={variant === 'brand' ? 'brand-title' : 'large-title'}>
           {title}
