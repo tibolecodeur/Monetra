@@ -73,3 +73,44 @@ export function setPrivate(on: boolean) {
   write(PRIVATE_KEY, on ? '1' : '0')
   document.documentElement.toggleAttribute('data-private', on)
 }
+
+const BACKUP_ON_KEY = 'monetra:backupReminder'
+const BACKUP_TIME_KEY = 'monetra:backupTime'
+const LAST_BACKUP_KEY = 'monetra:lastBackup'
+const BACKUP_SNOOZE_KEY = 'monetra:backupSnoozed'
+
+export interface BackupPrefs {
+  /** Rappel quotidien activé (oui par défaut). */
+  enabled: boolean
+  /** Heure à partir de laquelle la sauvegarde du jour est proposée, « HH:MM ». */
+  time: string
+  /** Instant ISO de la dernière sauvegarde enregistrée hors de l'app. */
+  lastBackup: string | null
+  /** Jour (YYYY-MM-DD) où le rappel a été reporté à demain. */
+  snoozedDay: string | null
+}
+
+const listeners = new Set<() => void>()
+
+export function getBackupPrefs(): BackupPrefs {
+  return {
+    enabled: read(BACKUP_ON_KEY) !== '0',
+    time: read(BACKUP_TIME_KEY) ?? '21:00',
+    lastBackup: read(LAST_BACKUP_KEY),
+    snoozedDay: read(BACKUP_SNOOZE_KEY),
+  }
+}
+
+export function setBackupPrefs(changes: Partial<BackupPrefs>) {
+  if (changes.enabled !== undefined) write(BACKUP_ON_KEY, changes.enabled ? '1' : '0')
+  if (changes.time) write(BACKUP_TIME_KEY, changes.time)
+  if (changes.lastBackup) write(LAST_BACKUP_KEY, changes.lastBackup)
+  if (changes.snoozedDay) write(BACKUP_SNOOZE_KEY, changes.snoozedDay)
+  listeners.forEach((fn) => fn())
+}
+
+/** Abonnement aux changements (bandeau de l'accueil et Réglages restent d'accord). */
+export function subscribeBackupPrefs(fn: () => void) {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}

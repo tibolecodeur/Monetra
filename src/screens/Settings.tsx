@@ -1,14 +1,18 @@
-import { ChevronRight, Download, Plus, ShieldCheck, Upload, Wallet } from 'lucide-react'
+import { ChevronRight, CircleCheck, Download, Plus, ShieldCheck, TriangleAlert, Upload, Wallet } from 'lucide-react'
 import { EmptyState } from '../components/EmptyState'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { Money } from '../components/AnimatedAmount'
 import { AccountIcon } from '../components/CategoryIcon'
 import { Segmented } from '../components/Segmented'
-import { downloadBackup, parseBackup, restoreBackup } from '../lib/backup'
+import { parseBackup, restoreBackup } from '../lib/backup'
+import { describeLastBackup, isStale } from '../lib/backupSchedule'
+import { useBackupPrefs, useNow, useSaveBackup } from '../lib/useBackup'
+import { SafetyCopies } from '../components/SafetyCopies'
 import { accountTypeLabel } from '../lib/categories'
 import { useAccounts } from '../lib/hooks'
-import { getTheme, setTheme, type Theme } from '../lib/prefs'
+import { getTheme, setBackupPrefs, setTheme, type Theme } from '../lib/prefs'
 import { generateRecurring } from '../lib/recurring'
+import { takeSnapshot } from '../lib/safety'
 import type { Account } from '../lib/types'
 import { NavHeader } from '../components/NavHeader'
 
@@ -25,22 +29,10 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
   const [status, setStatus] = useState<Status>(null)
   const [busy, setBusy] = useState(false)
   const [theme, setThemeState] = useState<Theme>(getTheme)
-
-  async function exportData() {
-    setBusy(true)
-    try {
-      const backup = await downloadBackup()
-      const { transactions, accounts: acc, recurring } = backup.data
-      setStatus({
-        kind: 'success',
-        text: `Sauvegarde exportée : ${acc.length} compte(s), ${transactions.length} transaction(s), ${recurring.length} récurrent(s).`,
-      })
-    } catch {
-      setStatus({ kind: 'error', text: "L'export a échoué. Réessayez ; si le problème persiste, libérez de l'espace." })
-    } finally {
-      setBusy(false)
-    }
-  }
+  const prefs = useBackupPrefs()
+  const now = useNow()
+  const stale = isStale(prefs.lastBackup, now)
+  const { save, ready } = useSaveBackup()
 
   async function importData(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -55,6 +47,8 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
         `Importer la sauvegarde du ${when} (${acc.length} compte(s), ${transactions.length} transaction(s)) ?\n\nToutes les données actuelles seront remplacées.`,
       )
       if (!ok) return
+      // Copie de l'état actuel d'abord : un import se défait depuis « Copies de sécurité ».
+      await takeSnapshot('import')
       await restoreBackup(backup)
       await generateRecurring()
       setStatus({ kind: 'success', text: 'Sauvegarde importée.' })
@@ -145,38 +139,83 @@ export function Settings({ onAddAccount, onSelectAccount }: Props) {
         <h2 id="backup-title" className="section-title">
           Sauvegarde
         </h2>
-        <div className="card">
-          <p className="body-muted">
-            Exportez régulièrement une sauvegarde JSON pour ne rien perdre ou changer de téléphone.
+        <div className="card backup-card">
+          <p className={`backup-last${stale ? ' stale' : ''}`} data-testid="last-backup">
+            {stale ? <TriangleAlert size={18} aria-hidden="true" /> : <CircleCheck size={18} aria-hidden="true" />}
+            Dernière sauvegarde : {describeLastBackup(prefs.lastBackup, now)}
           </p>
-          <div className="backup-actions">
-            <button type="button" className="btn btn-primary" onClick={exportData} disabled={busy}>
-              <Download size={20} aria-hidden="true" />
-              Exporter
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
-              <Upload size={20} aria-hidden="true" />
-              Importer
-            </button>
-            <input
-              ref={fileInput}
-              type="file"
-              accept="application/json,.json"
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden="true"
-              onChange={importData}
-              data-testid="import-input"
-            />
+          <p className="body-muted">
+            Enregistrez le fichier dans l'app Fichiers (iCloud Drive, par exemple dans un dossier « Monetra ») : c'est
+            la seule copie qui survit si l'app est supprimée ou le téléphone changé.
+          </p>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void save()} disabled={busy || !ready}>
+            <Download size={20} aria-hidden="true" />
+            Sauvegarder maintenant
+          </button>
+
+          <div className="backup-reminder">
+            <label className="switch-row">
+              <span>
+                <span className="switch-title">Rappel quotidien</span>
+                <span className="switch-sub">Un bandeau sur l'accueil, à partir de l'heure choisie</span>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                className="switch"
+                checked={prefs.enabled}
+                onChange={(e) => setBackupPrefs({ enabled: e.target.checked })}
+              />
+            </label>
+            {prefs.enabled && (
+              <label className="switch-row">
+                <span className="switch-title">Heure du rappel</span>
+                <input
+                  type="time"
+                  className="time-input"
+                  value={prefs.time}
+                  required
+                  onChange={(e) => e.target.value && setBackupPrefs({ time: e.target.value })}
+                />
+              </label>
+            )}
           </div>
-          <p className="hint">L'import remplace l'intégralité des données actuelles, après confirmation.</p>
+
+          <button type="button" className="btn btn-secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
+            <Upload size={20} aria-hidden="true" />
+            Importer une sauvegarde
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={importData}
+            data-testid="import-input"
+          />
+          <p className="hint">
+            L'import remplace toutes les données actuelles, après confirmation. Une copie de sécurité est prise juste
+            avant : il se défait depuis « Copies de sécurité ».
+          </p>
           {status && (
             <p className={`status ${status.kind}`} role={status.kind === 'error' ? 'alert' : 'status'}>
               {status.text}
             </p>
           )}
         </div>
+
+        <div className="card warning-card" role="note">
+          <TriangleAlert size={22} aria-hidden="true" />
+          <p>
+            <strong>Supprimer Monetra de l'écran d'accueil efface toutes ses données.</strong> Sauvegardez dans Fichiers
+            avant de la supprimer ou de la réinstaller.
+          </p>
+        </div>
       </section>
+
+      <SafetyCopies />
 
       <div className="card privacy">
         <ShieldCheck size={24} aria-hidden="true" />

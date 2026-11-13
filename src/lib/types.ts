@@ -62,3 +62,22 @@ export interface Goal {
   echeance: string
   montantActuel: number
 }
+
+/** Contenu d'une sauvegarde (export JSON, copie de sécurité). */
+export interface BackupData {
+  accounts: Account[]
+  transactions: Transaction[]
+  recurring: Recurring[]
+  budgets: Budget[]
+  goals: Goal[]
+}
+
+/** Copie de sécurité gardée sur l'appareil (effacée avec l'app). */
+export interface Snapshot {
+  id: string
+  /** Instant ISO. */
+  createdAt: string
+  /** auto : copie du jour ; import / restore : prise juste avant de remplacer les données. */
+  reason: 'auto' | 'import' | 'restore'
+  data: BackupData
+}

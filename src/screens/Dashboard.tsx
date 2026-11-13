@@ -3,6 +3,7 @@ import { EmptyState } from '../components/EmptyState'
 import { motion } from 'motion/react'
 import { useMemo, useRef, useState } from 'react'
 import { AnimatedAmount, Money } from '../components/AnimatedAmount'
+import { BackupBanner } from '../components/BackupBanner'
 import { CategoryBubbles } from '../components/CategoryBubbles'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { MonthSwitcher } from '../components/MonthSwitcher'
@@ -84,6 +85,8 @@ export function Dashboard({ month, onMonthChange, onSelect, onSeeAll, onAddAccou
           />
         }
       />
+
+      {accounts.length > 0 && <BackupBanner />}
 
       <motion.div
         ref={pagerArea}

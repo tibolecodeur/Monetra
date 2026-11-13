@@ -16,6 +16,7 @@
 **Revised:** 2026-11-12 : **expérience iOS** : menu contextuel à l'appui long, retours haptiques sur iPhone, onglet actif qui remonte, toast balayable, thème Automatique (voir « Réflexes iOS »).
 **Revised:** 2026-11-12 : **passage UX/UI** : Trajectoire (courbe des dépenses lisible au doigt), mode discret, dates relatives, raccourcis de date, états vides dessinés, bord de défilement en fondu.
 **Revised:** 2026-11-13 : **nouveau logo** (« M. » en serif sur noir à lueur violette) ; la Trajectoire ne compte plus l'épargne dans le rythme.
+**Revised:** 2026-11-13 : **sauvegarde et sécurité des données** : copies de sécurité locales, rappel quotidien vers l'app Fichiers, stockage persistant, avertissement sur la suppression de l'app.
 **Sources :** skills `emil-design-eng`, `mobile-native`, `gestures`, `animation-performance`, `review-animations`, `remove-animations` et `apple-design` (`.agents/skills/`, installés avec `npx skills add emilkowalski/skills`), skill `ui-ux-pro-max` (palette, composants), skill `motion` et agent `motion-reviewer` du [Motion AI Kit](https://motion.dev/docs/ai-kit) (`.claude/`, serveurs MCP dans `.mcp.json`).
 En cas de conflit sur **le mouvement, la typographie ou les matériaux, les skills d'Emil et `apple-design` priment.**
 **Category:** Personal Finance Tracker (PWA mobile, 100 % locale)
@@ -294,6 +295,30 @@ Le rebond n'apparaît **que** si le geste avait de l'élan : un bouton n'appliqu
 
 ---
 
+## Sauvegarde et sécurité des données
+
+Monetra est 100 % locale : sur iPhone, **supprimer l'app de l'écran d'accueil efface toutes ses données**. Deux niveaux de protection, dans cet ordre d'importance.
+
+### 1. Sauvegarde du jour vers l'app Fichiers (la seule qui survit à l'app)
+
+- **Rappel quotidien** (Réglages → Sauvegarde, activé par défaut, 21 h par défaut) : à partir de l'heure choisie, un bandeau « Sauvegarde du jour » apparaît en haut de l'accueil, une fois par jour, s'il n'y a pas eu de sauvegarde aujourd'hui. « Plus tard » le reporte au lendemain. Ambre au-delà de 3 jours sans sauvegarde (ou jamais).
+- **Un toucher** ouvre la feuille de partage d'iOS avec `monetra-AAAA-MM-JJ.json` (« Enregistrer dans Fichiers », dernier dossier retenu par iOS) ; ailleurs, le fichier est téléchargé. Le fichier est **préparé à l'avance** (`usePreparedBackupFile`) : Safari n'ouvre la feuille de partage que si l'appel suit immédiatement le geste.
+- Annuler la feuille ne compte pas comme une sauvegarde. Réglages affiche « Dernière sauvegarde : aujourd'hui à 21 h 04 » (vert) ou en ambre si elle est ancienne.
+- Une app web ne peut ni écrire seule dans un dossier de Fichiers, ni se réveiller à une heure donnée : le rappel apparaît à la première ouverture après l'heure choisie (ou dans la minute si l'app est ouverte). Le déclenchement à heure fixe passe par une automatisation de l'app Raccourcis (phase 3).
+
+### 2. Copies de sécurité locales (rattrapent une erreur, pas la suppression de l'app)
+
+- Table `snapshots` (base v2, ajoutée sans toucher aux données v1 ; testé en e2e).
+- Une **copie du jour** à la première ouverture de la journée, une copie **avant chaque import** et **avant chaque restauration** ; les **7 dernières** sont gardées.
+- Réglages → Copies de sécurité : liste et bouton « Restaurer » (confirmation) ; une restauration se défait elle-même.
+- `navigator.storage.persist()` est demandé au démarrage : le navigateur ne fait pas le ménage de lui-même.
+
+### Avertissement
+
+Une carte ambre dans Réglages : « Supprimer Monetra de l'écran d'accueil efface toutes ses données. Sauvegardez dans Fichiers avant de la supprimer ou de la réinstaller. » Toute consigne donnée à l'utilisateur qui implique de supprimer l'app commence par « Sauvegardez ».
+
+---
+
 ## Réflexes iOS (skill `apple-design` : familiarité, agency, multimodal)
 
 Ce qu'un utilisateur d'iPhone fait sans y penser doit marcher ici aussi.
@@ -374,6 +399,7 @@ Jamais au changement d'onglet, au segmented ni au défilement : l'haptique se r�
 - ❌ Dialogue de confirmation pour une suppression annulable : préférer l'annulation par toast
 - ❌ Fermer un menu contextuel sur `click` (le doigt qui l'a ouvert se lève dessus) ; haptique sur une action fréquente (onglets, défilement)
 - ❌ Couleur seule pour identifier une catégorie (toujours le libellé)
+- ❌ Conseiller de supprimer ou réinstaller l'app sans faire sauvegarder d'abord
 - ❌ Signe sur un montant nul (« −0,00 € ») : `formatSigned` ; centimes sur une estimation : `formatMoneyRound`
 - ❌ **Emojis comme icônes** ; chiffres proportionnels pour les montants
 - ❌ Contenu masqué par la barre d'onglets ; **focus invisible** ; cibles tactiles de moins de 44px

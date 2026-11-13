@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
-import { center, openWithDemo, settle, touchDrag, translateX, translateY } from './helpers.ts'
+import { center, DEMO, openWithDemo, settle, touchDrag, translateX, translateY } from './helpers.ts'
 
 const heroValue = async (page: Page) => Number(await page.locator('.hero-value').getAttribute('data-value'))
 // Intl insère des espaces insécables (fines) : on les normalise pour comparer.
@@ -121,7 +121,7 @@ test.describe('Monetra en émulation iPhone', () => {
   test('export puis import JSON avec données identiques', async ({ page }) => {
     await openWithDemo(page)
     await page.getByRole('button', { name: 'Réglages' }).tap()
-    const [first] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exporter' }).tap()])
+    const [first] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Sauvegarder maintenant' }).tap()])
     const firstPath = await first.path()
     const a = JSON.parse(await readFile(firstPath, 'utf8'))
 
@@ -134,7 +134,7 @@ test.describe('Monetra en émulation iPhone', () => {
 
     await page.getByTestId('import-input').setInputFiles(firstPath)
     await expect(page.getByText('Sauvegarde importée.')).toBeVisible()
-    const [second] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Exporter' }).tap()])
+    const [second] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Sauvegarder maintenant' }).tap()])
     const b = JSON.parse(await readFile(await second.path(), 'utf8'))
 
     const normalize = (data: Record<string, { id?: string; categorie?: string }[]>) =>
@@ -363,6 +363,124 @@ test.describe('Monetra en émulation iPhone', () => {
     await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
     await page.getByRole('button', { name: 'Opérations' }).tap()
     await expect(page.getByRole('region', { name: 'Hier' })).toContainText('Café')
+  })
+
+  test('sauvegarde du jour : bandeau à l’heure choisie, fichier, suivi', async ({ page }) => {
+    await openWithDemo(page)
+    // 10 h : avec le rappel à 21 h par défaut, pas de bandeau.
+    await expect(page.getByTestId('backup-banner')).toHaveCount(0)
+
+    // Rappel avancé à 9 h : le bandeau apparaît sur l'accueil, en alerte (jamais sauvegardé).
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    await expect(page.getByTestId('last-backup')).toHaveText(/jamais/)
+    await page.getByLabel('Heure du rappel').fill('09:00')
+    await page.getByRole('button', { name: 'Accueil' }).tap()
+    const banner = page.getByTestId('backup-banner')
+    await expect(banner).toBeVisible()
+    await expect(banner).toHaveClass(/stale/)
+
+    // Sauvegarder : un fichier daté (téléchargé ici ; feuille de partage sur iPhone), le bandeau disparaît.
+    const [download] = await Promise.all([page.waitForEvent('download'), banner.getByRole('button', { name: 'Sauvegarder' }).tap()])
+    expect(download.suggestedFilename()).toBe('monetra-2026-10-29.json')
+    const saved = JSON.parse(await readFile(await download.path(), 'utf8'))
+    expect(saved.app).toBe('monetra')
+    expect(saved.data.transactions.length).toBeGreaterThan(0)
+    await expect(banner).toHaveCount(0)
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    await expect(page.getByTestId('last-backup')).toHaveText(/aujourd'hui à \d{1,2} h \d{2}/)
+
+    // Désactivé : plus de bandeau, même dû.
+    await page.getByRole('switch', { name: /Rappel quotidien/ }).tap()
+    await expect(page.getByLabel('Heure du rappel')).toHaveCount(0)
+  })
+
+  test('« Plus tard » reporte le bandeau à demain', async ({ page }) => {
+    await openWithDemo(page)
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    await page.getByLabel('Heure du rappel').fill('08:00')
+    await page.getByRole('button', { name: 'Accueil' }).tap()
+    await page.getByRole('button', { name: 'Plus tard (demain)' }).tap()
+    await expect(page.getByTestId('backup-banner')).toHaveCount(0)
+    await page.reload()
+    await expect(page.getByText('Le mois en détail')).toBeVisible()
+    await expect(page.getByTestId('backup-banner')).toHaveCount(0)
+  })
+
+  test('copies de sécurité : copie du jour, avant import, restauration réversible', async ({ page }) => {
+    await openWithDemo(page)
+    // À l'ouverture suivante, la copie du jour est prise.
+    await page.reload()
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    const copies = page.getByTestId('safety-copies')
+    await expect(copies.locator('li')).toHaveCount(1)
+    await expect(copies).toContainText('Copie du jour')
+
+    // On ajoute une opération, puis on revient à la copie : l'opération disparaît.
+    await page.getByRole('button', { name: 'Ajouter une transaction' }).tap()
+    await page.getByLabel('Montant', { exact: true }).fill('7')
+    await page.getByLabel('Libellé').fill('Opération test')
+    await page.getByRole('radio', { name: 'Divers' }).tap()
+    await page.getByRole('button', { name: 'Ajouter', exact: true }).tap()
+    await page.getByRole('button', { name: 'Opérations' }).tap()
+    await expect(page.getByText('Opération test')).toBeVisible()
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    await copies.getByRole('button', { name: 'Restaurer' }).tap()
+    await expect(page.getByText('Copie restaurée')).toBeVisible()
+    await page.getByRole('button', { name: 'Opérations' }).tap()
+    await expect(page.getByText('Opération test')).toHaveCount(0)
+
+    // L'état d'avant la restauration est lui-même gardé, et un import est précédé d'une copie.
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    await expect(copies).toContainText('Avant une restauration')
+    await page.getByTestId('import-input').setInputFiles(DEMO)
+    await expect(page.getByText('Sauvegarde importée.')).toBeVisible()
+    await expect(copies).toContainText('Avant un import')
+    await expect(copies.locator('li')).toHaveCount(3)
+  })
+
+  test('mise à jour de la base (v1 → v2) : les données d’un téléphone existant sont conservées', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-10-29T10:00:00'))
+    // Une page vide sur la même origine crée la base telle que l'app V1 la laissait (Dexie : version 1 = 10).
+    await page.route('**/seed-v1', (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>seed</title>' }))
+    await page.goto('/seed-v1')
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const open = indexedDB.open('monetra', 10)
+          open.onupgradeneeded = () => {
+            const db = open.result
+            db.createObjectStore('accounts', { keyPath: 'id' })
+            const tx = db.createObjectStore('transactions', { keyPath: 'id' })
+            tx.createIndex('date', 'date')
+            tx.createIndex('compteId', 'compteId')
+            tx.createIndex('recurringId', 'recurringId')
+            db.createObjectStore('recurring', { keyPath: 'id' }).createIndex('compteId', 'compteId')
+            db.createObjectStore('budgets', { keyPath: 'categorie' })
+            db.createObjectStore('goals', { keyPath: 'id' })
+          }
+          open.onsuccess = () => {
+            const db = open.result
+            const t = db.transaction(['accounts', 'transactions'], 'readwrite')
+            t.objectStore('accounts').put({ id: 'c', nom: 'Compte courant', type: 'courant', banque: '', solde: 734.86 })
+            t.objectStore('transactions').put({
+              id: 't1', date: '2026-10-28', montant: 4.2, type: 'depense', categorie: 'resto', compteId: 'c', note: 'Boulangerie',
+            })
+            t.oncomplete = () => {
+              db.close()
+              resolve()
+            }
+            t.onerror = () => reject(t.error)
+          }
+          open.onerror = () => reject(open.error)
+        }),
+    )
+
+    // La nouvelle version de l'app ouvre cette base : tout est là, et la copie du jour est prise.
+    await page.goto('/#/operations')
+    await expect(page.getByText('Boulangerie')).toBeVisible()
+    await page.getByRole('button', { name: 'Réglages' }).tap()
+    await expect(page.locator('.summary-value')).toHaveText(/734,86/)
+    await expect(page.getByTestId('safety-copies')).toContainText('Copie du jour')
   })
 
   test.describe('avec l’apparence claire du système', () => {

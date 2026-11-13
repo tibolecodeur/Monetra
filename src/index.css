@@ -955,6 +955,226 @@ ul.card-flush {
   color: var(--color-text-tertiary);
 }
 
+/* Sauvegarde du jour (BackupBanner) : bandeau violet sur l'accueil, ambre au-delà de 3 jours sans sauvegarde. */
+.backup-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px 16px 16px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgb(184 161 255 / 26%);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgb(124 77 255 / 30%), transparent 70%),
+    var(--surface-1);
+}
+
+.backup-banner.stale {
+  border-color: rgb(255 181 71 / 40%);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgb(255 181 71 / 20%), transparent 70%),
+    var(--surface-1);
+}
+
+.backup-banner-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.backup-banner.stale .backup-banner-icon {
+  background: color-mix(in srgb, var(--cat-logement) 18%, transparent);
+  color: var(--cat-logement);
+}
+
+.backup-banner-text {
+  min-width: 0;
+  padding-right: 32px;
+}
+
+.backup-banner-text h2 {
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+  font-weight: 600;
+}
+
+.backup-banner-text p {
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  line-height: var(--lh-13);
+  color: var(--color-text-secondary);
+}
+
+.backup-banner-action {
+  grid-column: 1 / -1;
+  min-height: 46px;
+  font-size: var(--fs-15);
+}
+
+:root[data-theme='light'] .backup-banner-action {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.backup-banner-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text-secondary);
+}
+
+.backup-banner-close:active {
+  background: var(--color-pressed);
+}
+
+/* Réglages → Sauvegarde */
+.backup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.backup-last {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  font-weight: 600;
+  color: var(--color-income);
+}
+
+.backup-last.stale {
+  color: var(--cat-logement);
+}
+
+.backup-reminder {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.switch-row + .switch-row {
+  border-top: 1px solid var(--color-separator);
+}
+
+.switch-title {
+  display: block;
+  font-size: var(--fs-17);
+  letter-spacing: var(--ls-17);
+}
+
+.switch-sub {
+  display: block;
+  font-size: var(--fs-13);
+  letter-spacing: var(--ls-13);
+  color: var(--color-text-secondary);
+}
+
+/* Interrupteur façon iOS : 51 × 31, pastille blanche, piste violette une fois activé. */
+.switch {
+  flex: none;
+  position: relative;
+  width: 51px;
+  height: 31px;
+  margin: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-border-input);
+  appearance: none;
+  cursor: pointer;
+  transition: background-color 200ms var(--ease-out);
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 25%);
+  transition: transform 200ms var(--ease-out);
+}
+
+.switch:checked {
+  background: var(--color-accent);
+}
+
+.switch:checked::after {
+  transform: translateX(20px);
+}
+
+.time-input {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: var(--fs-17);
+  font-variant-numeric: tabular-nums;
+}
+
+.time-input:focus-visible {
+  outline: 2px solid var(--color-accent-text);
+}
+
+.warning-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-color: color-mix(in srgb, var(--cat-logement) 35%, transparent);
+  font-size: var(--fs-15);
+  letter-spacing: var(--ls-15);
+  line-height: var(--lh-15);
+  color: var(--color-text-secondary);
+}
+
+.warning-card svg {
+  flex: none;
+  color: var(--cat-logement);
+}
+
+.warning-card strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.btn-link {
+  flex: none;
+  min-height: var(--touch);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--color-accent-text);
+  font-size: var(--fs-15);
+  font-weight: 600;
+}
+
 /* Trajectoire : dépenses cumulées face aux revenus, lisible au doigt (components/TrajectoryChart.tsx). */
 
 .trajectory {
@@ -2304,6 +2524,8 @@ button.row:active,
 
 /* Mouvement réduit : plus de déplacement ni d'échelle ; les changements de couleur et d'opacité restent. */
 @media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch::after,
   .hero-privacy,
   .btn,
   .chip,
