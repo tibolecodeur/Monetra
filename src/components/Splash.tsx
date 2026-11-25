@@ -10,7 +10,7 @@ const HOLD_MS = 400
 export const BRAND_LAYOUT_ID = 'brand-mark'
 
 /**
- * Écran d'ouverture : le logo « M. » apparaît au centre, puis rejoint sa place dans l'en-tête de l'accueil
+ * Écran d'ouverture : le logo (le M « Moitiés ») apparaît au centre, puis rejoint sa place dans l'en-tête de l'accueil
  * (même élément, `layoutId`) pendant que l'écran se dévoile. ≈ 0,95 s (≤ 1,2 s), une fois par session ;
  * un toucher le passe ; jamais en mouvement réduit. Hors de l'accueil, le logo s'efface simplement.
  */

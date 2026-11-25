@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Monetra : « Moitiés ». Deux pics égaux, blanc et violet : ce qui entre, ce qui sort ; le M n'existe que
+       si les deux tiennent ensemble. Tuile noire, lueur violette qui monte du bas comme le panneau du reste à vivre.
+       Masters et règles : design-system/monetra/logo/. Icônes PNG : npm run icons. -->
+  <defs><radialGradient id="glow" cx="256" cy="600" r="420" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9b7bff"/><stop offset="0.24" stop-color="#6a3cf0"/><stop offset="0.46" stop-color="#4a1fb0"/><stop offset="0.7" stop-color="#1d0d45"/><stop offset="0.92" stop-color="#0d0b12"/></radialGradient></defs>
+  <rect id="bg" width="512" height="512" rx="112" fill="#0d0b12"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <g transform="translate(76.8 72.8) scale(1.4)"><path fill="none" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" stroke="#B8A1FF" d="M128 206 L170 50 L212 206"/><path fill="none" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" stroke="#FFFFFF" d="M44 206 L86 50 L128 206"/></g>
+</svg>
